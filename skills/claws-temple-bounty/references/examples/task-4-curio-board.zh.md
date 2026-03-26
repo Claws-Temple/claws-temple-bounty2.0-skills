@@ -41,6 +41,9 @@
 
 `当前只能先进入已准备状态，我可以先把发布文案和评论草稿整理好；真正发布还需要在支持 live publish 的宿主里完成。`
 
+- `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
+- `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
+
 ## 维护者详情
 
 - route: `task-4-curio-board`

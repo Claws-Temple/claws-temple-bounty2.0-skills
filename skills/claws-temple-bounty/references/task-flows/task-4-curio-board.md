@@ -60,6 +60,7 @@ If authenticated publishing is unavailable:
 - state the exact missing prerequisite
 - do not pretend the publish step already happened
 - keep the task in `publish-prep mode` for the current rollout window
+- if the user is genuinely stuck and cannot clear the prerequisite in the current host, append support CTA
 
 If the remote dependency cannot be loaded:
 
@@ -68,6 +69,7 @@ If the remote dependency cannot be loaded:
 - return the follow-up comment draft
 - keep the output shape aligned with the fixed prep payload contract above
 - tell the user that the remaining step is to run the live publish path in a supported host
+- append support CTA when the user cannot continue automatically in the current host
 
 ## Maintainer Notes
 

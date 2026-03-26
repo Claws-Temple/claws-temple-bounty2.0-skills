@@ -41,6 +41,9 @@ If the current host cannot load the live skill, or authenticated publishing is u
 
 `The task is still only at the prepared stage. I can draft the publish copy and comment now, but the actual live publish step still needs a supported host.`
 
+- `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
+- `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
+
 ## Maintainer Details
 
 - route: `task-4-curio-board`

@@ -24,6 +24,15 @@ If you want, I can take your choice and continue the oath flow now.
 - `submitted`: the oath has been sent and is waiting to settle into the public record.
 - `completed`: the faction direction and oath flow are both fully done.
 
+### Blocker Example
+
+If the direction is already chosen but the current environment cannot continue the oath flow yet, the reply should say:
+
+`Your direction is already locked in, but the oath flow cannot continue yet. I am keeping you at the ready-to-oath stage until the environment is available again.`
+
+- `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
+- `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
+
 ## Maintainer Details
 
 - route: `task-3-faction-oath`

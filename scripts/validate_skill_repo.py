@@ -308,6 +308,19 @@ def main() -> None:
         if "plain chat" not in text:
             fail(f"example is missing the plain-chat expansion note: {path}")
 
+    output_contract = (SKILL_ROOT / "references" / "output-contract.md").read_text(encoding="utf-8")
+    for marker in (
+        "## CTA Classification",
+        "`support`",
+        "`none`",
+        "Telegram first, then X",
+        "## Support CTA Strings",
+        "如果这里卡住了",
+        "If you're stuck here",
+    ):
+        if marker not in output_contract:
+            fail(f"missing support CTA contract marker: {marker}")
+
     task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
     task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
     for marker in ("身份入口", "第一次来", "平滑入口"):
@@ -316,6 +329,12 @@ def main() -> None:
     for marker in ("identity entry", "First time here", "smoother entry path"):
         if marker not in task2_en:
             fail(f"missing Task 2 English onboarding marker: {marker}")
+    for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese support marker: {marker}")
+    for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English support marker: {marker}")
 
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
@@ -325,6 +344,12 @@ def main() -> None:
     for required_stage in ("selected", "ready to oath", "submitted", "completed"):
         if required_stage not in task3_en:
             fail(f"missing Task 3 English stage example: {required_stage}")
+    for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese support marker: {marker}")
+    for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English support marker: {marker}")
 
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     task4_en = (EXAMPLES_DIR / "task-4-curio-board.en.md").read_text(encoding="utf-8")
@@ -338,6 +363,12 @@ def main() -> None:
         fail("missing Task 4 Chinese blocker example")
     if "Blocker Example" not in task4_en:
         fail("missing Task 4 English blocker example")
+    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task4_zh:
+            fail(f"missing Task 4 Chinese support marker: {marker}")
+    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task4_en:
+            fail(f"missing Task 4 English support marker: {marker}")
     for marker in ("奇物来源", "ClawHub", "GitHub"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese source marker: {marker}")
@@ -364,14 +395,31 @@ def main() -> None:
             fail(f"missing Task 4 publish-prep contract marker: {marker}")
 
     task2_flow = TASK2_FLOW_PATH.read_text(encoding="utf-8")
-    for marker in ("identity entry", "first-time", "smoother entry path"):
+    for marker in ("identity entry", "first-time", "smoother entry path", "support CTA"):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
+
+    task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
+    for marker in ("support CTA", "blocker summary"):
+        if marker not in task1_flow:
+            fail(f"missing Task 1 support flow marker: {marker}")
+
+    task3_flow = TASK3_FLOW_PATH.read_text(encoding="utf-8")
+    for marker in ("support CTA", "blocker summary"):
+        if marker not in task3_flow:
+            fail(f"missing Task 3 support flow marker: {marker}")
+
+    for marker in ("support CTA", "genuinely stuck"):
+        if marker not in task4_flow:
+            fail(f"missing Task 4 support flow marker: {marker}")
 
     task5_flow = TASK5_FLOW_PATH.read_text(encoding="utf-8")
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
         if marker not in task5_flow:
             fail(f"missing Task 5 platform template marker: {marker}")
+    for marker in ("support CTA", "genuinely stuck on sending"):
+        if marker not in task5_flow:
+            fail(f"missing Task 5 support flow marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
     if "REMOTE_PROBE_MODE=strict" not in release_gate:

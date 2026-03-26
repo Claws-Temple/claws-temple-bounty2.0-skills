@@ -21,6 +21,15 @@ Two paths are available:
 If your identity entry is already ready, I can continue with either path now.
 If this is your first time here, I will take you through identity-entry setup before the pairing flow continues.
 
+### Blocker Example
+
+If identity-entry setup fails, or the current host cannot continue the pairing path yet, the reply should say:
+
+`The pairing flow cannot continue yet, so I am keeping you at the identity-entry setup step for now. Once that entry is ready, we can continue.`
+
+- `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
+- `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
+
 ## Maintainer Details
 
 - route: `task-2-resonance-partner`

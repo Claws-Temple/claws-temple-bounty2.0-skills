@@ -154,4 +154,5 @@ Do not trigger this skill when:
 - Do not expose raw IDs, proposal IDs, transaction IDs, dependency skill names, or config keys in the default visible layer.
 - Do not directly show any original faction names from the dependency layer to ordinary users.
 - Rewrite faction display names by reading them from the Task 3 config file. Use the active brand lexicon only for surrounding task labels and helper wording.
+- If any task enters a real blocker or externally stalled state that the agent cannot resolve automatically in the current turn, append the support CTA from the bundled output contract.
 - Keep Task 5 optional in every roadmap and completion CTA.
