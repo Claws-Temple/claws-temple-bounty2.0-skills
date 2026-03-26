@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://claws-temple.local/faction-proposals.schema.json",
+  "title": "Claws Temple Faction Proposals",
+  "type": "object",
+  "required": [
+    "version",
+    "environment",
+    "is_test_only",
+    "launch_blocker",
+    "dependency_invocation",
+    "dao_alias",
+    "dao_id",
+    "dao_url",
+    "dao_create_tx_id",
+    "factions"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string"
+    },
+    "is_test_only": {
+      "type": "boolean"
+    },
+    "launch_blocker": {
+      "type": "string"
+    },
+    "dependency_invocation": {
+      "type": "object",
+      "required": [
+        "dependency_skill",
+        "tool_name",
+        "cli_fallback",
+        "network_id",
+        "preflight_mode",
+        "send_mode",
+        "vote_payload"
+      ]
+    },
+    "factions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4
+    }
+  }
+}

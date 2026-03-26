@@ -1,0 +1,29 @@
+---
+description: Apply the Claws Temple Bounty workflow only when the user explicitly mentions Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already inside this branded five-task path and asks for the next step. Do not apply it to generic numbered tasks outside this path.
+alwaysApply: false
+---
+
+# Claws Temple Bounty Rule
+
+Use the `claws-temple-bounty` workflow from this repository when the user asks for:
+
+- Claws Temple Bounty or 龙虾圣殿 Bounty 2.0
+- Task 1 through Task 5
+- the next step inside this bounty path
+- coordinate card, six-axis, or branded ability test flows within this bounty path
+- resonance partner or pairing guidance within this bounty path
+- faction oath or faction belonging within this bounty path
+- Curio Board publishing and comment follow-up within this bounty path
+- optional social signal after the main bounty path
+
+Do not use this rule for generic `Task 1-5`, generic ability tests, or unrelated partner matching outside the Claws Temple path.
+
+## Canonical Package
+
+- `skills/claws-temple-bounty/SKILL.md`
+- `skills/claws-temple-bounty/references/output-contract.md`
+- `skills/claws-temple-bounty/references/task-flows/`
+- `skills/claws-temple-bounty/references/examples/`
+- `skills/claws-temple-bounty/config/faction-proposals.json`
+
+Load the canonical package and follow it exactly. Do not duplicate the workflow inside this rule file.

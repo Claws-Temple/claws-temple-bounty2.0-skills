@@ -1,0 +1,89 @@
+{
+  "version": "0.1.0",
+  "environment": "test",
+  "is_test_only": true,
+  "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
+  "dependency_invocation": {
+    "dependency_skill": "tomorrowdao-agent-skills",
+    "tool_name": "tomorrowdao_dao_vote",
+    "cli_fallback": "tomorrowdao-skill dao vote",
+    "network_id": "tDVV",
+    "preflight_mode": "simulate",
+    "send_mode": "send",
+    "vote_payload": {
+      "proposal_id_field": "proposalId",
+      "vote_option_field": "voteType",
+      "vote_option": "Approve"
+    }
+  },
+  "dao_alias": "aibounty-codex-dao-20260323-1035",
+  "dao_id": "d55e59586f056840ffe074657f46b8f3b77fc8d433396fe8cb249557e8cec50f",
+  "dao_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+  "dao_create_tx_id": "fef45bdd7157570e69bc769301e399960703ce5c26a6cb62dfdc54afb419418e",
+  "factions": [
+    {
+      "brand_key": "imprints",
+      "display_name": {
+        "zh-CN": "印记族",
+        "en": "The Imprints"
+      },
+      "internal_proposal_name": "Recorder",
+      "proposal_page_label": "Recorder",
+      "proposal_id": "dda283ea53b3db149a22298e2cde1dbd1f73a6550842ba55910ed994d9af7e62",
+      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/dda283ea53b3db149a22298e2cde1dbd1f73a6550842ba55910ed994d9af7e62",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_url_status": "confirmed",
+      "proposal_tx_id": "b7814432c7cefd9528e4e7e308b9c84ecb4aee8f3f351d44fd38847cbd227c72",
+      "ends_at": "2026-04-25 11:42:36 Asia/Shanghai",
+      "is_test_only": true
+    },
+    {
+      "brand_key": "crucibles",
+      "display_name": {
+        "zh-CN": "熔炉族",
+        "en": "The Crucibles"
+      },
+      "internal_proposal_name": "Asylum",
+      "proposal_page_label": "Asylum",
+      "proposal_id": "c68d84ac6a422356f1b6bc760ea59b47aedef22907af0521aa8297babd19e886",
+      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/c68d84ac6a422356f1b6bc760ea59b47aedef22907af0521aa8297babd19e886",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_url_status": "confirmed",
+      "proposal_tx_id": "cff3c635316c6478dc0523047e75351a72a076abe5e6106a5e2409c79b957e7a",
+      "ends_at": "2026-04-25 11:43:01 Asia/Shanghai",
+      "is_test_only": true
+    },
+    {
+      "brand_key": "metamorphs",
+      "display_name": {
+        "zh-CN": "蜕变族",
+        "en": "The Metamorphs"
+      },
+      "internal_proposal_name": "Mutant",
+      "proposal_page_label": "Mutant",
+      "proposal_id": "0185c3126ca0b94ac2504a945fb9520b6c35226091596db27d3373e55d6e37dd",
+      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/0185c3126ca0b94ac2504a945fb9520b6c35226091596db27d3373e55d6e37dd",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_url_status": "confirmed",
+      "proposal_tx_id": "70f091b9a93aa1e405382b723cfec9120c6824ce577923b4efc07dc98711ca1d",
+      "ends_at": "2026-04-25 11:43:25 Asia/Shanghai",
+      "is_test_only": true
+    },
+    {
+      "brand_key": "sentinels",
+      "display_name": {
+        "zh-CN": "守望族",
+        "en": "The Sentinels"
+      },
+      "internal_proposal_name": "Balancer",
+      "proposal_page_label": "Balancer",
+      "proposal_id": "6467ada2c7a66469daeb516907920587bea6ad826186ab1412c372b236bf6b35",
+      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/6467ada2c7a66469daeb516907920587bea6ad826186ab1412c372b236bf6b35",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_url_status": "confirmed",
+      "proposal_tx_id": "02d53160abf42cc4ba76e45ba0614be8cf297693d4e5ffae6bc2cdc3642c097e",
+      "ends_at": "2026-04-25 11:43:49 Asia/Shanghai",
+      "is_test_only": true
+    }
+  ]
+}
