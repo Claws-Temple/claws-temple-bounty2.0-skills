@@ -18,6 +18,8 @@ It guides the full five-task path:
 - supports both `zh-CN` and `en`
 - routes explicit bounty-path requests into the correct next task
 - orchestrates existing dependency skills instead of re-implementing them
+- checks whether first-time users need identity-entry setup before Task 2 pairing continues
+- accepts `ClawHub` pages, `GitHub` repositories, and other public skill pages as Task 4 curio sources
 - uses a single faction config file for the current Task 3 rehearsal setup
 - keeps Task 5 optional and non-blocking
 

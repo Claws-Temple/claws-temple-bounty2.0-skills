@@ -62,6 +62,8 @@ Dependency rule:
 - if a required dependency is unavailable, stop with a branded blocker summary
 - keep dependency names in maintainer-facing details, not in the default visible layer
 - for Task 4, if the host cannot load the live remote skill or the network path is unavailable, fall back to `publish-prep mode`: prepare the publish payload and comment draft, then tell the user exactly what still needs to be completed manually
+- for Task 2, first-time users must be asked whether their `identity entry` is ready before pairing continues; if not, route them into identity-entry setup first
+- for Task 4, accept `ClawHub` public pages, `GitHub` repositories, and other public skill pages as valid curio sources; do not force GitHub-only wording
 
 ## Required First Step
 

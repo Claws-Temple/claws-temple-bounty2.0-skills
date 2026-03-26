@@ -16,13 +16,21 @@ Current status:
 - `publish`: `prepared`
 - `comment`: `waiting`
 
-If you already have the GitHub URL, title, summary, and tags, I can move straight into the publish path.
+Before the publish step, I first collect the `curio source`.
+
+Accepted source shapes include:
+
+- a `ClawHub` public page URL
+- a `GitHub` repository URL
+- another public `skill` page URL
+
+If you already have the curio source, title, summary, and tags, I can move straight into the publish path.
 If not, I can prepare the full publish copy first.
 If we are only preparing copy, the current stage is `prepared`, not completed yet; Task 4 is only complete after both publish and comment are done.
 
 ### Stage Samples
 
-- `prepared`: the copy, tags, and link are ready, but nothing has been published yet.
+- `prepared`: the copy, tags, and curio source are ready, but nothing has been published yet.
 - `published`: the entry is live, but the follow-up comment is still missing.
 - `commented`: the comment is done and the flow is waiting for final completion confirmation.
 - `completed`: both publish and comment are done.

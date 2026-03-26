@@ -18,6 +18,8 @@
 - 同时支持 `zh-CN` 与 `en`
 - 能把显式进入 bounty 路径的请求路由到正确任务
 - 复用现有依赖 skill，不重写底层能力
+- 在 Task 2 里会先判断新用户是否需要开通 `身份入口`
+- 在 Task 4 里接受 `ClawHub 页面 / GitHub repo / 公开 skill 页面` 作为奇物来源
 - 用单一 faction 配置文件维护 Task 3 的当前演练映射
 - 把 Task 5 保持为可选加分项，不阻塞主线
 

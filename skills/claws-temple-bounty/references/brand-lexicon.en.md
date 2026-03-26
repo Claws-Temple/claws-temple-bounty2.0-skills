@@ -13,10 +13,12 @@ Use this file when `output_language = en`.
 - Task 1 output -> `Coordinate Card`
 - Task 2 -> `Resonance Pairing`
 - Task 2 outcome -> `resonance partner`
+- Task 2 onboarding -> `identity entry setup`
 - Task 3 -> `Faction Belonging`
 - Task 3 action -> `Faction Oath`
 - Task 4 -> `Curio Board`
 - Task 4 action -> `publish and comment`
+- Task 4 source -> `curio source`
 - Task 5 -> `Social Signal`
 - Task 5 CTA -> `send a signal and let your resonance partner find you`
 
@@ -37,6 +39,7 @@ Use this file when `output_language = en`.
 - `faction choice` -> `Faction Oath`
 - `publish skill` -> `publish a curio`
 - `comment` -> `leave a short verdict`
+- `curio source` -> `curio source`
 - `social post` -> `social signal`
 
 ## Forbidden Visible Replacements

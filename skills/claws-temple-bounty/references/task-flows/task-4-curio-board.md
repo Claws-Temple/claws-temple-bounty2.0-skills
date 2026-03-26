@@ -8,18 +8,22 @@ Use this flow for Task 4 or any publish-and-comment skill showcase request.
 
 ## Goal
 
-Publish a branded curio and then leave a follow-up comment.
+Publish a branded curio from a supported source and then leave a follow-up comment.
 
 ## Steps
 
-1. Confirm the user has a skill or repository to publish.
-2. If title, summary, tags, or GitHub URL are missing, gather them first.
-3. In maintainer-facing execution, run the Task 4 live-skill preflight before relying on live publish.
-4. Load the live SHIT Skills integration skill only when both remote preflight and local authenticated publishing are available.
-5. Complete the publish step.
-6. Complete the comment step on the same entry.
-7. Return success only when both steps are complete.
-8. If the host cannot load the remote skill or the network path is unavailable, switch to `publish-prep mode` instead of failing silently.
+1. Confirm the user has a curio source to publish.
+2. Accept any supported curio source:
+   - `ClawHub` public page URL
+   - `GitHub` repository URL
+   - another public skill page URL
+3. If title, summary, tags, or curio source are missing, gather them first.
+4. In maintainer-facing execution, run the Task 4 live-skill preflight before relying on live publish.
+5. Load the live SHIT Skills integration skill only when both remote preflight and local authenticated publishing are available.
+6. Complete the publish step.
+7. Complete the comment step on the same entry.
+8. Return success only when both steps are complete.
+9. If the host cannot load the remote skill or the network path is unavailable, switch to `publish-prep mode` instead of failing silently.
 
 ## Required Visible Output
 
@@ -36,7 +40,7 @@ When `publish-prep mode` is used, return a fixed prep payload shape:
 - `title`
 - `summary`
 - `tags`
-- `github_url`
+- `curio_source`
 - `publish_draft`
 - `comment_draft`
 - `remaining_live_step`
@@ -69,5 +73,6 @@ If the remote dependency cannot be loaded:
 
 - the visible layer should say `奇物志` or `Curio Board`
 - the visible layer should not expose the raw dependency name
+- the visible layer should not force GitHub-only wording when the user provides a `ClawHub` or other public skill source
 - keep the live skill URL in the maintainer layer when the user asks for details
 - for test rollouts, prefer graceful downgrade over hard failure when the remote skill probe is flaky
