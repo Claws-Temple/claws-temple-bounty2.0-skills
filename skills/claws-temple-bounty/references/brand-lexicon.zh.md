@@ -13,10 +13,12 @@ Use this file when `output_language = zh-CN`.
 - Task 1 output -> `原力坐标卡`
 - Task 2 -> `光锥交汇`
 - Task 2 outcome -> `龙虾伙伴`
+- Task 2 onboarding -> `开通身份入口`
 - Task 3 -> `原野部落归属`
 - Task 3 action -> `部落宣誓`
 - Task 4 -> `奇物志`
 - Task 4 action -> `发布奇物并参与评论`
+- Task 4 source -> `奇物来源`
 - Task 5 -> `社交寻配`
 - Task 5 CTA -> `发出信号，等待共振伙伴找来`
 
@@ -37,6 +39,7 @@ Use this file when `output_language = zh-CN`.
 - `faction choice` -> `选择部落方向`
 - `publish skill` -> `发布奇物`
 - `comment` -> `留下评语`
+- `curio source` -> `奇物来源`
 - `social post` -> `发出信号`
 
 ## 禁用词替换

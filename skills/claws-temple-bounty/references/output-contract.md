@@ -108,6 +108,8 @@ Expanded layer rule:
 ### Task 2 Replies
 
 - explain whether the user is looking for a direct partner or a broader partner signal
+- confirm whether the user's `identity entry` is already ready before moving into pairing
+- if the user is first-time, explain that identity-entry setup happens before the pairing flow
 - end with a CTA toward Task 3 when the path is stable
 
 ### Task 3 Replies
@@ -124,12 +126,14 @@ Expanded layer rule:
 ### Task 4 Replies
 
 - completion requires both publish and comment stages
+- accept a `curio source` from `ClawHub`, `GitHub`, or another public skill page
 - distinguish the stage clearly:
   - `prepared`
   - `published`
   - `commented`
   - `completed`
 - say which stage the user is in and what is still missing
+- if the task is still only in prep, say that live publish is still missing
 - if authenticated publishing is blocked, explain the blocker plainly and offer the exact next step
 
 ### Task 5 Replies

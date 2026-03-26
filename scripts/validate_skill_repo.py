@@ -17,6 +17,7 @@ CONFIG_PATH = SKILL_ROOT / "config" / "faction-proposals.json"
 CONFIG_SCHEMA_PATH = SKILL_ROOT / "config" / "faction-proposals.schema.json"
 EXAMPLES_DIR = SKILL_ROOT / "references" / "examples"
 OPENAI_METADATA_PATH = SKILL_ROOT / "agents" / "openai.yaml"
+TASK2_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-2-resonance-partner.md"
 TASK3_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-3-faction-oath.md"
 CANONICAL_SKILL_PATH = SKILL_ROOT / "SKILL.md"
 TASK4_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-4-curio-board.md"
@@ -307,6 +308,15 @@ def main() -> None:
         if "plain chat" not in text:
             fail(f"example is missing the plain-chat expansion note: {path}")
 
+    task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
+    task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
+    for marker in ("身份入口", "第一次来", "平滑入口"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese onboarding marker: {marker}")
+    for marker in ("identity entry", "First time here", "smoother entry path"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English onboarding marker: {marker}")
+
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
     for required_stage in ("已选择", "已准备宣誓", "已提交", "已完成"):
@@ -328,6 +338,12 @@ def main() -> None:
         fail("missing Task 4 Chinese blocker example")
     if "Blocker Example" not in task4_en:
         fail("missing Task 4 English blocker example")
+    for marker in ("奇物来源", "ClawHub", "GitHub"):
+        if marker not in task4_zh:
+            fail(f"missing Task 4 Chinese source marker: {marker}")
+    for marker in ("curio source", "ClawHub", "GitHub"):
+        if marker not in task4_en:
+            fail(f"missing Task 4 English source marker: {marker}")
 
     task4_flow = TASK4_FLOW_PATH.read_text(encoding="utf-8")
     for marker in (
@@ -336,13 +352,21 @@ def main() -> None:
         "`title`",
         "`summary`",
         "`tags`",
-        "`github_url`",
+        "`curio_source`",
         "`publish_draft`",
         "`comment_draft`",
         "`remaining_live_step`",
+        "`ClawHub`",
+        "`GitHub`",
+        "public skill page",
     ):
         if marker not in task4_flow:
             fail(f"missing Task 4 publish-prep contract marker: {marker}")
+
+    task2_flow = TASK2_FLOW_PATH.read_text(encoding="utf-8")
+    for marker in ("identity entry", "first-time", "smoother entry path"):
+        if marker not in task2_flow:
+            fail(f"missing Task 2 onboarding flow marker: {marker}")
 
     task5_flow = TASK5_FLOW_PATH.read_text(encoding="utf-8")
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
