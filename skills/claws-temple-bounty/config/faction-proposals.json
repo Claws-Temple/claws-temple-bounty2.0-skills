@@ -3,6 +3,20 @@
   "environment": "test",
   "is_test_only": true,
   "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
+  "dependency_min_version": "0.2.0",
+  "vote_token_symbol": "AIBOUNTY",
+  "vote_amount_display": "2 AIBOUNTY",
+  "vote_amount_minimal_unit": 200000000,
+  "token_balance_tool_name": "tomorrowdao_token_balance_view",
+  "success_telegram_group_url": "https://t.me/+tChFhfxgU6AzYjJl",
+  "success_telegram_template": {
+    "zh-CN": "我是{faction_name}阵营，编号 {txId}。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+    "en": "I am with {faction_name}, reference {txId}. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group."
+  },
+  "success_bonus_note": {
+    "zh-CN": "两周后可额外领取 20 Token，有问题 TG 群里讨论。",
+    "en": "There is an extra 20 Token claim in two weeks, and any questions can go into the Telegram group."
+  },
   "dependency_invocation": {
     "dependency_skill": "tomorrowdao-agent-skills",
     "tool_name": "tomorrowdao_dao_vote",
@@ -12,8 +26,10 @@
     "send_mode": "send",
     "vote_payload": {
       "proposal_id_field": "proposalId",
-      "vote_option_field": "voteType",
-      "vote_option": "Approve"
+      "vote_option_field": "voteOption",
+      "vote_option_value": 0,
+      "vote_amount_field": "voteAmount",
+      "vote_amount_minimal_unit": 200000000
     }
   },
   "dao_alias": "aibounty-codex-dao-20260323-1035",

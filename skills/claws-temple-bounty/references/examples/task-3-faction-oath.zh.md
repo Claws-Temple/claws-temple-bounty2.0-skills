@@ -20,22 +20,34 @@
 ### 阶段示例
 
 - `已选择`：已经确定方向，但还没进入宣誓提交。
-- `已准备宣誓`：映射和时间检查都已完成，下一步就是正式提交。
+- `等待 Token`：方向已经确认，但当前还没满足进入投票的 2 个 AIBOUNTY 条件。
+- `已准备宣誓`：映射、版本、时间和 Token 预检都已完成，下一步就是正式提交。
 - `已提交`：宣誓已经发出，等待把结果记入公开记录页。
-- `已完成`：方向确认和宣誓流程都已经完成，可以进入下一项任务。
+- `已完成`：宣誓交易已经成功，且你已经拿到了需要带去 Telegram 群回报的编号。
 
 ### 阻断示例
 
-如果方向已经选好了，但当前环境还不能继续宣誓，就应该明确告诉用户：
+如果方向已经选好了，但当前 `AIBOUNTY` 余额还不到 2 个，就应该明确告诉用户：
 
-`当前方向已经确认，但宣誓流程还不能继续。我会先把你停在已准备宣誓阶段，等环境恢复后再继续。`
+`当前方向已经确认，但你现在还没满足进入部落宣誓所需的 2 个 AIBOUNTY。我会先把你停在等待 Token 阶段。你可以先等 Task 2 配对成功后再回来，或者邀请朋友来配对，补足进入投票所需的 Token。`
 
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
+
+### 成功示例
+
+如果宣誓交易已经成功并拿到了 `txId`，就应该明确告诉用户：
+
+`你的部落宣誓已经成功，当前编号是 txid-1234。请立刻加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送下面这条消息。两周后你还可以额外领取 20 Token；如果有问题，也欢迎直接在群里讨论。`
+
+群内发送模板：
+
+`我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。`
 
 ## 维护者详情
 
 - route: `task-3-faction-oath`
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
 - active_environment: `test`
+- dependency_min_version: `0.2.0`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`

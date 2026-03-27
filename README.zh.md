@@ -91,7 +91,7 @@ cp -R skills/claws-temple-bounty "${CODEX_HOME:-$HOME/.codex}/skills/claws-templ
 
 - 本地 skill：`agent-spectrum`
 - 本地 skill：`resonance-contract`
-- 本地 skill：`tomorrowdao-agent-skills`
+- 本地 skill：`tomorrowdao-agent-skills` `>= 0.2.0`
 - Task 4 远端 live skill：`https://www.shitskills.net/skill.md`
 
 如果希望依赖预检在缺失时直接失败，而不是只给 warning，可以用 `STRICT_DEPS=1` 运行 smoke check。
@@ -105,6 +105,7 @@ ls "${CODEX_HOME:-$HOME/.codex}/skills"
 ```
 
 如果依赖缺失，当前仓库级 smoke check 仍可能在 warning 模式下通过，但 Task 1-3 会在运行时进入 blocker。
+Task 3 还要求真实通过 `2 AIBOUNTY` 余额预检后，才允许继续部落宣誓投票。
 
 ## 使用方式
 
@@ -138,6 +139,7 @@ Task 5 是可选加分项，负责扩大社区传播。
 
 Task 3 当前内置的是演练用 faction 映射。
 正式上线前，必须替换 `skills/claws-temple-bounty/config/faction-proposals.json`。
+Task 3 现在要求 `tomorrowdao-agent-skills >= 0.2.0`、通用 `tomorrowdao_token_balance_view` 工具，以及 `2 AIBOUNTY` 的投票门槛。
 Task 4 的 live publish 还依赖 `https://www.shitskills.net/skill.md` 的可达性。
 
 ## Task 4 上线预案

@@ -52,7 +52,7 @@ Use these dependencies explicitly when the relevant task is requested:
 
 - Task 1 -> `agent-spectrum`
 - Task 2 -> `resonance-contract`
-- Task 3 -> `tomorrowdao-agent-skills`
+- Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.0`
 - Task 4 -> preferred live skill at `https://www.shitskills.net/skill.md`
 - Task 5 -> `resonance-contract` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
 
@@ -63,6 +63,9 @@ Dependency rule:
 - if a required dependency is unavailable, stop with a branded blocker summary
 - keep dependency names in maintainer-facing details, not in the default visible layer
 - for Task 2, first-time users must be asked whether their `identity entry` is ready before pairing continues; if not, route them into identity-entry setup first
+- for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, vote payload fields, and success Telegram follow-up
+- for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
+- for Task 3, only treat the oath as completed after a mined-success `txId` is returned; the success close must then instruct the user to join the Telegram group and post the fixed template
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl`
 - for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA

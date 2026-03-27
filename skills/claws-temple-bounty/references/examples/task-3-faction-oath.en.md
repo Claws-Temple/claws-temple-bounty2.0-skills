@@ -20,22 +20,34 @@ If you want, I can take your choice and continue the oath flow now.
 ### Stage Samples
 
 - `selected`: the user has chosen a faction, but the oath has not started yet.
-- `ready to oath`: mapping and time checks are complete, and the next step is the actual submission.
+- `waiting for tokens`: the faction is chosen, but the user still does not meet the 2 AIBOUNTY requirement for the vote.
+- `ready to oath`: mapping, version, timing, and token prechecks are complete, and the next step is the actual submission.
 - `submitted`: the oath has been sent and is waiting to settle into the public record.
-- `completed`: the faction direction and oath flow are both fully done.
+- `completed`: the oath transaction has succeeded and the user now has the `txId` they must report in Telegram.
 
 ### Blocker Example
 
-If the direction is already chosen but the current environment cannot continue the oath flow yet, the reply should say:
+If the direction is already chosen but the user does not yet have 2 AIBOUNTY, the reply should say:
 
-`Your direction is already locked in, but the oath flow cannot continue yet. I am keeping you at the ready-to-oath stage until the environment is available again.`
+`Your direction is already locked in, but you do not yet meet the 2 AIBOUNTY requirement for the oath vote. I am keeping you in the waiting-for-tokens stage for now. You can return after Task 2 pairing succeeds, or invite friends to pair so you can build toward the required tokens.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
+
+### Success Example
+
+If the oath transaction already succeeded and returned a `txId`, the reply should say:
+
+`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send the message below. There is also an extra 20 Token claim in two weeks, and any questions can go straight into the group.`
+
+Telegram post template:
+
+`I am with The Sentinels, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.`
 
 ## Maintainer Details
 
 - route: `task-3-faction-oath`
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
 - active_environment: `test`
+- dependency_min_version: `0.2.0`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`
