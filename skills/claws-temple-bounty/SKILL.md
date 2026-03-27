@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.1.0
+version: 0.2.0
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.1.0`
+- Current skill version: `0.2.0`
 
 ## Scope
 
