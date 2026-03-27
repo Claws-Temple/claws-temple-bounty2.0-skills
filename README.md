@@ -18,7 +18,7 @@ It guides the full five-task path:
 - supports both `zh-CN` and `en`
 - routes explicit bounty-path requests into the correct next task
 - orchestrates existing dependency skills instead of re-implementing them
-- checks whether first-time users need identity-entry setup before Task 2 pairing continues
+- checks whether first-time users need identity-entry setup and a ready `user ID` before Task 2 pairing continues
 - routes Task 4 into the native SHIT Skills flow with `GitHub` as the only publishable source
 - collects native Task 4 fields such as `installType`, `installCommand`, and `installUrl` when needed
 - uses a single faction config file for the current Task 3 rehearsal setup

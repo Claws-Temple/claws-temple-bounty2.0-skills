@@ -145,10 +145,14 @@ Use these strings when `cta_type = support`.
 
 ### Task 2 Replies
 
-- explain whether the user is looking for a direct partner or a broader partner signal
-- confirm whether the user's `identity entry` is already ready before moving into pairing
-- if the user is first-time, explain that identity-entry setup happens before the pairing flow
-- if identity-entry setup or the pairing path is externally blocked and the user cannot continue automatically, append support CTA
+- explain whether the user is looking for `targeted match` or `open partner search`
+- confirm whether the user's `identity entry` is already open before moving into pairing
+- confirm whether the user already has their own `user ID`
+- if the user is first-time, explain that the smoother identity-entry path happens before the pairing flow and ends with a usable `user ID`
+- if the user chooses `targeted match`, ask for the other user's `user ID`
+- if the user provides `email`, `Address`, nickname, or another non-`user ID` input for targeted match, correct the input naturally and offer `provide the other user's user ID` or `switch to open partner search`
+- keep `CA only`, `counterparty_ca_hash`, and `queue` inside maintainer-facing details; the default visible layer should say `user ID`
+- if identity-entry setup or the pairing path is externally blocked and the user cannot continue automatically, translate the blocker into `身份入口 / 用户ID 未准备好` style wording and append support CTA
 - end with a CTA toward Task 3 when the path is stable
 
 ### Task 3 Replies

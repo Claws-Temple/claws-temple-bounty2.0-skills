@@ -122,6 +122,13 @@ def compile_visible_term_pattern(term: str) -> re.Pattern[str]:
     return re.compile(rf"(?i){re.escape(term)}")
 
 
+def strip_maintainer_layer(text: str) -> str:
+    for marker in ("\n## 维护者详情", "\n## Maintainer Details"):
+        if marker in text:
+            return text.split(marker, 1)[0]
+    return text
+
+
 def validate_against_subset_schema(value: object, schema: object, path: str = "$") -> None:
     if not isinstance(schema, dict):
         return
@@ -366,18 +373,32 @@ def main() -> None:
 
     task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
     task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
-    for marker in ("身份入口", "第一次来", "平滑入口"):
+    for marker in ("身份入口", "用户ID", "第一次来", "平滑入口", "指定匹配", "开放寻配"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese onboarding marker: {marker}")
-    for marker in ("identity entry", "First time here", "smoother entry path"):
+    for marker in ("identity entry", "user ID", "first time here", "smoother entry path", "Targeted match", "Open partner search"):
         if marker not in task2_en:
             fail(f"missing Task 2 English onboarding marker: {marker}")
+    for marker in ("纠正示例", "对方的用户ID", "邮箱", "地址", "昵称"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese correction marker: {marker}")
+    for marker in ("Correction Example", "other user's user ID", "email", "address", "nickname"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English correction marker: {marker}")
     for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese support marker: {marker}")
     for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
         if marker not in task2_en:
             fail(f"missing Task 2 English support marker: {marker}")
+    task2_zh_visible = strip_maintainer_layer(task2_zh)
+    task2_en_visible = strip_maintainer_layer(task2_en)
+    for banned in ("ca_hash", "CA only", "EOA"):
+        if banned in task2_zh_visible or banned in task2_en_visible:
+            fail(f"Task 2 visible layer must not expose dependency identifier terms: {banned}")
+    for marker in ("CA only", "ca_hash", "counterparty_ca_hash", "queue"):
+        if marker not in task2_zh and marker not in task2_en:
+            fail(f"missing Task 2 maintainer mapping marker: {marker}")
 
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
@@ -445,7 +466,17 @@ def main() -> None:
             fail(f"old Task 4 flow marker must be removed: {banned}")
 
     task2_flow = TASK2_FLOW_PATH.read_text(encoding="utf-8")
-    for marker in ("identity entry", "first-time", "smoother entry path", "support CTA"):
+    for marker in (
+        "identity entry",
+        "user ID",
+        "targeted match",
+        "open partner search",
+        "smoother entry path",
+        "support CTA",
+        "CA only",
+        "counterparty_ca_hash",
+        "queue",
+    ):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
 
