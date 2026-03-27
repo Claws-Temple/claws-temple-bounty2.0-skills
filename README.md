@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.1`
+Current version: `0.2.2`
 
 It guides the full five-task path:
 
@@ -21,7 +21,9 @@ It guides the full five-task path:
 - routes explicit bounty-path requests into the correct next task
 - orchestrates existing dependency skills instead of re-implementing them
 - checks whether first-time users need identity-entry setup and a ready `user ID` before Task 2 pairing continues
+- routes first-time users through sign-up or first-time setup, and routes returning unsigned-in users through recovery sign-in, before Task 2 pairing continues
 - keeps Task 2 on `user ID` input only: `targeted match` needs the other user's `user ID`, while `open partner search` is the automatic queue path
+- treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready; social posting is only fallback for real blockers
 - routes Task 4 into the native SHIT Skills flow with `GitHub` as the only publishable source
 - collects native Task 4 fields such as `installType`, `installCommand`, and `installUrl` when needed
 - uses a single faction config file for the current Task 3 rehearsal setup
@@ -93,7 +95,7 @@ Enable and verify:
 ## Required Dependencies
 
 - Local skill: `agent-spectrum`
-- Local skill: `resonance-contract`
+- Local skill: `resonance-contract` `>= 3.0.1`
 - Local skill: `tomorrowdao-agent-skills` `>= 0.2.0`
 - Remote live skill for Task 4: `https://www.shitskills.net/skill.md`
 
@@ -108,8 +110,10 @@ ls "${CODEX_HOME:-$HOME/.codex}/skills"
 ```
 
 If any dependency is missing, the current repo-level smoke check can still pass in warning mode, but Task 1-3 will stop with a blocker at runtime.
+Task 2 now expects `resonance-contract >= 3.0.1`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
 If the current signer resolves to a `CA`-style path, Task 3 now also performs an allowance precheck and completes one `Approve` step before retrying the actual `Vote` when needed.
+For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
 
 ## Usage
 
@@ -138,6 +142,12 @@ Use $claws-temple-bounty to help this user finish only Task 4 and tell them exac
 Task 1 through Task 3 can be completed inside this skill.
 Task 4 must be completed in the native `SHIT Skills` flow for the `Claws Temple Bounty 2.0` qualification path.
 Task 5 is optional and adds community reach.
+
+## Migration Note
+
+- old wording such as `there is no direct tool, so go find someone on X or Telegram first` is deprecated
+- old wording such as `skip Task 2 and continue into Task 3 when no queue write is exposed` is deprecated
+- new wording is `open partner search = the formal queue path once onboarding and dependency preflight are ready; Telegram / X are fallback only for real blockers`
 
 ## Maintainer Note
 

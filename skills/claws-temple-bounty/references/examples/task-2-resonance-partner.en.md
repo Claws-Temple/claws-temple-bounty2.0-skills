@@ -13,7 +13,8 @@ Before we enter the actual pairing flow, I should first confirm two things:
 - whether your `identity entry` is already open
 - whether your own `user ID` is already ready
 
-If this is your first time here, I will take you through the `smoother entry path` first. That is the default recommendation, and it ends with a usable `user ID` for the pairing flow.
+If this is your first time here, I will take you through the `smoother entry path` first. That path starts with sign-up or first-time setup, and it ends with a usable `user ID` for the pairing flow.
+If you are returning but not currently signed in, I will also use the `smoother entry path` first so we can complete recovery sign-in before pairing continues.
 
 Once your identity entry and user ID are ready, two paths are available:
 
@@ -21,8 +22,10 @@ Once your identity entry and user ID are ready, two paths are available:
 - `Open partner search`: use this when you do not already know the target; this is the automatic queue-matching path and does not need a preselected partner.
 
 If your identity entry is already open and your own user ID is ready, I can continue with either path now.
-If this is your first time here, or your own user ID is still missing, I will take you through identity-entry setup before the pairing flow continues.
+If this is your first time here, I will take you through sign-up or first-time setup before the pairing flow continues.
+If you are returning but not currently signed in, I will take you through recovery sign-in before the pairing flow continues.
 If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.
+Once identity entry and user-ID onboarding are ready, I should continue into the formal queue flow instead of suggesting a skip or social-posting substitute.
 
 ### Correction Example
 
@@ -32,7 +35,7 @@ If the user tries to use email, address-like input, or a nickname inside `target
 
 ### Blocker Example
 
-If identity-entry setup fails, the current user's user ID is still not ready, or the current host cannot continue the pairing path yet, the reply should say:
+If sign-up, recovery sign-in, identity-entry setup fails, the current user's user ID is still not ready, or the current host cannot continue the pairing path yet, the reply should say:
 
 `The pairing flow cannot continue yet, so I am keeping you at the identity-entry and user-ID setup step for now. Once those prerequisites are ready, we can continue.`
 
@@ -44,6 +47,7 @@ If identity-entry setup fails, the current user's user ID is still not ready, or
 - route: `task-2-resonance-partner`
 - dependency_skill: `resonance-contract`
 - dependency_contract: `CA only`
+- onboarding_mapping: `new users sign up first; returning unsigned-in users recover sign-in first`
 - user_id_mapping: `user-facing user ID = dependency ca_hash`
 - targeted_match_field: `counterparty_ca_hash`
 - open_partner_search_mode: `queue`

@@ -19,6 +19,6 @@ If you have not started yet, begin with `Task 1: Coordinate Reading`.
 
 ## Maintainer Details
 
-- skill: `claws-temple-bounty@0.2.1`
+- skill: `claws-temple-bounty@0.2.2`
 - route: `task-roadmap`
 - next_recommended_task: `task-1-coordinate-card`
