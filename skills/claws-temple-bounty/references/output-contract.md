@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.0`
+Version: `0.2.1`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -170,9 +170,12 @@ Use these strings when `cta_type = support`.
 - before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.0` and the configured generic token-balance tool are available
 - before vote submission, verify that the user's `AIBOUNTY` balance is at least the configured vote amount
 - if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
+- when the current signer path is `CA` or another delegated-spend route, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
+- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send one `Approve` step first, and only then retry the actual vote
+- keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
 - only move to `completed` after the vote returns a mined-success `txId`
 - in `completed`, include the `txId`, the Telegram group CTA, the fixed Telegram post template, and the two-week extra 20 Token reminder
-- if the mapping exists but the current environment cannot continue the oath flow, or the dependency contract is missing, explain the blocker and append support CTA
+- if the mapping exists but the current environment cannot continue the oath flow, the allowance step cannot be completed, or the dependency contract is missing, explain the blocker and append support CTA
 - if the current mapping is rehearsal-only, keep the visible layer natural and place the launch blocker in the maintainer layer
 
 ### Task 4 Replies

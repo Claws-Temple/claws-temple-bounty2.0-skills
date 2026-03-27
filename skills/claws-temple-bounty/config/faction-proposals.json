@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "environment": "test",
   "is_test_only": true,
   "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
@@ -8,6 +8,7 @@
   "vote_amount_display": "2 AIBOUNTY",
   "vote_amount_minimal_unit": 200000000,
   "token_balance_tool_name": "tomorrowdao_token_balance_view",
+  "token_allowance_tool_name": "tomorrowdao_token_allowance_view",
   "success_telegram_group_url": "https://t.me/+tChFhfxgU6AzYjJl",
   "success_telegram_template": {
     "zh-CN": "我是{faction_name}阵营，编号 {txId}。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
