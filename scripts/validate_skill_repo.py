@@ -157,6 +157,8 @@ def validate_against_subset_schema(value: object, schema: object, path: str = "$
         fail(f"schema type mismatch at {path}: expected string")
     if expected_type == "boolean" and not isinstance(value, bool):
         fail(f"schema type mismatch at {path}: expected boolean")
+    if expected_type == "number" and not isinstance(value, (int, float)):
+        fail(f"schema type mismatch at {path}: expected number")
 
 
 def parse_shanghai_timestamp(raw_value: str) -> datetime:
@@ -206,6 +208,18 @@ def main() -> None:
     if not dependency_invocation:
         fail("missing dependency_invocation in faction config")
     for key in (
+        "dependency_min_version",
+        "vote_token_symbol",
+        "vote_amount_display",
+        "vote_amount_minimal_unit",
+        "token_balance_tool_name",
+        "success_telegram_group_url",
+        "success_telegram_template",
+        "success_bonus_note",
+    ):
+        if not config.get(key):
+            fail(f"missing top-level Task 3 config key: {key}")
+    for key in (
         "dependency_skill",
         "tool_name",
         "cli_fallback",
@@ -217,9 +231,27 @@ def main() -> None:
         if not dependency_invocation.get(key):
             fail(f"missing dependency_invocation.{key}")
     vote_payload = dependency_invocation["vote_payload"]
-    for key in ("proposal_id_field", "vote_option_field", "vote_option"):
-        if not vote_payload.get(key):
+    for key in (
+        "proposal_id_field",
+        "vote_option_field",
+        "vote_option_value",
+        "vote_amount_field",
+        "vote_amount_minimal_unit",
+    ):
+        if key not in vote_payload:
             fail(f"missing dependency_invocation.vote_payload.{key}")
+    if config["token_balance_tool_name"] != "tomorrowdao_token_balance_view":
+        fail("expected token_balance_tool_name to be tomorrowdao_token_balance_view")
+    if vote_payload["vote_option_field"] != "voteOption":
+        fail("expected dependency_invocation.vote_payload.vote_option_field to use voteOption")
+    if vote_payload["vote_option_value"] != 0:
+        fail("expected dependency_invocation.vote_payload.vote_option_value to be 0")
+    if vote_payload["vote_amount_field"] != "voteAmount":
+        fail("expected dependency_invocation.vote_payload.vote_amount_field to use voteAmount")
+    if vote_payload["vote_amount_minimal_unit"] != config["vote_amount_minimal_unit"]:
+        fail("expected vote payload amount to match top-level vote_amount_minimal_unit")
+    if config["vote_amount_minimal_unit"] != 200000000:
+        fail("expected top-level vote_amount_minimal_unit to be 200000000 for rehearsal config")
 
     factions = config.get("factions", [])
     if len(factions) != 4:
@@ -349,10 +381,10 @@ def main() -> None:
 
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
-    for required_stage in ("已选择", "已准备宣誓", "已提交", "已完成"):
+    for required_stage in ("已选择", "等待 Token", "已准备宣誓", "已提交", "已完成"):
         if required_stage not in task3_zh:
             fail(f"missing Task 3 Chinese stage example: {required_stage}")
-    for required_stage in ("selected", "ready to oath", "submitted", "completed"):
+    for required_stage in ("selected", "waiting for tokens", "ready to oath", "submitted", "completed"):
         if required_stage not in task3_en:
             fail(f"missing Task 3 English stage example: {required_stage}")
     for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
@@ -361,6 +393,12 @@ def main() -> None:
     for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
         if marker not in task3_en:
             fail(f"missing Task 3 English support marker: {marker}")
+    for marker in ("AIBOUNTY", "txid-1234", "两周后可额外领取 20 Token", "Task 2 配对成功后再回来"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese success/token marker: {marker}")
+    for marker in ("AIBOUNTY", "txid-1234", "extra 20 Token", "return after Task 2 pairing succeeds"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English success/token marker: {marker}")
 
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     task4_en = (EXAMPLES_DIR / "task-4-curio-board.en.md").read_text(encoding="utf-8")
@@ -417,7 +455,16 @@ def main() -> None:
             fail(f"missing Task 1 support flow marker: {marker}")
 
     task3_flow = TASK3_FLOW_PATH.read_text(encoding="utf-8")
-    for marker in ("support CTA", "blocker summary"):
+    for marker in (
+        "support CTA",
+        "blocker summary",
+        "waiting for tokens",
+        "AIBOUNTY",
+        "token-balance tool",
+        "minimum version",
+        "txId",
+        "Telegram",
+    ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
 
@@ -477,6 +524,13 @@ def main() -> None:
         for banned in ("publish-prep mode", "ClawHub", "publish + comment"):
             if banned in text:
                 fail(f"old Task 4 wording must be removed from {path}: {banned}")
+    for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, SKILL_ROOT / "references" / "output-contract.md"):
+        text = path.read_text(encoding="utf-8")
+        for marker in ("AIBOUNTY", "0.2.0"):
+            if marker not in text:
+                fail(f"missing Task 3 version/token marker {marker!r} in {path}")
+    if "voteType" in CONFIG_PATH.read_text(encoding="utf-8") or '"Approve"' in CONFIG_PATH.read_text(encoding="utf-8"):
+        fail("old Task 3 voteType/Approve contract must be removed from config")
 
     for path in (
         SKILL_ROOT / "references" / "brand-lexicon.zh.md",

@@ -55,6 +55,10 @@ The default visible layer must not include:
 - config keys
 - internal faction names
 
+Task-specific exception:
+
+- Task 3 completed replies may include the mined-success `txId` because the user must repost it into Telegram as their confirmation number.
+
 ## Banned User-Facing Terms
 
 Do not use these strings in the default visible layer:
@@ -152,11 +156,17 @@ Use these strings when `cta_type = support`.
 - present only branded faction names in the visible layer
 - distinguish the stage clearly:
   - `selected`
+  - `waiting for tokens`
   - `ready to oath`
   - `submitted`
   - `completed`
 - say which stage the user is in and what is still missing
-- if the mapping exists but the current environment cannot continue the oath flow, explain the blocker and append support CTA
+- before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.0` and the configured generic token-balance tool are available
+- before vote submission, verify that the user's `AIBOUNTY` balance is at least the configured vote amount
+- if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
+- only move to `completed` after the vote returns a mined-success `txId`
+- in `completed`, include the `txId`, the Telegram group CTA, the fixed Telegram post template, and the two-week extra 20 Token reminder
+- if the mapping exists but the current environment cannot continue the oath flow, or the dependency contract is missing, explain the blocker and append support CTA
 - if the current mapping is rehearsal-only, keep the visible layer natural and place the launch blocker in the maintainer layer
 
 ### Task 4 Replies

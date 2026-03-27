@@ -51,6 +51,57 @@ else
   echo "[smoke-check] dependency skills verified"
 fi
 
+echo "[smoke-check] checking TomorrowDAO dependency version and Task 3 balance tool"
+python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+skills_home = Path(sys.argv[2])
+strict = sys.argv[3] == "1"
+config = json.loads((root / "skills" / "claws-temple-bounty" / "config" / "faction-proposals.json").read_text(encoding="utf-8"))
+dep_dir = skills_home / "tomorrowdao-agent-skills"
+issues: list[str] = []
+
+def parse_version(raw: str) -> tuple[int, ...]:
+    return tuple(int(part) for part in raw.split(".") if part.isdigit())
+
+pkg_path = dep_dir / "package.json"
+if not pkg_path.exists():
+    issues.append(f"missing package.json in {dep_dir}")
+else:
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+    actual_version = str(pkg.get("version") or "")
+    min_version = config["dependency_min_version"]
+    if parse_version(actual_version) < parse_version(min_version):
+        issues.append(f"tomorrowdao-agent-skills version {actual_version} is below required {min_version}")
+
+tool_marker = config["token_balance_tool_name"]
+server_path = dep_dir / "src" / "mcp" / "server.ts"
+openclaw_path = dep_dir / "openclaw.json"
+cli_path = dep_dir / "tomorrowdao_skill.ts"
+for path in (server_path, openclaw_path):
+    if not path.exists():
+        issues.append(f"missing expected dependency file: {path}")
+        continue
+    if tool_marker not in path.read_text(encoding="utf-8"):
+        issues.append(f"{tool_marker} not found in {path}")
+cli_marker = "token-balance-view"
+if not cli_path.exists():
+    issues.append(f"missing expected dependency file: {cli_path}")
+elif cli_marker not in cli_path.read_text(encoding="utf-8"):
+    issues.append(f"{cli_marker} not found in {cli_path}")
+
+if issues:
+    joined = "; ".join(issues)
+    if strict:
+        raise SystemExit(joined)
+    print(f"[smoke-check] warning: {joined}")
+else:
+    print("[smoke-check] tomorrowdao dependency version and token balance tool verified")
+PY
+
 if [[ "$CHECK_REMOTE_SKILL" == "1" ]]; then
   echo "[smoke-check] checking remote Task 4 live skill"
   PROBE_MODE="$REMOTE_PROBE_MODE" \

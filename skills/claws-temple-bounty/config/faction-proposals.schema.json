@@ -8,6 +8,14 @@
     "environment",
     "is_test_only",
     "launch_blocker",
+    "dependency_min_version",
+    "vote_token_symbol",
+    "vote_amount_display",
+    "vote_amount_minimal_unit",
+    "token_balance_tool_name",
+    "success_telegram_group_url",
+    "success_telegram_template",
+    "success_bonus_note",
     "dependency_invocation",
     "dao_alias",
     "dao_id",
@@ -28,6 +36,40 @@
     "launch_blocker": {
       "type": "string"
     },
+    "dependency_min_version": {
+      "type": "string"
+    },
+    "vote_token_symbol": {
+      "type": "string"
+    },
+    "vote_amount_display": {
+      "type": "string"
+    },
+    "vote_amount_minimal_unit": {
+      "type": "number"
+    },
+    "token_balance_tool_name": {
+      "type": "string"
+    },
+    "success_telegram_group_url": {
+      "type": "string"
+    },
+    "success_telegram_template": {
+      "type": "object",
+      "required": ["zh-CN", "en"],
+      "properties": {
+        "zh-CN": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
+    "success_bonus_note": {
+      "type": "object",
+      "required": ["zh-CN", "en"],
+      "properties": {
+        "zh-CN": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    },
     "dependency_invocation": {
       "type": "object",
       "required": [
@@ -38,7 +80,32 @@
         "preflight_mode",
         "send_mode",
         "vote_payload"
-      ]
+      ],
+      "properties": {
+        "dependency_skill": { "type": "string" },
+        "tool_name": { "type": "string" },
+        "cli_fallback": { "type": "string" },
+        "network_id": { "type": "string" },
+        "preflight_mode": { "type": "string" },
+        "send_mode": { "type": "string" },
+        "vote_payload": {
+          "type": "object",
+          "required": [
+            "proposal_id_field",
+            "vote_option_field",
+            "vote_option_value",
+            "vote_amount_field",
+            "vote_amount_minimal_unit"
+          ],
+          "properties": {
+            "proposal_id_field": { "type": "string" },
+            "vote_option_field": { "type": "string" },
+            "vote_option_value": { "type": "number" },
+            "vote_amount_field": { "type": "string" },
+            "vote_amount_minimal_unit": { "type": "number" }
+          }
+        }
+      }
     },
     "factions": {
       "type": "array",
