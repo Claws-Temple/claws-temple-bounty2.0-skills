@@ -220,6 +220,7 @@ def main() -> None:
         "vote_amount_display",
         "vote_amount_minimal_unit",
         "token_balance_tool_name",
+        "token_allowance_tool_name",
         "success_telegram_group_url",
         "success_telegram_template",
         "success_bonus_note",
@@ -249,6 +250,8 @@ def main() -> None:
             fail(f"missing dependency_invocation.vote_payload.{key}")
     if config["token_balance_tool_name"] != "tomorrowdao_token_balance_view":
         fail("expected token_balance_tool_name to be tomorrowdao_token_balance_view")
+    if config["token_allowance_tool_name"] != "tomorrowdao_token_allowance_view":
+        fail("expected token_allowance_tool_name to be tomorrowdao_token_allowance_view")
     if vote_payload["vote_option_field"] != "voteOption":
         fail("expected dependency_invocation.vote_payload.vote_option_field to use voteOption")
     if vote_payload["vote_option_value"] != 0:
@@ -432,6 +435,12 @@ def main() -> None:
     for marker in ("AIBOUNTY", "txid-1234", "extra 20 Token", "return after Task 2 pairing succeeds"):
         if marker not in task3_en:
             fail(f"missing Task 3 English success/token marker: {marker}")
+    for marker in ("授权示例", "授权", "Approve", "txid-1234，不是授权编号"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese allowance/approve marker: {marker}")
+    for marker in ("Approval Example", "authorization step", "Approve", "not the approval tx id"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English allowance/approve marker: {marker}")
 
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     task4_en = (EXAMPLES_DIR / "task-4-curio-board.en.md").read_text(encoding="utf-8")
@@ -508,9 +517,12 @@ def main() -> None:
         "waiting for tokens",
         "AIBOUNTY",
         "token-balance tool",
+        "token-allowance tool",
         "minimum version",
         "txId",
         "Telegram",
+        "Approve",
+        "allowance",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
@@ -584,6 +596,11 @@ def main() -> None:
         for marker in ("AIBOUNTY", "0.2.0"):
             if marker not in text:
                 fail(f"missing Task 3 version/token marker {marker!r} in {path}")
+    for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, CANONICAL_SKILL_PATH, SKILL_ROOT / "references" / "output-contract.md"):
+        text = path.read_text(encoding="utf-8")
+        for marker in ("allowance", "Approve"):
+            if marker not in text:
+                fail(f"missing Task 3 allowance marker {marker!r} in {path}")
     if "voteType" in CONFIG_PATH.read_text(encoding="utf-8") or '"Approve"' in CONFIG_PATH.read_text(encoding="utf-8"):
         fail("old Task 3 voteType/Approve contract must be removed from config")
 

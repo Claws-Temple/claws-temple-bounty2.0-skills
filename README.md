@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.0`
+Current version: `0.2.1`
 
 It guides the full five-task path:
 
@@ -109,6 +109,7 @@ ls "${CODEX_HOME:-$HOME/.codex}/skills"
 
 If any dependency is missing, the current repo-level smoke check can still pass in warning mode, but Task 1-3 will stop with a blocker at runtime.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
+If the current signer resolves to a `CA`-style path, Task 3 now also performs an allowance precheck and completes one `Approve` step before retrying the actual `Vote` when needed.
 
 ## Usage
 
@@ -142,7 +143,8 @@ Task 5 is optional and adds community reach.
 
 Task 3 currently ships with rehearsal-only faction mapping.
 Before any production launch, replace `skills/claws-temple-bounty/config/faction-proposals.json`.
-Task 3 now expects `tomorrowdao-agent-skills >= 0.2.0`, the generic `tomorrowdao_token_balance_view` tool, and a `2 AIBOUNTY` vote threshold.
+Task 3 now expects `tomorrowdao-agent-skills >= 0.2.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, and a `2 AIBOUNTY` vote threshold.
+This unblock can be handled inside `claws-temple-bounty` orchestration itself; no mandatory upstream skill change is required for the immediate fix.
 Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
 
 ## Task 4 Rollout Plan

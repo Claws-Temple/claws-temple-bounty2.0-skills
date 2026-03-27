@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.0
+version: 0.2.1
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.0`
+- Current skill version: `0.2.1`
 
 ## Scope
 
@@ -69,9 +69,11 @@ Dependency rule:
 - for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
-- for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, vote payload fields, and success Telegram follow-up
+- for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, token-allowance precheck, vote payload fields, and success Telegram follow-up
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
-- for Task 3, only treat the oath as completed after a mined-success `txId` is returned; the success close must then instruct the user to join the Telegram group and post the fixed template
+- for Task 3, when the current signer resolves to a `CA` account or another delegated-spend path, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
+- for Task 3, when the allowance is below the configured vote amount, send one `Approve` transaction first through the available `CA` write path, wait for mined success, and only then retry the actual `Vote`
+- for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl`
 - for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA

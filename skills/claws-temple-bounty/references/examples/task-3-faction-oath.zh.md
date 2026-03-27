@@ -21,7 +21,7 @@
 
 - `已选择`：已经确定方向，但还没进入宣誓提交。
 - `等待 Token`：方向已经确认，但当前还没满足进入投票的 2 个 AIBOUNTY 条件。
-- `已准备宣誓`：映射、版本、时间和 Token 预检都已完成，下一步就是正式提交。
+- `已准备宣誓`：映射、版本、时间和 Token 预检都已完成；如果当前路径还差最后一步授权，我会先补齐授权，再继续正式提交。
 - `已提交`：宣誓已经发出，等待把结果记入公开记录页。
 - `已完成`：宣誓交易已经成功，且你已经拿到了需要带去 Telegram 群回报的编号。
 
@@ -34,11 +34,21 @@
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
 
+### 授权示例
+
+如果 `AIBOUNTY` 余额已经够了，但当前路径还差一次投票授权，回复应该明确告诉用户：
+
+`你现在已经满足进入部落宣誓所需的 2 个 AIBOUNTY 条件，但这次宣誓还差最后一步授权。我会先补齐本次投票所需的授权，授权成功后再继续发出部落宣誓。`
+
 ### 成功示例
 
 如果宣誓交易已经成功并拿到了 `txId`，就应该明确告诉用户：
 
 `你的部落宣誓已经成功，当前编号是 txid-1234。请立刻加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送下面这条消息。两周后你还可以额外领取 20 Token；如果有问题，也欢迎直接在群里讨论。`
+
+如果当前路径先做过一次授权，也要明确提醒：
+
+`如果刚才这条路径先做过授权，带去 Telegram 群回报的仍然是最终宣誓成功的 txid-1234，不是授权编号。`
 
 群内发送模板：
 
@@ -50,4 +60,5 @@
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
 - active_environment: `test`
 - dependency_min_version: `0.2.0`
+- ca_vote_path: `allowance precheck -> Approve if needed -> Vote`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`
