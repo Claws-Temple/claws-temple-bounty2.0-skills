@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.1
+version: 0.2.2
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.1`
+- Current skill version: `0.2.2`
 
 ## Scope
 
@@ -51,10 +51,10 @@ Keep all visible fixed strings monolingual after selection.
 Use these dependencies explicitly when the relevant task is requested:
 
 - Task 1 -> `agent-spectrum`
-- Task 2 -> `resonance-contract`
+- Task 2 -> `resonance-contract` version `>= 3.0.1`
 - Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.0`
 - Task 4 -> preferred live skill at `https://www.shitskills.net/skill.md`
-- Task 5 -> `resonance-contract` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
+- Task 5 -> `resonance-contract` version `>= 3.0.1` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
 
 Dependency rule:
 
@@ -64,8 +64,10 @@ Dependency rule:
 - keep dependency names in maintainer-facing details, not in the default visible layer
 - for Task 2, first-time users must be asked whether their `identity entry` is already open and whether their own `user ID` is already available before pairing continues
 - for Task 2, if the current user has not finished the `identity entry` path or still does not have their own `user ID`, route them into the smoother identity-entry path first
+- for Task 2, if the user is new, the smoother identity-entry path should first cover sign-up or first-time setup; if the user is returning but not currently signed in, the smoother path should cover recovery or sign-in before pairing continues
 - for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
 - for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is ready
+- for Task 2, once identity-entry onboarding finishes and dependency queue preflight can proceed, continue into the formal queue path; do not suggest skipping Task 2 or replacing queue with social posting
 - for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`

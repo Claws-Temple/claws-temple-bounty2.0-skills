@@ -382,6 +382,12 @@ def main() -> None:
     for marker in ("identity entry", "user ID", "first time here", "smoother entry path", "Targeted match", "Open partner search"):
         if marker not in task2_en:
             fail(f"missing Task 2 English onboarding marker: {marker}")
+    for marker in ("注册", "登录", "恢复登录"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese registration/recovery marker: {marker}")
+    for marker in ("sign-up", "signed in", "recovery sign-in"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English registration/recovery marker: {marker}")
     for marker in ("自动排队匹配", "不需要先知道具体是谁"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese queue marker: {marker}")
@@ -408,9 +414,15 @@ def main() -> None:
     for banned in ("aelf 社区", "aelf社区", "Moltbook", "拿对方地址", "tDVV 地址"):
         if banned in task2_zh_visible:
             fail(f"Task 2 Chinese visible layer must not expose old community/address wording: {banned}")
+    for banned in ("没有直接工具", "跳过 Task 2"):
+        if banned in task2_zh_visible:
+            fail(f"Task 2 Chinese visible layer must not expose old fallback wording: {banned}")
     for banned in ("aelf community", "Moltbook", "get the other address", "tDVV address"):
         if banned in task2_en_visible:
             fail(f"Task 2 English visible layer must not expose old community/address wording: {banned}")
+    for banned in ("there is no direct tool", "skip Task 2"):
+        if banned in task2_en_visible:
+            fail(f"Task 2 English visible layer must not expose old fallback wording: {banned}")
     for marker in ("CA only", "ca_hash", "counterparty_ca_hash", "queue"):
         if marker not in task2_zh and marker not in task2_en:
             fail(f"missing Task 2 maintainer mapping marker: {marker}")
@@ -494,6 +506,8 @@ def main() -> None:
         "open partner search",
         "automatic queue",
         "smoother entry path",
+        "registration",
+        "sign-in",
         "support CTA",
         "CA only",
         "counterparty_ca_hash",
@@ -501,9 +515,23 @@ def main() -> None:
     ):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
-    for banned in ("aelf community", "Moltbook", "tDVV address", "拿对方地址"):
+    for banned in ("aelf community", "Moltbook", "tDVV address", "拿对方地址", "there is no direct tool", "skip Task 2"):
         if banned in task2_flow or banned in task2_zh_visible or banned in task2_en_visible:
             fail(f"Task 2 old community/address wording must be removed: {banned}")
+
+    skill_text = CANONICAL_SKILL_PATH.read_text(encoding="utf-8")
+    for marker in ("`resonance-contract` version `>= 3.0.1`", "`tomorrowdao-agent-skills` version `>= 0.2.0`"):
+        if marker not in skill_text:
+            fail(f"missing dependency version contract marker: {marker}")
+
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_zh = (ROOT / "README.zh.md").read_text(encoding="utf-8")
+    for marker in ("`resonance-contract` `>= 3.0.1`", "Task 2 now expects `resonance-contract >= 3.0.1`"):
+        if marker not in readme_en:
+            fail(f"missing English dependency version marker: {marker}")
+    for marker in ("`resonance-contract` `>= 3.0.1`", "Task 2 现在要求 `resonance-contract >= 3.0.1`"):
+        if marker not in readme_zh:
+            fail(f"missing Chinese dependency version marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
     for marker in ("support CTA", "blocker summary"):

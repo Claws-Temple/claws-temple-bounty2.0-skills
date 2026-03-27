@@ -51,6 +51,42 @@ else
   echo "[smoke-check] dependency skills verified"
 fi
 
+echo "[smoke-check] checking resonance-contract dependency version"
+python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+skills_home = Path(sys.argv[2])
+strict = sys.argv[3] == "1"
+issues: list[str] = []
+
+dep_dir = skills_home / "resonance-contract"
+skill_path = dep_dir / "SKILL.md"
+min_version = (3, 0, 1)
+
+if not skill_path.exists():
+    issues.append(f"missing SKILL.md in {dep_dir}")
+else:
+    text = skill_path.read_text(encoding="utf-8")
+    match = re.search(r"^version:\s*([0-9]+\.[0-9]+\.[0-9]+)\s*$", text, re.MULTILINE)
+    if not match:
+        issues.append(f"could not resolve resonance-contract version from {skill_path}")
+    else:
+        raw = match.group(1)
+        actual = tuple(int(part) for part in raw.split("."))
+        if actual < min_version:
+            issues.append(f"resonance-contract version {raw} is below required {'.'.join(map(str, min_version))}")
+
+if issues:
+    joined = "; ".join(issues)
+    if strict:
+        raise SystemExit(joined)
+    print(f"[smoke-check] warning: {joined}")
+else:
+    print("[smoke-check] resonance-contract dependency version verified")
+PY
+
 echo "[smoke-check] checking TomorrowDAO dependency version and Task 3 balance tool"
 python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" <<'PY'
 import json
