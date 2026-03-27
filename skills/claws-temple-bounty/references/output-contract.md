@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.2`
+Version: `0.2.4`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -57,6 +57,7 @@ The default visible layer must not include:
 
 Task-specific exception:
 
+- Task 2 replies may include the fully resolved current user's own `user ID` because the user needs a direct confirmation that queue readiness is already in place.
 - Task 3 completed replies may include the mined-success `txId` because the user must repost it into Telegram as their confirmation number.
 
 ## Banned User-Facing Terms
@@ -101,7 +102,7 @@ Resolve `cta_type` before rendering blocker or close-out replies:
 
 - `support`
   - a real blocker, externally stalled state, or host/runtime limitation means the agent cannot continue automatically in the current turn
-  - examples: missing dependency skill, missing authenticated publish capability, identity-entry setup failure, missing config, remote live-skill outage, host capability gap, or rehearsal-only limits that block real submission
+  - examples: dependency self-heal already failed, missing authenticated publish capability, identity-entry setup failure, missing config, remote live-skill outage, host capability gap, or rehearsal-only limits that block real submission
 - `none`
   - the agent can still continue by collecting missing user input
   - the issue is only a light routing correction or an unfinished user choice
@@ -112,6 +113,22 @@ Hard rules:
 - append support CTA only when `cta_type = support`
 - do not mix support CTA with ordinary success or next-task CTA in the same close
 - support replies must show `Telegram first, then X`
+
+## Dependency Self-Heal Rules
+
+For Task 1 through Task 3, treat `missing dependency` and `dependency version below minimum` as self-heal cases before any blocker reply.
+
+Required order:
+
+1. try automatic install, refresh, or upgrade first
+2. if the host cannot do that automatically, give explicit install or upgrade guidance
+3. only append support CTA after self-heal or guidance still cannot unblock the task
+
+Known local sources for self-heal:
+
+- `agent-spectrum` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
+- `resonance-contract` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract`
+- `tomorrowdao-agent-skills` -> `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`
 
 ## Support CTA Strings
 
@@ -133,6 +150,8 @@ Use these strings when `cta_type = support`.
 
 - state that Task 1 through Task 3 can be completed in this path
 - state that Task 4 must be completed in the SHIT Skills native flow for the qualification path
+- state that the default recommended Task 4 action is `publish`
+- state that the current repository still routes Task 3 through a testing or rehearsal record path and that production will switch later
 - state that Task 5 is optional
 - recommend Task 1 first if no progress is known
 
@@ -140,23 +159,30 @@ Use these strings when `cta_type = support`.
 
 - show a coordinate card
 - translate faction or type wording into the selected brand language
-- if the dependency skill is unavailable or the scoring run cannot continue, explain the blocker and append support CTA
+- if the dependency skill is missing or below the required runnable state, try dependency self-heal first
+- if the host cannot auto-install or auto-upgrade, give explicit install guidance before any support CTA
+- if dependency self-heal or the scoring run still cannot continue, explain the blocker and append support CTA
 - end with a CTA toward Task 2
 
 ### Task 2 Replies
 
 - explain whether the user is looking for `targeted match` or `open partner search`
 - confirm whether the user's `identity entry` is already open before moving into pairing
-- confirm whether the user already has their own `user ID`
+- confirm whether the user is already signed in; if not, route returning users into recovery sign-in before pairing
 - if the user is first-time, explain that the smoother identity-entry path starts with sign-up or first-time setup before the pairing flow and ends with a usable `user ID`
 - if the user is returning but not currently signed in, explain that the smoother identity-entry path starts with recovery sign-in before the pairing flow and ends with a usable `user ID`
+- if identity entry and sign-in are ready, auto-resolve the current user's own `user ID` instead of asking the user to type it manually
+- once the current user's `user ID` resolves, show the full value in the visible layer as the Task 2 queue-readiness confirmation
 - if the user chooses `targeted match`, ask for the other user's `user ID`
 - if the user does not already have a concrete partner, explain that `open partner search` is the automatic queue-matching path and does not need a preselected target
+- if `resonance-contract` is missing or below `3.0.1`, try dependency self-heal first
+- if the host cannot auto-install or auto-upgrade `resonance-contract`, give explicit install or upgrade guidance before any support CTA
 - if dependency queue preflight can proceed, continue into the formal queue path and do not suggest skipping Task 2 or replacing queue with social posting
+- treat the Task 2 path as stable enough for Task 3 once the queue join is active or the direct pair submission has been sent
 - if the user provides `email`, `Address`, nickname, `tDVV` address, or another non-`user ID` input for targeted match, correct the input naturally and offer `provide the other user's user ID` or `switch to open partner search`
 - keep `CA only`, `counterparty_ca_hash`, and `queue` inside maintainer-facing details; the default visible layer should say `user ID`
 - do not tell the user to look in legacy community-brand wording, extra platform names outside Telegram and X, or any address-based source; if the user is stuck, point them to the clickable Telegram / X links instead
-- if registration, recovery sign-in, identity-entry setup, or the pairing path is externally blocked and the user cannot continue automatically, translate the blocker into `身份入口 / 用户ID 未准备好` style wording and append support CTA
+- if registration, recovery sign-in, user-ID auto-resolution, dependency self-heal, identity-entry setup, or the pairing path is externally blocked and the user cannot continue automatically, translate the blocker into `身份入口 / 用户ID 未准备好` style wording and append support CTA
 - end with a CTA toward Task 3 when the path is stable
 
 ### Task 3 Replies
@@ -170,22 +196,30 @@ Use these strings when `cta_type = support`.
   - `completed`
 - say which stage the user is in and what is still missing
 - before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.0` and the configured generic token-balance tool are available
+- if `tomorrowdao-agent-skills` is missing or below `0.2.0`, try dependency self-heal first
+- if the host cannot auto-install or auto-upgrade `tomorrowdao-agent-skills`, give explicit install or upgrade guidance before any support CTA
 - before vote submission, verify that the user's `AIBOUNTY` balance is at least the configured vote amount
 - if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
+- treat `waiting for tokens` as a normal unmet-threshold state with `cta_type = none`; do not append support CTA unless the balance check itself is externally blocked
 - when the current signer path is `CA` or another delegated-spend route, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
 - when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send one `Approve` step first, and only then retry the actual vote
 - keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
+- use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
+- in `submitted`, explain that the oath is waiting for final public-record confirmation and keep `cta_type = none` unless monitoring itself is externally blocked
 - only move to `completed` after the vote returns a mined-success `txId`
 - in `completed`, include the `txId`, the Telegram group CTA, the fixed Telegram post template, and the two-week extra 20 Token reminder
+- if the current mapping is rehearsal-only, say clearly in the visible layer that this is a testing or rehearsal record and that production will later switch to the formal record
 - if the mapping exists but the current environment cannot continue the oath flow, the allowance step cannot be completed, or the dependency contract is missing, explain the blocker and append support CTA
-- if the current mapping is rehearsal-only, keep the visible layer natural and place the launch blocker in the maintainer layer
 
 ### Task 4 Replies
 
 - state clearly that the user is entering the native SHIT Skills flow
+- ask which native action the user wants right now
+- if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
+- say clearly that `publish` is the default qualification action in the bounty path, while other native actions are auxiliary unless campaign rules say otherwise
 - ask whether the user already has a SHIT Skills account; if not, route them into registration or sign-in first
-- require a publishable `GitHub repo URL`
-- gather the native publish fields:
+- require a publishable `GitHub repo URL` only when the chosen native action actually needs it
+- gather the native publish fields only when the chosen native action actually needs them:
   - `title`
   - `summary`
   - `githubUrl`
@@ -197,8 +231,9 @@ Use these strings when `cta_type = support`.
 - allow native platform actions such as publish, edit, delete, comment, vote, like, and parse GitHub `SKILL.md`
 - do not use a local `prepared / published / commented / completed` stage model for Task 4
 - do not claim that the local bounty skill itself has completed Task 4; only say which SHIT Skills native action is ready, blocked, or confirmed
-- if the user does not have a publishable `GitHub repo URL`, explain that Task 4 cannot continue yet and append support CTA
-- if registration, sign-in, authenticated publishing, or live remote loading is blocked, explain the blocker plainly and append support CTA
+- if the user chose a repo-dependent action but does not have a publishable `GitHub repo URL`, explain that the action is still missing a prerequisite and keep `cta_type = none`
+- if registration or sign-in is the next normal step, keep `cta_type = none`
+- if registration, sign-in, authenticated publishing, or live remote loading is truly blocked, explain the blocker plainly and append support CTA
 
 ### Task 5 Replies
 

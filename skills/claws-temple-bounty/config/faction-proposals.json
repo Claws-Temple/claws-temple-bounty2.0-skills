@@ -1,5 +1,5 @@
 {
-  "version": "0.2.2",
+  "version": "0.2.4",
   "environment": "test",
   "is_test_only": true,
   "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
@@ -11,8 +11,8 @@
   "token_allowance_tool_name": "tomorrowdao_token_allowance_view",
   "success_telegram_group_url": "https://t.me/+tChFhfxgU6AzYjJl",
   "success_telegram_template": {
-    "zh-CN": "我是{faction_name}阵营，编号 {txId}。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
-    "en": "I am with {faction_name}, reference {txId}. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group."
+    "zh-CN": "我是{faction_name}阵营，编号 {txId}。我已完成龙虾圣殿 Task 3 测试版部落宣誓记录。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+    "en": "I am with {faction_name}, reference {txId}. I have completed the testing or rehearsal record for Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group."
   },
   "success_bonus_note": {
     "zh-CN": "两周后可额外领取 20 Token，有问题 TG 群里讨论。",

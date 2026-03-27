@@ -4,19 +4,19 @@
 
 ## User Summary
 
-You are at `Task 4: SHIT Skills Native Flow`.
+You are at `Task 4: Curio Board / SHIT Skills Native Flow`.
 
 This task no longer uses a local completion stage model. I take you directly into the native `SHIT Skills` flow instead.
 
 I first confirm two things:
 
-1. whether you already have a `SHIT Skills` account
-2. whether you already have a publishable `GitHub repo URL`
+1. which native action you want to continue right now
+2. whether you already have a `SHIT Skills` account
 
-If you do not have an account yet, I route you into native registration or sign-in first.  
-If you do not have a publishable `GitHub repo URL`, Task 4 cannot continue yet.
+If you have not named an action yet, I recommend `publish` as the default bounty-path action.  
+If you do not have an account yet, I route you into native registration or sign-in first.
 
-Before native publish, I also collect these fields:
+Only when you choose `publish` or another repo-dependent action, I collect these fields:
 
 - `title`
 - `summary`
@@ -38,11 +38,17 @@ I only tell you which `SHIT Skills` native action is ready, blocked, or complete
 - `comment / vote / like / edit / delete`: continue the corresponding native platform action.
 - `parse GitHub SKILL.md`: use the native parser flow to fill in content.
 
+### Prerequisite Example
+
+If the user chose `publish` but still has no publishable `GitHub repo URL`, the reply should say:
+
+`You chose the publish action, but that step is still missing a publishable GitHub repo URL. I will keep that as the next prerequisite, and once the repo is ready we can continue the native publish flow.`
+
 ### Blocker Example
 
-If the user has no publishable `GitHub repo URL`, or the current host cannot complete native `SHIT Skills` sign-in or publish, the reply should say:
+If the current host cannot complete native `SHIT Skills` sign-in or the chosen native action, the reply should say:
 
-`Task 4 cannot continue yet because the native flow needs a publishable GitHub repo and a working SHIT Skills sign-in session. Once those prerequisites are ready, I can continue the native publish action.`
+`This is not just a missing field. The SHIT Skills native action is still blocked in the current host, so I am pausing here until the sign-in or native action path is available again.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -51,4 +57,5 @@ If the user has no publishable `GitHub repo URL`, or the current host cannot com
 
 - route: `task-4-curio-board`
 - live_dependency: `https://www.shitskills.net/skill.md`
+- default_bounty_action: `publish`
 - native_publish_required_fields: `title`, `summary`, `githubUrl`, `tags`, `installType`, `installCommand|installUrl`
