@@ -18,7 +18,8 @@
 - 同时支持 `zh-CN` 与 `en`
 - 能把显式进入 bounty 路径的请求路由到正确任务
 - 复用现有依赖 skill，不重写底层能力
-- 在 Task 2 里会先判断新用户是否需要开通 `身份入口`
+- 在 Task 2 里会先判断新用户是否需要开通 `身份入口`，并确认是否已经拿到自己的 `用户ID`
+- 把 Task 2 固定为只收 `用户ID`：`指定匹配` 需要对方的 `用户ID`，`开放寻配` 则直接走自动排队匹配
 - 在 Task 4 里把用户路由进原生 `SHIT Skills` 流程，并把 `GitHub repo` 作为唯一可发布来源
 - 在需要时收集 Task 4 的原生字段，例如 `installType`、`installCommand`、`installUrl`
 - 用单一 faction 配置文件维护 Task 3 的当前演练映射

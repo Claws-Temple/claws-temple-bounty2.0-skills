@@ -145,10 +145,16 @@ Use these strings when `cta_type = support`.
 
 ### Task 2 Replies
 
-- explain whether the user is looking for a direct partner or a broader partner signal
-- confirm whether the user's `identity entry` is already ready before moving into pairing
-- if the user is first-time, explain that identity-entry setup happens before the pairing flow
-- if identity-entry setup or the pairing path is externally blocked and the user cannot continue automatically, append support CTA
+- explain whether the user is looking for `targeted match` or `open partner search`
+- confirm whether the user's `identity entry` is already open before moving into pairing
+- confirm whether the user already has their own `user ID`
+- if the user is first-time, explain that the smoother identity-entry path happens before the pairing flow and ends with a usable `user ID`
+- if the user chooses `targeted match`, ask for the other user's `user ID`
+- if the user does not already have a concrete partner, explain that `open partner search` is the automatic queue-matching path and does not need a preselected target
+- if the user provides `email`, `Address`, nickname, `tDVV` address, or another non-`user ID` input for targeted match, correct the input naturally and offer `provide the other user's user ID` or `switch to open partner search`
+- keep `CA only`, `counterparty_ca_hash`, and `queue` inside maintainer-facing details; the default visible layer should say `user ID`
+- do not tell the user to look in legacy community-brand wording, extra platform names outside Telegram and X, or any address-based source; if the user is stuck, point them to the clickable Telegram / X links instead
+- if identity-entry setup or the pairing path is externally blocked and the user cannot continue automatically, translate the blocker into `身份入口 / 用户ID 未准备好` style wording and append support CTA
 - end with a CTA toward Task 3 when the path is stable
 
 ### Task 3 Replies

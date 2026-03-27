@@ -62,7 +62,13 @@ Dependency rule:
 - do not re-derive scoring, pairing, governance, or publishing logic from memory
 - if a required dependency is unavailable, stop with a branded blocker summary
 - keep dependency names in maintainer-facing details, not in the default visible layer
-- for Task 2, first-time users must be asked whether their `identity entry` is ready before pairing continues; if not, route them into identity-entry setup first
+- for Task 2, first-time users must be asked whether their `identity entry` is already open and whether their own `user ID` is already available before pairing continues
+- for Task 2, if the current user has not finished the `identity entry` path or still does not have their own `user ID`, route them into the smoother identity-entry path first
+- for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
+- for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is ready
+- for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
+- for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
+- for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
 - for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, vote payload fields, and success Telegram follow-up
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
 - for Task 3, only treat the oath as completed after a mined-success `txId` is returned; the success close must then instruct the user to join the Telegram group and post the fixed template

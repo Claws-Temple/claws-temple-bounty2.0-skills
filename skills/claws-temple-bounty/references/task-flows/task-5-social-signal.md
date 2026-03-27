@@ -22,8 +22,8 @@ Help the user send a public signal on Telegram, X, or the Curio Board without tr
 
 ## Platform Templates
 
-- `TG`: slightly longer, conversational, may use 2 short paragraphs and a clear reply CTA
-- `X`: one compact post, keep it within a short single-post format
+- `TG`: slightly longer, conversational, may use 2 short paragraphs and a clear reply CTA; when practical, point the user to the clickable `Telegram group` link
+- `X`: one compact post, keep it within a short single-post format; when practical, point the user to the clickable `X` link
 - `Curio Board`: slightly more descriptive, may mention what kind of resonance partner the user wants
 
 Each platform draft should include:
@@ -37,6 +37,7 @@ Each platform draft should include:
 - task label
 - optional-task reminder
 - post copy or signal draft
+- clickable platform links when the user asks where to post
 - recommended CTA
 - blocker summary plus support CTA only when the user is genuinely stuck on sending
 

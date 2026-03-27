@@ -8,24 +8,33 @@ You are at `Task 2: Resonance Pairing`.
 
 Your Coordinate Card is already in place, so the next move is to find the kind of partner who completes your missing side.
 
-Before we enter the actual pairing flow, I should first confirm whether your `identity entry` is already ready.
+Before we enter the actual pairing flow, I should first confirm two things:
 
-- `Already ready`: go straight into pairing.
-- `First time here`: open the identity entry first; the smoother entry path is the default recommendation.
+- whether your `identity entry` is already open
+- whether your own `user ID` is already ready
 
-Two paths are available:
+If this is your first time here, I will take you through the `smoother entry path` first. That is the default recommendation, and it ends with a usable `user ID` for the pairing flow.
 
-- `Direct partner`: use this when you already know who you want to pair with.
-- `Open partner search`: use this when you want the system to help you find the right resonance partner.
+Once your identity entry and user ID are ready, two paths are available:
 
-If your identity entry is already ready, I can continue with either path now.
-If this is your first time here, I will take you through identity-entry setup before the pairing flow continues.
+- `Targeted match`: use this when you already know who you want to pair with, and provide the other user's `user ID`.
+- `Open partner search`: use this when you do not already know the target; this is the automatic queue-matching path and does not need a preselected partner.
+
+If your identity entry is already open and your own user ID is ready, I can continue with either path now.
+If this is your first time here, or your own user ID is still missing, I will take you through identity-entry setup before the pairing flow continues.
+If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.
+
+### Correction Example
+
+If the user tries to use email, address-like input, or a nickname inside `targeted match`, the reply should say:
+
+`Targeted match now needs the other user's user ID, not an email, address-like input, or nickname. If you already have that user ID, I can continue; if not, we should switch to open partner search.`
 
 ### Blocker Example
 
-If identity-entry setup fails, or the current host cannot continue the pairing path yet, the reply should say:
+If identity-entry setup fails, the current user's user ID is still not ready, or the current host cannot continue the pairing path yet, the reply should say:
 
-`The pairing flow cannot continue yet, so I am keeping you at the identity-entry setup step for now. Once that entry is ready, we can continue.`
+`The pairing flow cannot continue yet, so I am keeping you at the identity-entry and user-ID setup step for now. Once those prerequisites are ready, we can continue.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -34,4 +43,8 @@ If identity-entry setup fails, or the current host cannot continue the pairing p
 
 - route: `task-2-resonance-partner`
 - dependency_skill: `resonance-contract`
+- dependency_contract: `CA only`
+- user_id_mapping: `user-facing user ID = dependency ca_hash`
+- targeted_match_field: `counterparty_ca_hash`
+- open_partner_search_mode: `queue`
 - output_style: `brand-layer`
