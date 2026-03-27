@@ -379,6 +379,12 @@ def main() -> None:
     for marker in ("identity entry", "user ID", "first time here", "smoother entry path", "Targeted match", "Open partner search"):
         if marker not in task2_en:
             fail(f"missing Task 2 English onboarding marker: {marker}")
+    for marker in ("自动排队匹配", "不需要先知道具体是谁"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese queue marker: {marker}")
+    for marker in ("automatic queue-matching path", "does not need a preselected partner"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English queue marker: {marker}")
     for marker in ("纠正示例", "对方的用户ID", "邮箱", "地址", "昵称"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese correction marker: {marker}")
@@ -396,6 +402,12 @@ def main() -> None:
     for banned in ("ca_hash", "CA only", "EOA"):
         if banned in task2_zh_visible or banned in task2_en_visible:
             fail(f"Task 2 visible layer must not expose dependency identifier terms: {banned}")
+    for banned in ("aelf 社区", "aelf社区", "Moltbook", "拿对方地址", "tDVV 地址"):
+        if banned in task2_zh_visible:
+            fail(f"Task 2 Chinese visible layer must not expose old community/address wording: {banned}")
+    for banned in ("aelf community", "Moltbook", "get the other address", "tDVV address"):
+        if banned in task2_en_visible:
+            fail(f"Task 2 English visible layer must not expose old community/address wording: {banned}")
     for marker in ("CA only", "ca_hash", "counterparty_ca_hash", "queue"):
         if marker not in task2_zh and marker not in task2_en:
             fail(f"missing Task 2 maintainer mapping marker: {marker}")
@@ -471,6 +483,7 @@ def main() -> None:
         "user ID",
         "targeted match",
         "open partner search",
+        "automatic queue",
         "smoother entry path",
         "support CTA",
         "CA only",
@@ -479,6 +492,9 @@ def main() -> None:
     ):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
+    for banned in ("aelf community", "Moltbook", "tDVV address", "拿对方地址"):
+        if banned in task2_flow or banned in task2_zh_visible or banned in task2_en_visible:
+            fail(f"Task 2 old community/address wording must be removed: {banned}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
     for marker in ("support CTA", "blocker summary"):
@@ -507,9 +523,17 @@ def main() -> None:
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
         if marker not in task5_flow:
             fail(f"missing Task 5 platform template marker: {marker}")
-    for marker in ("support CTA", "genuinely stuck on sending"):
+    for marker in ("support CTA", "genuinely stuck on sending", "clickable `Telegram group` link", "clickable `X` link"):
         if marker not in task5_flow:
             fail(f"missing Task 5 support flow marker: {marker}")
+    task5_zh = (EXAMPLES_DIR / "task-5-social-signal.zh.md").read_text(encoding="utf-8")
+    task5_en = (EXAMPLES_DIR / "task-5-social-signal.en.md").read_text(encoding="utf-8")
+    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task5_zh:
+            fail(f"missing Task 5 Chinese clickable link marker: {marker}")
+    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task5_en:
+            fail(f"missing Task 5 English clickable link marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
     if "REMOTE_PROBE_MODE=strict" not in release_gate:

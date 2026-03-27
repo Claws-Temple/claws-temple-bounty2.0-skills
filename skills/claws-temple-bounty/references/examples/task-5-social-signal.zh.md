@@ -19,6 +19,11 @@
 
 如果你愿意，我也可以按 `TG / X / 奇物志` 三个平台分别帮你改成更适合发布的版本。
 
+如果你现在就想发，也可以直接去：
+
+- [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)
+- [X / Twitter](https://x.com/aelfblockchain)
+
 ### 分平台模板
 
 - `TG`：用 2 段短文，语气更像邀人对话，结尾用“欢迎来认领我”这类 CTA。

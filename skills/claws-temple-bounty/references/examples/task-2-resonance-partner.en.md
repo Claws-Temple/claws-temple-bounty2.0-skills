@@ -18,16 +18,17 @@ If this is your first time here, I will take you through the `smoother entry pat
 Once your identity entry and user ID are ready, two paths are available:
 
 - `Targeted match`: use this when you already know who you want to pair with, and provide the other user's `user ID`.
-- `Open partner search`: use this when you want the system to help you find the right resonance partner.
+- `Open partner search`: use this when you do not already know the target; this is the automatic queue-matching path and does not need a preselected partner.
 
 If your identity entry is already open and your own user ID is ready, I can continue with either path now.
 If this is your first time here, or your own user ID is still missing, I will take you through identity-entry setup before the pairing flow continues.
+If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.
 
 ### Correction Example
 
-If the user tries to use email, address, or a nickname inside `targeted match`, the reply should say:
+If the user tries to use email, address-like input, or a nickname inside `targeted match`, the reply should say:
 
-`Targeted match now needs the other user's user ID, not an email, address, or nickname. If you already have that user ID, I can continue; if not, we should switch to open partner search.`
+`Targeted match now needs the other user's user ID, not an email, address-like input, or nickname. If you already have that user ID, I can continue; if not, we should switch to open partner search.`
 
 ### Blocker Example
 
