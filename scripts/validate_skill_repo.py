@@ -308,6 +308,30 @@ def main() -> None:
         if "plain chat" not in text:
             fail(f"example is missing the plain-chat expansion note: {path}")
 
+    output_contract = (SKILL_ROOT / "references" / "output-contract.md").read_text(encoding="utf-8")
+    for marker in (
+        "## CTA Classification",
+        "`support`",
+        "`none`",
+        "Telegram first, then X",
+        "## Support CTA Strings",
+        "如果这里卡住了",
+        "If you're stuck here",
+    ):
+        if marker not in output_contract:
+            fail(f"missing support CTA contract marker: {marker}")
+    for marker in (
+        "Task 1 through Task 3 can be completed in this path",
+        "Task 4 must be completed in the SHIT Skills native flow",
+        "require a publishable `GitHub repo URL`",
+        "`githubUrl`",
+        "`installType`",
+        "`installCommand` or `installUrl`",
+        "do not use a local `prepared / published / commented / completed` stage model for Task 4",
+    ):
+        if marker not in output_contract:
+            fail(f"missing Task 4 native contract marker: {marker}")
+
     task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
     task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
     for marker in ("身份入口", "第一次来", "平滑入口"):
@@ -316,6 +340,12 @@ def main() -> None:
     for marker in ("identity entry", "First time here", "smoother entry path"):
         if marker not in task2_en:
             fail(f"missing Task 2 English onboarding marker: {marker}")
+    for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese support marker: {marker}")
+    for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English support marker: {marker}")
 
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
@@ -325,53 +355,83 @@ def main() -> None:
     for required_stage in ("selected", "ready to oath", "submitted", "completed"):
         if required_stage not in task3_en:
             fail(f"missing Task 3 English stage example: {required_stage}")
+    for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese support marker: {marker}")
+    for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English support marker: {marker}")
 
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     task4_en = (EXAMPLES_DIR / "task-4-curio-board.en.md").read_text(encoding="utf-8")
-    for required_stage in ("已准备", "已发布", "已评论", "已完成"):
-        if required_stage not in task4_zh:
-            fail(f"missing Task 4 Chinese stage example: {required_stage}")
-    for required_stage in ("prepared", "published", "commented", "completed"):
-        if required_stage not in task4_en:
-            fail(f"missing Task 4 English stage example: {required_stage}")
+    for marker in ("SHIT Skills", "GitHub", "installType", "installCommand", "installUrl", "注册账号", "登录"):
+        if marker not in task4_zh:
+            fail(f"missing Task 4 Chinese native-flow marker: {marker}")
+    for marker in ("SHIT Skills", "GitHub", "installType", "installCommand", "installUrl", "register", "sign in"):
+        if marker not in task4_en:
+            fail(f"missing Task 4 English native-flow marker: {marker}")
     if "阻断示例" not in task4_zh:
         fail("missing Task 4 Chinese blocker example")
     if "Blocker Example" not in task4_en:
         fail("missing Task 4 English blocker example")
-    for marker in ("奇物来源", "ClawHub", "GitHub"):
+    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
         if marker not in task4_zh:
-            fail(f"missing Task 4 Chinese source marker: {marker}")
-    for marker in ("curio source", "ClawHub", "GitHub"):
+            fail(f"missing Task 4 Chinese support marker: {marker}")
+    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
         if marker not in task4_en:
-            fail(f"missing Task 4 English source marker: {marker}")
+            fail(f"missing Task 4 English support marker: {marker}")
+    for banned in ("奇物来源", "ClawHub", "已准备", "已发布", "已评论", "已完成", "completion_rule: `publish + comment`", "publish-prep mode"):
+        if banned in task4_zh:
+            fail(f"old Task 4 Chinese marker must be removed: {banned}")
+    for banned in ("curio source", "ClawHub", "prepared", "published", "commented", "completed", "completion_rule: `publish + comment`", "publish-prep mode"):
+        if banned in task4_en:
+            fail(f"old Task 4 English marker must be removed: {banned}")
 
     task4_flow = TASK4_FLOW_PATH.read_text(encoding="utf-8")
     for marker in (
-        "## Publish-Prep Contract",
-        "## Rollout Modes",
+        "native SHIT Skills flow",
+        "`GitHub` repository URL",
         "`title`",
         "`summary`",
+        "`githubUrl`",
         "`tags`",
-        "`curio_source`",
-        "`publish_draft`",
-        "`comment_draft`",
-        "`remaining_live_step`",
-        "`ClawHub`",
-        "`GitHub`",
-        "public skill page",
+        "`installType`",
+        "`installCommand`",
+        "`installUrl`",
+        "hard failure",
     ):
         if marker not in task4_flow:
-            fail(f"missing Task 4 publish-prep contract marker: {marker}")
+            fail(f"missing Task 4 native-flow marker: {marker}")
+    for banned in ("publish-prep mode", "`curio_source`", "`publish_draft`", "`comment_draft`", "`remaining_live_step`", "`ClawHub`", "public skill page"):
+        if banned in task4_flow:
+            fail(f"old Task 4 flow marker must be removed: {banned}")
 
     task2_flow = TASK2_FLOW_PATH.read_text(encoding="utf-8")
-    for marker in ("identity entry", "first-time", "smoother entry path"):
+    for marker in ("identity entry", "first-time", "smoother entry path", "support CTA"):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
+
+    task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
+    for marker in ("support CTA", "blocker summary"):
+        if marker not in task1_flow:
+            fail(f"missing Task 1 support flow marker: {marker}")
+
+    task3_flow = TASK3_FLOW_PATH.read_text(encoding="utf-8")
+    for marker in ("support CTA", "blocker summary"):
+        if marker not in task3_flow:
+            fail(f"missing Task 3 support flow marker: {marker}")
+
+    for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
+        if marker not in task4_flow:
+            fail(f"missing Task 4 support flow marker: {marker}")
 
     task5_flow = TASK5_FLOW_PATH.read_text(encoding="utf-8")
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
         if marker not in task5_flow:
             fail(f"missing Task 5 platform template marker: {marker}")
+    for marker in ("support CTA", "genuinely stuck on sending"):
+        if marker not in task5_flow:
+            fail(f"missing Task 5 support flow marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
     if "REMOTE_PROBE_MODE=strict" not in release_gate:
@@ -380,8 +440,43 @@ def main() -> None:
     test_rollout_gate = (SKILL_ROOT / "scripts" / "test-rollout-gate.sh").read_text(encoding="utf-8")
     if "task4-live-skill-probe.sh" not in test_rollout_gate:
         fail("test rollout gate must call Task 4 probe")
-    if "PROBE_MODE=warn" not in test_rollout_gate:
-        fail("test rollout gate must keep Task 4 probe in warn mode")
+    if "PROBE_MODE=strict" not in test_rollout_gate:
+        fail("test rollout gate must keep Task 4 probe in strict mode")
+
+    task4_probe = (SKILL_ROOT / "scripts" / "task4-live-skill-probe.sh").read_text(encoding="utf-8")
+    if "publish-prep mode" in task4_probe:
+        fail("Task 4 probe must not reference publish-prep mode anymore")
+
+    task4_rollout = (SKILL_ROOT / "references" / "task-4-live-rollout.md").read_text(encoding="utf-8")
+    for marker in ("native SHIT Skills flow", "Task 4 is unavailable", "do not simulate a prep-only success path"):
+        if marker not in task4_rollout:
+            fail(f"missing Task 4 rollout marker: {marker}")
+    for banned in ("publish-prep mode", "prep-only mode"):
+        if banned in task4_rollout:
+            fail(f"old Task 4 rollout marker must be removed: {banned}")
+
+    roadmap_flow = (SKILL_ROOT / "references" / "task-flows" / "task-roadmap.md").read_text(encoding="utf-8")
+    for marker in (
+        "Task 1 through Task 3 as the in-skill path",
+        "Task 4 as the native SHIT Skills step required for qualification",
+    ):
+        if marker not in roadmap_flow:
+            fail(f"missing roadmap qualification marker: {marker}")
+
+    roadmap_zh = (EXAMPLES_DIR / "roadmap.zh.md").read_text(encoding="utf-8")
+    roadmap_en = (EXAMPLES_DIR / "roadmap.en.md").read_text(encoding="utf-8")
+    for marker in ("Task 1` 到 `Task 3", "SHIT Skills"):
+        if marker not in roadmap_zh:
+            fail(f"missing Chinese roadmap marker: {marker}")
+    for marker in ("Task 1` through `Task 3", "SHIT Skills"):
+        if marker not in roadmap_en:
+            fail(f"missing English roadmap marker: {marker}")
+
+    for path in (ROOT / "README.md", ROOT / "README.zh.md", CANONICAL_SKILL_PATH):
+        text = path.read_text(encoding="utf-8")
+        for banned in ("publish-prep mode", "ClawHub", "publish + comment"):
+            if banned in text:
+                fail(f"old Task 4 wording must be removed from {path}: {banned}")
 
     for path in (
         SKILL_ROOT / "references" / "brand-lexicon.zh.md",

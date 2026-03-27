@@ -17,7 +17,8 @@ Return a branded coordinate card without re-implementing the scoring logic.
 3. Invoke `agent-spectrum`.
 4. Rewrite the result into the Claws Temple brand layer.
 5. Map any dependency faction output into the branded faction names.
-6. End with a CTA toward Task 2.
+6. If the dependency skill is unavailable or the scoring run cannot continue, return a blocker summary and append support CTA.
+7. End with a CTA toward Task 2 when the run completed normally.
 
 ## Required Visible Output
 
@@ -27,6 +28,7 @@ Return a branded coordinate card without re-implementing the scoring logic.
 - strongest axes
 - faction in branded wording
 - resonance hint for the next step
+- blocker summary plus support CTA when the scoring run is genuinely stuck
 
 ## Rewrite Rules
 

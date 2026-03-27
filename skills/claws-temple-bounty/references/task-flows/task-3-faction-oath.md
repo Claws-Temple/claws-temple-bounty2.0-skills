@@ -25,8 +25,9 @@ Present four branded factions, map the selected faction to the current rehearsal
    - confirm the dependency invocation contract exists in the config file
    - confirm the required proposal id is present
    - confirm the proposal end time is still in the future
-6. Invoke the dependency skill only after the mapping is confirmed and use the exact invocation contract from the config file.
-7. If the config is marked as rehearsal-only, keep the visible layer natural and place the production replacement blocker in the maintainer layer.
+6. If preflight or the current environment blocks the oath flow and the agent cannot continue automatically, return a blocker summary and append support CTA.
+7. Invoke the dependency skill only after the mapping is confirmed and use the exact invocation contract from the config file.
+8. If the config is marked as rehearsal-only, keep the visible layer natural and place the production replacement blocker in the maintainer layer.
 
 ## Required Visible Output
 
@@ -34,6 +35,7 @@ Present four branded factions, map the selected faction to the current rehearsal
 - the four branded faction names
 - one-line faction thesis per faction
 - selected faction or selection prompt
+- blocker summary plus support CTA when the oath cannot continue
 - next step after the oath
 
 ## Faction Display Mapping

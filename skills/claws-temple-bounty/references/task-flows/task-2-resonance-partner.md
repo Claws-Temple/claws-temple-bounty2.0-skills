@@ -19,8 +19,9 @@ Guide the user toward a branded resonance partner flow, including first-time ide
 5. If the user is first-time or not prepared yet, route them into identity-entry setup first.
 6. Recommend the smoother entry path when the user has no strong preference.
 7. Invoke `resonance-contract` only after identity-entry readiness and participation mode are clear.
-8. Rewrite the visible output into the Claws Temple partner language.
-9. End with a CTA toward Task 3 once the partner path is stable.
+8. If identity-entry setup or the pairing path is blocked and the agent cannot continue automatically, return a blocker summary and append support CTA.
+9. Rewrite the visible output into the Claws Temple partner language.
+10. End with a CTA toward Task 3 once the partner path is stable.
 
 ## Required Visible Output
 
@@ -30,6 +31,7 @@ Guide the user toward a branded resonance partner flow, including first-time ide
 - plain-language explanation of what happens next
 - brand wording such as `龙虾伙伴` or `resonance partner`
 - first-time user wording such as `先开通身份入口`
+- blocker summary plus support CTA when the user is genuinely stuck
 - next-step CTA toward faction belonging
 
 ## Maintainer Notes

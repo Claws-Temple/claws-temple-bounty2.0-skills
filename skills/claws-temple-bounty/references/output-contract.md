@@ -91,11 +91,44 @@ Expanded layer rule:
 - it may mention external services and dependency skill names
 - it must still avoid the `aelf` brand name
 
+## CTA Classification
+
+Resolve `cta_type` before rendering blocker or close-out replies:
+
+- `support`
+  - a real blocker, externally stalled state, or host/runtime limitation means the agent cannot continue automatically in the current turn
+  - examples: missing dependency skill, missing authenticated publish capability, identity-entry setup failure, missing config, remote live-skill outage, host capability gap, or rehearsal-only limits that block real submission
+- `none`
+  - the agent can still continue by collecting missing user input
+  - the issue is only a light routing correction or an unfinished user choice
+  - the user is waiting, but not genuinely stuck yet
+
+Hard rules:
+
+- append support CTA only when `cta_type = support`
+- do not mix support CTA with ordinary success or next-task CTA in the same close
+- support replies must show `Telegram first, then X`
+
+## Support CTA Strings
+
+Use these strings when `cta_type = support`.
+
+### `zh-CN`
+
+- `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
+- `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
+
+### `en`
+
+- `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
+- `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
+
 ## Task Framing Rules
 
 ### Roadmap Replies
 
-- state that Task 1 through Task 4 unlock the Claws Temple Bounty 2.0 qualification path
+- state that Task 1 through Task 3 can be completed in this path
+- state that Task 4 must be completed in the SHIT Skills native flow for the qualification path
 - state that Task 5 is optional
 - recommend Task 1 first if no progress is known
 
@@ -103,6 +136,7 @@ Expanded layer rule:
 
 - show a coordinate card
 - translate faction or type wording into the selected brand language
+- if the dependency skill is unavailable or the scoring run cannot continue, explain the blocker and append support CTA
 - end with a CTA toward Task 2
 
 ### Task 2 Replies
@@ -110,6 +144,7 @@ Expanded layer rule:
 - explain whether the user is looking for a direct partner or a broader partner signal
 - confirm whether the user's `identity entry` is already ready before moving into pairing
 - if the user is first-time, explain that identity-entry setup happens before the pairing flow
+- if identity-entry setup or the pairing path is externally blocked and the user cannot continue automatically, append support CTA
 - end with a CTA toward Task 3 when the path is stable
 
 ### Task 3 Replies
@@ -121,25 +156,34 @@ Expanded layer rule:
   - `submitted`
   - `completed`
 - say which stage the user is in and what is still missing
+- if the mapping exists but the current environment cannot continue the oath flow, explain the blocker and append support CTA
 - if the current mapping is rehearsal-only, keep the visible layer natural and place the launch blocker in the maintainer layer
 
 ### Task 4 Replies
 
-- completion requires both publish and comment stages
-- accept a `curio source` from `ClawHub`, `GitHub`, or another public skill page
-- distinguish the stage clearly:
-  - `prepared`
-  - `published`
-  - `commented`
-  - `completed`
-- say which stage the user is in and what is still missing
-- if the task is still only in prep, say that live publish is still missing
-- if authenticated publishing is blocked, explain the blocker plainly and offer the exact next step
+- state clearly that the user is entering the native SHIT Skills flow
+- ask whether the user already has a SHIT Skills account; if not, route them into registration or sign-in first
+- require a publishable `GitHub repo URL`
+- gather the native publish fields:
+  - `title`
+  - `summary`
+  - `githubUrl`
+  - `tags`
+  - `installType`
+  - `installCommand` or `installUrl`
+  - optional `content`
+  - optional `coverUrl`
+- allow native platform actions such as publish, edit, delete, comment, vote, like, and parse GitHub `SKILL.md`
+- do not use a local `prepared / published / commented / completed` stage model for Task 4
+- do not claim that the local bounty skill itself has completed Task 4; only say which SHIT Skills native action is ready, blocked, or confirmed
+- if the user does not have a publishable `GitHub repo URL`, explain that Task 4 cannot continue yet and append support CTA
+- if registration, sign-in, authenticated publishing, or live remote loading is blocked, explain the blocker plainly and append support CTA
 
 ### Task 5 Replies
 
 - present Task 5 as optional
 - frame it as reach or community impact, not as a blocker
+- if the user explicitly wants to send the signal now but the platform or current context blocks that action, append support CTA
 
 ## Expansion Triggers
 
