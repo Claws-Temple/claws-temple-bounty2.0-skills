@@ -14,11 +14,15 @@ Return a branded coordinate card without re-implementing the scoring logic.
 
 1. Determine whether the user wants a quick pass or a fuller read.
 2. If unspecified, default to the quick edition.
-3. Invoke `agent-spectrum`.
-4. Rewrite the result into the Claws Temple brand layer.
-5. Map any dependency faction output into the branded faction names.
-6. If the dependency skill is unavailable or the scoring run cannot continue, return a blocker summary and append support CTA.
-7. End with a CTA toward Task 2 when the run completed normally.
+3. Check whether `agent-spectrum` is already installed and usable.
+4. If the dependency is missing, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh agent-spectrum`.
+5. If that helper cannot run in the current host, try to install or activate the dependency from `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`.
+6. If the current host cannot auto-install or auto-activate the dependency, return explicit install guidance before any support CTA.
+7. Invoke `agent-spectrum`.
+8. Rewrite the result into the Claws Temple brand layer.
+9. Map any dependency faction output into the branded faction names.
+10. If dependency self-heal, install guidance, or the scoring run still cannot continue, return a blocker summary and append support CTA.
+11. End with a CTA toward Task 2 when the run completed normally.
 
 ## Required Visible Output
 
@@ -28,6 +32,7 @@ Return a branded coordinate card without re-implementing the scoring logic.
 - strongest axes
 - faction in branded wording
 - resonance hint for the next step
+- dependency install or activation summary when Task 1 is self-healing
 - blocker summary plus support CTA when the scoring run is genuinely stuck
 
 ## Rewrite Rules

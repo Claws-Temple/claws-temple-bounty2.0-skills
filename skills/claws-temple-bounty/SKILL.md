@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.2
+version: 0.2.4
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.2`
+- Current skill version: `0.2.4`
 
 ## Scope
 
@@ -60,13 +60,23 @@ Dependency rule:
 
 - prefer the locally available dependency skill when present
 - do not re-derive scoring, pairing, governance, or publishing logic from memory
-- if a required dependency is unavailable, stop with a branded blocker summary
+- if a required dependency is unavailable or below the minimum version, first try to install, refresh, or upgrade it from the known local source before returning any blocker
+- if the current host cannot auto-install or auto-upgrade, give explicit install or upgrade guidance before falling back to a blocker
+- only return a branded blocker summary after dependency self-heal or explicit install guidance still cannot unblock the task
+- prefer the bundled helper `skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh` when the current host can run shell commands inside this repository
+- known local dependency sources for self-heal:
+  - `agent-spectrum` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
+  - `resonance-contract` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract`
+  - `tomorrowdao-agent-skills` -> `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`
 - keep dependency names in maintainer-facing details, not in the default visible layer
-- for Task 2, first-time users must be asked whether their `identity entry` is already open and whether their own `user ID` is already available before pairing continues
-- for Task 2, if the current user has not finished the `identity entry` path or still does not have their own `user ID`, route them into the smoother identity-entry path first
+- for Task 2, first-time users must be asked whether their `identity entry` is already open and whether they are currently signed in before pairing continues
+- for Task 2, if the current user has not finished the `identity entry` path or is not currently signed in, route them into the smoother identity-entry path first
 - for Task 2, if the user is new, the smoother identity-entry path should first cover sign-up or first-time setup; if the user is returning but not currently signed in, the smoother path should cover recovery or sign-in before pairing continues
+- for Task 2, once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually
+- for Task 2, if the current user's `user ID` resolves successfully, the default visible layer may show the full resolved value as a Task 2-only exception so the queue path can be confirmed
+- for Task 2, if the current user's `user ID` still cannot be auto-resolved after onboarding, keep the user in the identity-entry or recovery path; do not ask the user to paste their own `user ID`
 - for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
-- for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is ready
+- for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is auto-resolved
 - for Task 2, once identity-entry onboarding finishes and dependency queue preflight can proceed, continue into the formal queue path; do not suggest skipping Task 2 or replacing queue with social posting
 - for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
@@ -76,8 +86,11 @@ Dependency rule:
 - for Task 3, when the current signer resolves to a `CA` account or another delegated-spend path, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
 - for Task 3, when the allowance is below the configured vote amount, send one `Approve` transaction first through the available `CA` write path, wait for mined success, and only then retry the actual `Vote`
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
+- for Task 3, if the current mapping is still rehearsal-only, the visible layer must say clearly that the current oath record is a testing or rehearsal record and that production will use a later formal record
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
-- for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl`
+- for Task 4, ask which native action the user wants first; if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
+- for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl` only when the user chooses `publish` or another action that actually needs them
+- for Task 4, treat missing native prerequisites such as `GitHub repo URL`, missing content fields, or an unchosen action as checklist gaps, not support blockers
 - for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
 
 ## Required First Step
@@ -167,6 +180,7 @@ Do not trigger this skill when:
 - Always keep the default visible layer inside the Claws Temple brand voice.
 - Never show `aelf`, `Web3`, `blockchain`, `chain`, `wallet`, `区块链`, `链`, `链上`, or `钱包` in the default visible layer.
 - Do not expose raw IDs, proposal IDs, transaction IDs, dependency skill names, or config keys in the default visible layer.
+- Task 2 may show the fully resolved current user's own `user ID` in the default visible layer as a controlled exception for queue readiness confirmation.
 - Do not directly show any original faction names from the dependency layer to ordinary users.
 - Rewrite faction display names by reading them from the Task 3 config file. Use the active brand lexicon only for surrounding task labels and helper wording.
 - If any task enters a real blocker or externally stalled state that the agent cannot resolve automatically in the current turn, append the support CTA from the bundled output contract.

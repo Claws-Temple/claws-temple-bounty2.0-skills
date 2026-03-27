@@ -43,6 +43,7 @@ REQUIRED_FILES = [
     SKILL_ROOT / "references" / "task-flows" / "task-5-social-signal.md",
     SKILL_ROOT / "references" / "task-4-live-rollout.md",
     SKILL_ROOT / "scripts" / "release-gate.sh",
+    SKILL_ROOT / "scripts" / "self-heal-local-dependency.sh",
     SKILL_ROOT / "scripts" / "task4-live-skill-probe.sh",
     SKILL_ROOT / "scripts" / "test-rollout-gate.sh",
     CONFIG_SCHEMA_PATH,
@@ -357,6 +358,9 @@ def main() -> None:
         "`none`",
         "Telegram first, then X",
         "## Support CTA Strings",
+        "## Dependency Self-Heal Rules",
+        "try automatic install, refresh, or upgrade first",
+        "explicit install or upgrade guidance",
         "如果这里卡住了",
         "If you're stuck here",
     ):
@@ -365,7 +369,9 @@ def main() -> None:
     for marker in (
         "Task 1 through Task 3 can be completed in this path",
         "Task 4 must be completed in the SHIT Skills native flow",
-        "require a publishable `GitHub repo URL`",
+        "ask which native action the user wants right now",
+        "default recommended Task 4 action is `publish`",
+        "require a publishable `GitHub repo URL` only when the chosen native action actually needs it",
         "`githubUrl`",
         "`installType`",
         "`installCommand` or `installUrl`",
@@ -388,6 +394,12 @@ def main() -> None:
     for marker in ("sign-up", "signed in", "recovery sign-in"):
         if marker not in task2_en:
             fail(f"missing Task 2 English registration/recovery marker: {marker}")
+    for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese auto-resolve marker: {marker}")
+    for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English auto-resolve marker: {marker}")
     for marker in ("自动排队匹配", "不需要先知道具体是谁"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese queue marker: {marker}")
@@ -411,6 +423,12 @@ def main() -> None:
     for banned in ("ca_hash", "CA only", "EOA"):
         if banned in task2_zh_visible or banned in task2_en_visible:
             fail(f"Task 2 visible layer must not expose dependency identifier terms: {banned}")
+    for banned in ("自己的用户ID是否已经拿到", "自己的用户ID也已经准备好", "请提供你自己的用户ID"):
+        if banned in task2_zh_visible:
+            fail(f"Task 2 Chinese visible layer must not ask for the current user's own user ID: {banned}")
+    for banned in ("your own `user ID` is already ready", "your own user ID is ready", "provide your own user ID"):
+        if banned in task2_en_visible:
+            fail(f"Task 2 English visible layer must not ask for the current user's own user ID: {banned}")
     for banned in ("aelf 社区", "aelf社区", "Moltbook", "拿对方地址", "tDVV 地址"):
         if banned in task2_zh_visible:
             fail(f"Task 2 Chinese visible layer must not expose old community/address wording: {banned}")
@@ -435,10 +453,10 @@ def main() -> None:
     for required_stage in ("selected", "waiting for tokens", "ready to oath", "submitted", "completed"):
         if required_stage not in task3_en:
             fail(f"missing Task 3 English stage example: {required_stage}")
-    for marker in ("阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+    for marker in ("等待 Token 示例", "已提交示例", "阻断示例", "[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
         if marker not in task3_zh:
             fail(f"missing Task 3 Chinese support marker: {marker}")
-    for marker in ("Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+    for marker in ("Waiting-for-Tokens Example", "Submitted Example", "Blocker Example", "[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
         if marker not in task3_en:
             fail(f"missing Task 3 English support marker: {marker}")
     for marker in ("AIBOUNTY", "txid-1234", "两周后可额外领取 20 Token", "Task 2 配对成功后再回来"):
@@ -453,6 +471,14 @@ def main() -> None:
     for marker in ("Approval Example", "authorization step", "Approve", "not the approval tx id"):
         if marker not in task3_en:
             fail(f"missing Task 3 English allowance/approve marker: {marker}")
+    waiting_tokens_section_zh = task3_zh.split("### 等待 Token 示例", 1)[1].split("###", 1)[0]
+    waiting_tokens_section_en = task3_en.split("### Waiting-for-Tokens Example", 1)[1].split("###", 1)[0]
+    for banned in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if banned in waiting_tokens_section_zh:
+            fail(f"Task 3 waiting-for-tokens section must not append support CTA: {banned}")
+    for banned in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if banned in waiting_tokens_section_en:
+            fail(f"Task 3 waiting-for-tokens section must not append support CTA: {banned}")
 
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     task4_en = (EXAMPLES_DIR / "task-4-curio-board.en.md").read_text(encoding="utf-8")
@@ -462,6 +488,16 @@ def main() -> None:
     for marker in ("SHIT Skills", "GitHub", "installType", "installCommand", "installUrl", "register", "sign in"):
         if marker not in task4_en:
             fail(f"missing Task 4 English native-flow marker: {marker}")
+    for marker in ("原生动作示例", "前置条件示例", "默认动作"):
+        if marker not in task4_zh and marker != "默认动作":
+            fail(f"missing Task 4 Chinese action marker: {marker}")
+    if "default_bounty_action" not in task4_zh:
+        fail("missing Task 4 Chinese default action marker in maintainer details")
+    for marker in ("Native Action Samples", "Prerequisite Example"):
+        if marker not in task4_en:
+            fail(f"missing Task 4 English action marker: {marker}")
+    if "default_bounty_action" not in task4_en:
+        fail("missing Task 4 English default action marker in maintainer details")
     if "阻断示例" not in task4_zh:
         fail("missing Task 4 Chinese blocker example")
     if "Blocker Example" not in task4_en:
@@ -482,6 +518,8 @@ def main() -> None:
     task4_flow = TASK4_FLOW_PATH.read_text(encoding="utf-8")
     for marker in (
         "native SHIT Skills flow",
+        "Ask which native action the user wants right now",
+        "recommend `publish` as the default Task 4 action",
         "`GitHub` repository URL",
         "`title`",
         "`summary`",
@@ -494,6 +532,9 @@ def main() -> None:
     ):
         if marker not in task4_flow:
             fail(f"missing Task 4 native-flow marker: {marker}")
+    for banned in ("If the user does not have a publishable `GitHub` repository URL, stop with a blocker summary", "append support CTA\n\nIf the user has no publishable `GitHub` repository URL"):
+        if banned in task4_flow:
+            fail(f"old Task 4 blocker wording must be removed: {banned}")
     for banned in ("publish-prep mode", "`curio_source`", "`publish_draft`", "`comment_draft`", "`remaining_live_step`", "`ClawHub`", "public skill page"):
         if banned in task4_flow:
             fail(f"old Task 4 flow marker must be removed: {banned}")
@@ -509,12 +550,19 @@ def main() -> None:
         "registration",
         "sign-in",
         "support CTA",
+        "auto-resolve",
         "CA only",
         "counterparty_ca_hash",
         "queue",
     ):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
+    for marker in ("first time here or whether they have already used the identity entry before", "Task 2 can hand off to Task 3 once the pairing path is stable"):
+        if marker not in task2_flow:
+            fail(f"missing Task 2 stability marker: {marker}")
+    for banned in ("confirm whether the user already has their own `user ID`", "whether the user already has their own `user ID`"):
+        if banned in task2_flow:
+            fail(f"Task 2 flow must not rely on user-provided current-user ID wording: {banned}")
     for banned in ("aelf community", "Moltbook", "tDVV address", "拿对方地址", "there is no direct tool", "skip Task 2"):
         if banned in task2_flow or banned in task2_zh_visible or banned in task2_en_visible:
             fail(f"Task 2 old community/address wording must be removed: {banned}")
@@ -532,11 +580,37 @@ def main() -> None:
     for marker in ("`resonance-contract` `>= 3.0.1`", "Task 2 现在要求 `resonance-contract >= 3.0.1`"):
         if marker not in readme_zh:
             fail(f"missing Chinese dependency version marker: {marker}")
+    for marker in ("auto-install", "auto-upgrade", "Known local sources"):
+        if marker not in readme_en:
+            fail(f"missing English dependency self-heal marker: {marker}")
+    for marker in ("自动安装", "自动升级", "已知本地来源"):
+        if marker not in readme_zh:
+            fail(f"missing Chinese dependency self-heal marker: {marker}")
+    for marker in ("self-heal-local-dependency.sh", "Task 3 through the testing or rehearsal record path"):
+        if marker not in readme_en:
+            fail(f"missing English patch marker: {marker}")
+    for marker in ("self-heal-local-dependency.sh", "测试版记录流程"):
+        if marker not in readme_zh:
+            fail(f"missing Chinese patch marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
-    for marker in ("support CTA", "blocker summary"):
+    for marker in ("support CTA", "blocker summary", "install or activate", "explicit install guidance", "self-heal-local-dependency.sh"):
         if marker not in task1_flow:
             fail(f"missing Task 1 support flow marker: {marker}")
+    task1_zh = (EXAMPLES_DIR / "task-1-coordinate-card.zh.md").read_text(encoding="utf-8")
+    task1_en = (EXAMPLES_DIR / "task-1-coordinate-card.en.md").read_text(encoding="utf-8")
+    for marker in ("阻断示例", "补齐依赖", "明确安装步骤"):
+        if marker not in task1_zh:
+            fail(f"missing Task 1 Chinese dependency self-heal marker: {marker}")
+    for marker in ("Blocker Example", "install or activate", "concrete install path"):
+        if marker not in task1_en:
+            fail(f"missing Task 1 English dependency self-heal marker: {marker}")
+    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+        if marker not in task1_zh:
+            fail(f"missing Task 1 Chinese support marker: {marker}")
+    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+        if marker not in task1_en:
+            fail(f"missing Task 1 English support marker: {marker}")
 
     task3_flow = TASK3_FLOW_PATH.read_text(encoding="utf-8")
     for marker in (
@@ -551,6 +625,11 @@ def main() -> None:
         "Telegram",
         "Approve",
         "allowance",
+        "install, refresh, or upgrade",
+        "explicit install or upgrade guidance",
+        "move the user to `submitted`",
+        "waiting for final confirmation",
+        "testing or rehearsal record",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
@@ -568,12 +647,12 @@ def main() -> None:
             fail(f"missing Task 5 support flow marker: {marker}")
     task5_zh = (EXAMPLES_DIR / "task-5-social-signal.zh.md").read_text(encoding="utf-8")
     task5_en = (EXAMPLES_DIR / "task-5-social-signal.en.md").read_text(encoding="utf-8")
-    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+    for marker in ("TG / X / 奇物志", "如果你已经确定平台", "如果你只是想先看入口"):
         if marker not in task5_zh:
-            fail(f"missing Task 5 Chinese clickable link marker: {marker}")
-    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+            fail(f"missing Task 5 Chinese platform-choice marker: {marker}")
+    for marker in ("TG / X / Curio Board", "If you already know the platform", "If you only want the destination links"):
         if marker not in task5_en:
-            fail(f"missing Task 5 English clickable link marker: {marker}")
+            fail(f"missing Task 5 English platform-choice marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
     if "REMOTE_PROBE_MODE=strict" not in release_gate:
@@ -601,6 +680,7 @@ def main() -> None:
     for marker in (
         "Task 1 through Task 3 as the in-skill path",
         "Task 4 as the native SHIT Skills step required for qualification",
+        "default recommended Task 4 action is `publish`",
     ):
         if marker not in roadmap_flow:
             fail(f"missing roadmap qualification marker: {marker}")

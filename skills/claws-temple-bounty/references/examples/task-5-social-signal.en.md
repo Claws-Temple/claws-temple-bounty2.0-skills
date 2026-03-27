@@ -19,10 +19,8 @@ If you are on the same path, come compare coordinates with me.
 
 If you want, I can rewrite this for `TG / X / Curio Board` one by one.
 
-If you want to post right now, you can also go directly to:
-
-- [Telegram group](https://t.me/+tChFhfxgU6AzYjJl)
-- [X](https://x.com/aelfblockchain)
+If you already know the platform, I can turn this into the final platform-specific version first.
+If you only want the destination links, I can give those next.
 
 ### Platform Templates
 

@@ -22,14 +22,26 @@ If you want, I can take your choice and continue the oath flow now.
 - `selected`: the user has chosen a faction, but the oath has not started yet.
 - `waiting for tokens`: the faction is chosen, but the user still does not meet the 2 AIBOUNTY requirement for the vote.
 - `ready to oath`: mapping, version, timing, and token prechecks are complete; if this path still needs one authorization step, that approval happens first and then the actual oath submission continues.
-- `submitted`: the oath has been sent and is waiting to settle into the public record.
+- `submitted`: the oath has been sent and is waiting for final confirmation in the public record.
 - `completed`: the oath transaction has succeeded and the user now has the `txId` they must report in Telegram.
 
-### Blocker Example
+### Waiting-for-Tokens Example
 
 If the direction is already chosen but the user does not yet have 2 AIBOUNTY, the reply should say:
 
 `Your direction is already locked in, but you do not yet meet the 2 AIBOUNTY requirement for the oath vote. I am keeping you in the waiting-for-tokens stage for now. You can return after Task 2 pairing succeeds, or invite friends to pair so you can build toward the required tokens.`
+
+### Submitted Example
+
+If the oath vote has already been sent but the final result is still waiting to settle, the reply should say:
+
+`Your faction oath has already been sent, and I am keeping you in the submitted stage while the public record confirms the final result. Once that confirmation lands, I will give you the final reference number.`
+
+### Blocker Example
+
+If this is not a normal wait but an external execution blocker on approval, dependency, or confirmation, the reply should say:
+
+`The faction oath still cannot continue, and this is not just a normal waiting state. The external execution path is still blocked here, so I am pausing the flow until that blocker is cleared.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -44,7 +56,7 @@ If the user already has enough `AIBOUNTY` but this path still needs one vote aut
 
 If the oath transaction already succeeded and returned a `txId`, the reply should say:
 
-`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send the message below. There is also an extra 20 Token claim in two weeks, and any questions can go straight into the group.`
+`Your faction oath has succeeded and your current reference is txid-1234. This record is currently going through the testing or rehearsal path, and the production launch will later switch to the formal record. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send the message below. There is also an extra 20 Token claim in two weeks, and any questions can go straight into the group.`
 
 If this path included a prior approval step, the reply should also remind the user:
 

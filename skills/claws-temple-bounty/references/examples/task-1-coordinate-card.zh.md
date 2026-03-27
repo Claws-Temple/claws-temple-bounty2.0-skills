@@ -25,8 +25,26 @@
 
 如果你想继续，我可以直接带你进入 `Task 2：光锥交汇`。
 
+### 阻断示例
+
+如果当前环境还没有装好 `Task 1` 所需依赖，默认顺序应该是先自愈，不是直接让用户去 Telegram / X：
+
+`当前还差一项坐标测绘依赖，我先帮你补齐依赖。`
+
+如果当前宿主没法自动安装，再给明确安装指引：
+
+`当前宿主还不能自动补齐这项依赖。我会先给你明确安装步骤，装好后我们就继续原力坐标测绘。`
+
+只有安装或激活后仍然不能继续，才进入真正的 blocker：
+
+`当前遇到了依赖阻断，坐标测绘还不能继续。我已经先尝试了依赖补齐，但这一步现在还没走通。`
+
+- `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
+- `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
+
 ## 维护者详情
 
 - dependency_skill: `agent-spectrum`
 - route: `task-1-coordinate-card`
 - rewritten_output: `brand-layer`
+- self_heal_source: `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`

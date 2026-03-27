@@ -11,21 +11,28 @@ Your Coordinate Card is already in place, so the next move is to find the kind o
 Before we enter the actual pairing flow, I should first confirm two things:
 
 - whether your `identity entry` is already open
-- whether your own `user ID` is already ready
+- whether you are already signed in this time
 
 If this is your first time here, I will take you through the `smoother entry path` first. That path starts with sign-up or first-time setup, and it ends with a usable `user ID` for the pairing flow.
 If you are returning but not currently signed in, I will also use the `smoother entry path` first so we can complete recovery sign-in before pairing continues.
 
-Once your identity entry and user ID are ready, two paths are available:
+Once your identity entry and sign-in are ready, I should auto-resolve your current `user ID` first, so you do not need to type your own identifier manually.
+
+If the resolution succeeds, I should confirm it like this:
+
+`Resolved your user ID: uid-9UP8S`
+
+After that confirmation, two paths are available:
 
 - `Targeted match`: use this when you already know who you want to pair with, and provide the other user's `user ID`.
 - `Open partner search`: use this when you do not already know the target; this is the automatic queue-matching path and does not need a preselected partner.
 
-If your identity entry is already open and your own user ID is ready, I can continue with either path now.
+If your identity entry is already open and you are signed in, I should auto-resolve and show your current user ID before continuing with either path.
 If this is your first time here, I will take you through sign-up or first-time setup before the pairing flow continues.
 If you are returning but not currently signed in, I will take you through recovery sign-in before the pairing flow continues.
 If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.
-Once identity entry and user-ID onboarding are ready, I should continue into the formal queue flow instead of suggesting a skip or social-posting substitute.
+Once identity entry, sign-in, and current-user ID resolution are ready, I should continue into the formal queue flow instead of suggesting a skip or social-posting substitute.
+Once the `Open partner search` queue join is active, or the `Targeted match` submission has already been sent, I should treat `Task 2` as stable enough to hand off into `Task 3`.
 
 ### Correction Example
 
@@ -35,9 +42,9 @@ If the user tries to use email, address-like input, or a nickname inside `target
 
 ### Blocker Example
 
-If sign-up, recovery sign-in, identity-entry setup fails, the current user's user ID is still not ready, or the current host cannot continue the pairing path yet, the reply should say:
+If sign-up, recovery sign-in, dependency self-heal, identity-entry setup fails, the current user's user ID still cannot be auto-resolved, or the current host cannot continue the pairing path yet, the reply should say:
 
-`The pairing flow cannot continue yet, so I am keeping you at the identity-entry and user-ID setup step for now. Once those prerequisites are ready, we can continue.`
+`The pairing flow cannot continue yet, so I am keeping you at the identity-entry, recovery sign-in, and user-ID resolution step for now. Once those prerequisites are ready, we can continue.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -48,6 +55,7 @@ If sign-up, recovery sign-in, identity-entry setup fails, the current user's use
 - dependency_skill: `resonance-contract`
 - dependency_contract: `CA only`
 - onboarding_mapping: `new users sign up first; returning unsigned-in users recover sign-in first`
+- current_user_id_resolution: `auto-resolve from dependency context; do not ask the user to paste it manually`
 - user_id_mapping: `user-facing user ID = dependency ca_hash`
 - targeted_match_field: `counterparty_ca_hash`
 - open_partner_search_mode: `queue`

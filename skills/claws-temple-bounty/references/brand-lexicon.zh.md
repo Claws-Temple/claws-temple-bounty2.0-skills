@@ -21,7 +21,7 @@ Use this file when `output_language = zh-CN`.
 - Task 3 -> `原野部落归属`
 - Task 3 action -> `部落宣誓`
 - Task 4 -> `奇物志`
-- Task 4 action -> `发布奇物并参与评论`
+- Task 4 action -> `进入原生动作`
 - Task 4 source -> `奇物来源`
 - Task 5 -> `社交寻配`
 - Task 5 CTA -> `发出信号，等待共振伙伴找来`
