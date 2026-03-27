@@ -19,11 +19,12 @@ This skill is an orchestration layer for the five-task Claws Temple path:
 - Task 1: branded coordinate card
 - Task 2: branded resonance partner flow
 - Task 3: branded faction oath flow
-- Task 4: branded Curio Board publish and comment flow
+- Task 4: native SHIT Skills platform flow
 - Task 5: optional social signal flow
 
 This skill does not re-implement the underlying capabilities.
 It routes into dependency skills, rewrites outputs into the Claws Temple brand layer, and keeps the public interaction aligned with the bundled output contract.
+Task 4 is handled as a native platform handoff instead of a local completion state machine.
 
 ## Required References
 
@@ -61,9 +62,10 @@ Dependency rule:
 - do not re-derive scoring, pairing, governance, or publishing logic from memory
 - if a required dependency is unavailable, stop with a branded blocker summary
 - keep dependency names in maintainer-facing details, not in the default visible layer
-- for Task 4, if the host cannot load the live remote skill or the network path is unavailable, fall back to `publish-prep mode`: prepare the publish payload and comment draft, then tell the user exactly what still needs to be completed manually
 - for Task 2, first-time users must be asked whether their `identity entry` is ready before pairing continues; if not, route them into identity-entry setup first
-- for Task 4, accept `ClawHub` public pages, `GitHub` repositories, and other public skill pages as valid curio sources; do not force GitHub-only wording
+- for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
+- for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl`
+- for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
 
 ## Required First Step
 
@@ -72,7 +74,7 @@ For a generic bounty request, do not jump straight into a single task.
 The agent must first:
 
 - explain the five-task path in branded language
-- state that Task 1 through Task 4 unlock the Claws Temple Bounty 2.0 qualification path
+- state that Task 1 through Task 3 can be completed in this path and Task 4 must be completed in the SHIT Skills native flow for the qualification path
 - state that Task 5 is optional and adds community reach
 - recommend Task 1 when the user has not completed anything yet
 
@@ -113,13 +115,13 @@ Read `references/task-flows/task-3-faction-oath.md` when:
 - the user says `Task 3`
 - or asks which faction to join, faction belonging, tribe belonging, or oath guidance as part of this bounty
 
-### Route E: Task 4 Curio Board
+### Route E: Task 4 Native SHIT Skills Flow
 
 Read `references/task-flows/task-4-curio-board.md` when:
 
 - the current conversation is already inside the Claws Temple Bounty path and
 - the user says `Task 4`
-- or asks to publish a skill for discussion and comment on it as part of this bounty
+- or asks to publish a skill, sign in, register, or continue a SHIT Skills action as part of this bounty
 
 ### Route F: Task 5 Social Signal
 
@@ -155,4 +157,5 @@ Do not trigger this skill when:
 - Do not directly show any original faction names from the dependency layer to ordinary users.
 - Rewrite faction display names by reading them from the Task 3 config file. Use the active brand lexicon only for surrounding task labels and helper wording.
 - If any task enters a real blocker or externally stalled state that the agent cannot resolve automatically in the current turn, append the support CTA from the bundled output contract.
+- Do not declare Task 4 locally completed unless the user confirms that the requested native SHIT Skills action actually succeeded.
 - Keep Task 5 optional in every roadmap and completion CTA.

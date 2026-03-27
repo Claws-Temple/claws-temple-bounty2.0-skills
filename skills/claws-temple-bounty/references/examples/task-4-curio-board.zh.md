@@ -4,42 +4,45 @@
 
 ## 普通用户摘要
 
-你现在在 `Task 4：奇物志`。
+你现在在 `Task 4：SHIT Skills 原生流程`。
 
-这一项要分两步完成：
+这一项不再用本地阶段机判断完成状态，我会直接把你带进 `SHIT Skills` 的原生流程。
 
-1. 发布你的奇物。
-2. 在发布后的条目下留下评论，形成讨论。
+我先确认两件事：
 
-当前状态：
+1. 你是否已经有 `SHIT Skills` 账号。
+2. 你是否已经有可发布的 `GitHub repo URL`。
 
-- `发布`: `已准备`
-- `评论`: `等待中`
+如果你还没有账号，我会先带你走原生注册或登录。  
+如果你还没有可发布的 `GitHub repo URL`，这一项现在还不能继续。
 
-在进入发布前，我会先收你的 `奇物来源`。
+进入原生发布前，我还会继续收这些字段：
 
-可接受的来源包括：
+- `title`
+- `summary`
+- `githubUrl`
+- `tags`
+- `installType`
+- `installCommand` 或 `installUrl`
+- 可选 `content`
+- 可选 `coverUrl`
 
-- `ClawHub` 公开页面链接
-- `GitHub` 仓库地址
-- 其他可公开访问的 `skill` 页面链接
+这里不会再把 Task 4 包成本地阶段标签。  
+我只会告诉你：你当前是在 `SHIT Skills` 的哪个原生动作里，以及下一步还缺什么。
 
-如果你已经有奇物来源、标题、简介和标签，我可以直接带你进入发布流程。
-如果还没有，我也可以先帮你把发布文案整理好。
-当前阶段如果只是整理文案，状态应该算 `已准备`，还不算完成；只有发布并评论都完成，Task 4 才算真正完成。
+### 原生动作示例
 
-### 阶段示例
-
-- `已准备`：文案、标题、标签和奇物来源都整理好了，但还没真正发布。
-- `已发布`：条目已经发出，但评论还没补上。
-- `已评论`：评论已经完成，正在等待把发布与评论合并确认。
-- `已完成`：发布和评论都已经完成，Task 4 结束。
+- `注册账号`：还没有账号，需要先完成 email OTP + password 注册。
+- `登录`：已有账号，但当前宿主还没有可用登录态。
+- `发布`：账号和 `GitHub repo URL` 都已就绪，可以继续填写原生发布字段。
+- `评论 / 投票 / 点赞 / 编辑 / 删除`：进入对应的原生平台动作。
+- `解析 GitHub SKILL.md`：用平台原生解析动作补全内容。
 
 ### 阻断示例
 
-如果当前宿主无法加载 live skill，或者缺少认证发布能力，就应该明确告诉用户：
+如果你还没有可发布的 `GitHub repo URL`，或者当前宿主无法完成 `SHIT Skills` 的原生登录 / 发布动作，就应该明确告诉你：
 
-`当前只能先进入已准备状态，我可以先把发布文案和评论草稿整理好；真正发布还需要在支持 live publish 的宿主里完成。`
+`Task 4 现在还不能继续，因为原生流程需要可发布的 GitHub repo 和可用的 SHIT Skills 登录态。等这两个前置条件具备后，我再继续带你进入原生发布动作。`
 
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
@@ -48,4 +51,4 @@
 
 - route: `task-4-curio-board`
 - live_dependency: `https://www.shitskills.net/skill.md`
-- completion_rule: `publish + comment`
+- native_publish_required_fields: `title`, `summary`, `githubUrl`, `tags`, `installType`, `installCommand|installUrl`

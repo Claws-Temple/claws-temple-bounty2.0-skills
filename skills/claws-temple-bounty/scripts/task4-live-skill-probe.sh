@@ -42,7 +42,7 @@ echo "[task4-probe] remote live skill probe failed after $PROBE_ATTEMPTS attempt
 if [[ -n "$last_error" ]]; then
   echo "[task4-probe] last error: $last_error" >&2
 fi
-echo "[task4-probe] fallback: keep Task 4 in publish-prep mode for this rollout window" >&2
+echo "[task4-probe] Task 4 native flow should be treated as unavailable until this probe passes" >&2
 
 if [[ "$PROBE_MODE" == "strict" ]]; then
   exit 1

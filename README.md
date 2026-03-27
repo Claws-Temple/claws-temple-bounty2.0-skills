@@ -9,7 +9,7 @@ It guides the full five-task path:
 1. Generate a branded coordinate card.
 2. Complete Resonance Pairing and find a resonance partner.
 3. Complete the Faction Oath.
-4. Publish and comment in the Curio Board path.
+4. Enter the native SHIT Skills flow and complete the platform action you need.
 5. Optionally send a social signal for wider community matching.
 
 ## What This Skill Does
@@ -19,7 +19,8 @@ It guides the full five-task path:
 - routes explicit bounty-path requests into the correct next task
 - orchestrates existing dependency skills instead of re-implementing them
 - checks whether first-time users need identity-entry setup before Task 2 pairing continues
-- accepts `ClawHub` pages, `GitHub` repositories, and other public skill pages as Task 4 curio sources
+- routes Task 4 into the native SHIT Skills flow with `GitHub` as the only publishable source
+- collects native Task 4 fields such as `installType`, `installCommand`, and `installUrl` when needed
 - uses a single faction config file for the current Task 3 rehearsal setup
 - keeps Task 5 optional and non-blocking
 
@@ -129,7 +130,8 @@ Use $claws-temple-bounty to help this user finish only Task 4 and tell them exac
 
 ## Qualification Note
 
-Task 1 through Task 4 unlock the `Claws Temple Bounty 2.0` qualification path.
+Task 1 through Task 3 can be completed inside this skill.
+Task 4 must be completed in the native `SHIT Skills` flow for the `Claws Temple Bounty 2.0` qualification path.
 Task 5 is optional and adds community reach.
 
 ## Maintainer Note
@@ -142,11 +144,11 @@ Task 4 live publish also depends on network reachability to `https://www.shitski
 
 - Testing window:
   - run `bash skills/claws-temple-bounty/scripts/test-rollout-gate.sh`
-  - if the live-skill probe warns, keep Task 4 in `publish-prep mode`
-  - do not mark Task 4 complete unless both live publish and comment succeed
+  - require the Task 4 live-skill probe to pass
+  - if probe or native auth publish is unavailable, treat Task 4 as unavailable for that window
 - Production window:
   - run `bash skills/claws-temple-bounty/scripts/release-gate.sh`
-  - require Task 4 live-skill probe to pass before treating Task 4 as fully live
+  - require Task 4 live-skill probe and native auth publish to pass before treating Task 4 as available
 
 Maintainer runbook:
 

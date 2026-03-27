@@ -127,7 +127,8 @@ Use these strings when `cta_type = support`.
 
 ### Roadmap Replies
 
-- state that Task 1 through Task 4 unlock the Claws Temple Bounty 2.0 qualification path
+- state that Task 1 through Task 3 can be completed in this path
+- state that Task 4 must be completed in the SHIT Skills native flow for the qualification path
 - state that Task 5 is optional
 - recommend Task 1 first if no progress is known
 
@@ -160,17 +161,23 @@ Use these strings when `cta_type = support`.
 
 ### Task 4 Replies
 
-- completion requires both publish and comment stages
-- accept a `curio source` from `ClawHub`, `GitHub`, or another public skill page
-- distinguish the stage clearly:
-  - `prepared`
-  - `published`
-  - `commented`
-  - `completed`
-- say which stage the user is in and what is still missing
-- if the task is still only in prep, say that live publish is still missing
-- if authenticated publishing is blocked, explain the blocker plainly and offer the exact next step
-- if the user is genuinely stuck on live publish or comment completion, append support CTA
+- state clearly that the user is entering the native SHIT Skills flow
+- ask whether the user already has a SHIT Skills account; if not, route them into registration or sign-in first
+- require a publishable `GitHub repo URL`
+- gather the native publish fields:
+  - `title`
+  - `summary`
+  - `githubUrl`
+  - `tags`
+  - `installType`
+  - `installCommand` or `installUrl`
+  - optional `content`
+  - optional `coverUrl`
+- allow native platform actions such as publish, edit, delete, comment, vote, like, and parse GitHub `SKILL.md`
+- do not use a local `prepared / published / commented / completed` stage model for Task 4
+- do not claim that the local bounty skill itself has completed Task 4; only say which SHIT Skills native action is ready, blocked, or confirmed
+- if the user does not have a publishable `GitHub repo URL`, explain that Task 4 cannot continue yet and append support CTA
+- if registration, sign-in, authenticated publishing, or live remote loading is blocked, explain the blocker plainly and append support CTA
 
 ### Task 5 Replies
 

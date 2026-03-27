@@ -4,22 +4,23 @@ Use this file for maintainer-facing rollout and incident handling for the extern
 
 ## Goal
 
-Keep Task 4 usable even when the external live skill is unstable, while preserving a stricter production gate for full live publish.
+Keep Task 4 clearly available or unavailable as a native SHIT Skills flow, without falling back to a local prep-only success path.
 
 ## Rollout Modes
 
 - `test rollout`
   - run `scripts/test-rollout-gate.sh`
   - local dependencies must pass
-  - remote Task 4 probe may warn
-  - if the probe warns or authenticated publish is unavailable, keep Task 4 in `publish-prep mode`
+  - remote Task 4 probe must pass
+  - authenticated native publish must be available
+  - if either prerequisite is missing, Task 4 is unavailable for that window
   - Tasks 1, 2, 3, and 5 may continue normally
 - `production rollout`
   - run `scripts/release-gate.sh`
   - local dependencies must pass
   - remote Task 4 probe must pass
-  - authenticated publish must be available
-  - only then treat Task 4 as fully live
+  - authenticated native publish must be available
+  - only then treat Task 4 as available
 
 ## Preflight Checklist
 
@@ -29,38 +30,35 @@ Before announcing a live Task 4 window:
 2. run `bash skills/claws-temple-bounty/scripts/smoke-check.sh`
 3. run `bash skills/claws-temple-bounty/scripts/task4-live-skill-probe.sh`
 4. confirm the current host supports live remote skill loading
-5. confirm the current host has authenticated publishing available
+5. confirm the current host has authenticated native publishing available
 
-## Fallback Matrix
+## Availability Matrix
 
 - remote probe fails
-  - status: `prepared`
-  - action: switch to `publish-prep mode`
-  - user promise: publish copy and comment draft are still delivered
+  - status: `unavailable`
+  - action: close the current Task 4 window
+  - user promise: explain the blocker and send the support CTA
 - remote probe passes but auth publish is unavailable
-  - status: `prepared`
-  - action: keep the live step pending
-  - user promise: explain the missing prerequisite plainly
-- publish succeeds but comment is still pending
-  - status: `published`
-  - action: resume only the comment step
-- comment succeeds after publish
-  - status: `completed`
-  - action: offer Task 5 CTA
+  - status: `blocked`
+  - action: stop the current Task 4 attempt
+  - user promise: explain the missing prerequisite plainly and send the support CTA
+- native action succeeds
+  - status: `native action complete`
+  - action: report the completed SHIT Skills action without claiming local bounty-state completion
 
 ## Test Window Guidance
 
 For a testing window, publish this rule to maintainers:
 
-- Task 4 may be evaluated in `publish-prep mode`
-- do not mark Task 4 as complete unless both live publish and comment actually succeed
-- if the probe is flaky, continue collecting test feedback on the prep flow instead of blocking all testing
+- Task 4 must be treated as unavailable when the remote probe or authenticated publish path fails
+- do not simulate a prep-only success path
+- Tasks 1, 2, 3, and 5 may continue testing even while Task 4 is unavailable
 
 ## Incident Handling
 
 If the remote live skill becomes unstable during testing:
 
 1. rerun `scripts/task4-live-skill-probe.sh`
-2. if it still fails, switch the current window to prep-only mode
-3. tell testers that Task 4 remains testable, but only at the `prepared` stage
-4. rerun the probe before reopening full live publish
+2. if it still fails, keep the current Task 4 window closed
+3. tell testers that Task 4 is unavailable until the native flow is healthy again
+4. rerun the probe before reopening Task 4
