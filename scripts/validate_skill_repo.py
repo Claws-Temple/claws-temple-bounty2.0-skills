@@ -225,8 +225,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.8":
-        fail("dependency source catalog must be version 0.2.8")
+    if dependency_sources.get("version") != "0.2.9":
+        fail("dependency source catalog must be version 0.2.9")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -743,11 +743,23 @@ def main() -> None:
         "explicit install guidance",
         "self-heal-local-dependency.sh",
         "dependency-sources.json",
+        "hexagon block",
+        "coordinate card",
+        "thin wrapper",
     ):
         if marker not in task1_flow:
             fail(f"missing Task 1 support flow marker: {marker}")
     task1_zh = (EXAMPLES_DIR / "task-1-coordinate-card.zh.md").read_text(encoding="utf-8")
     task1_en = (EXAMPLES_DIR / "task-1-coordinate-card.en.md").read_text(encoding="utf-8")
+    for marker in ("### 六边形图", "### 原野坐标卡", "thin-brand-layer", "preserved_visual_blocks"):
+        if marker not in task1_zh:
+            fail(f"missing Task 1 Chinese visual marker: {marker}")
+    for marker in ("### Hexagon Block", "### Coordinate Card Block", "thin-brand-layer", "preserved_visual_blocks"):
+        if marker not in task1_en:
+            fail(f"missing Task 1 English visual marker: {marker}")
+    for forbidden in ("uid-9UP8S",):
+        if forbidden in task1_zh or forbidden in task1_en:
+            fail(f"unexpected Task 1 literal placeholder leaked into example: {forbidden}")
     for marker in ("阻断示例", "补齐依赖", "明确安装或升级步骤", "默认仓库地址"):
         if marker not in task1_zh:
             fail(f"missing Task 1 Chinese dependency self-heal marker: {marker}")

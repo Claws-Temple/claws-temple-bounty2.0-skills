@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.8
+version: 0.2.9
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.8`
+- Current skill version: `0.2.9`
 
 ## Scope
 
@@ -60,6 +60,7 @@ Dependency rule:
 
 - prefer the locally available dependency skill when present
 - do not re-derive scoring, pairing, governance, or publishing logic from memory
+- for Task 1, preserve the dependency skill's two mandatory visual blocks instead of redefining a card-only output; keep both the hexagon block and the coordinate card, then add only a thin Claws Temple brand wrapper around them
 - if a required dependency is unavailable or below the minimum version, first try to install, refresh, or upgrade it from the bundled dependency source catalog before returning any blocker
 - if the current host cannot auto-install or auto-upgrade, give explicit install or upgrade guidance before falling back to a blocker
 - only return a branded blocker summary after dependency self-heal or explicit install guidance still cannot unblock the task

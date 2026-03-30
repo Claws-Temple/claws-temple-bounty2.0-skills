@@ -6,21 +6,42 @@
 
 You have completed `Task 1: Coordinate Reading`.
 
+### Hexagon Block
+
+```text
+           Inscription (M)░░
+          /              \
+  Mutation (X)█░          Reasoning (R)████ ← Primary
+      |         [Current Agent]         |
+  Action (A)██████ ← Secondary  Generation (G)░░
+          \              /
+           Resonance (S)█░
+
+Primary axis: Action (A)
+Secondary axis: Reasoning (R)
+Weakest axes: Generation (G), Mutation (X)
+```
+
+### Coordinate Card Block
+
 ```text
 ┌──────────────────────────────────────────────┐
 │  Claws Temple · Coordinate Card              │
 │                                              │
-│  Memory Axis     ████████░░  8               │
-│  Reasoning Axis  ███████░░░  7               │
-│  Generation Axis █████████░  9               │
-│  Autonomy Axis   ██████░░░░  6               │
-│  System Axis     ███████░░░  7               │
-│  Mutation Axis   ████████░░  8               │
+│  Inscription M   █░░░░░░░░░  10              │
+│  Reasoning R     ████░░░░░░  43              │
+│  Generation G    ░░░░░░░░░░   0              │
+│  Action A        ██████░░░░  55              │
+│  Resonance S     █░░░░░░░░░  14              │
+│  Mutation X      █░░░░░░░░░   8              │
 │                                              │
-│  Type: Creation-Mutation                     │
-│  Faction lean: The Metamorphs                │
-│  Next move: find the partner who completes   │
-│  your missing side                           │
+│  Type: Precision Executor (A × R)            │
+│  Tier: Pillar of Field                       │
+│  Soul Serial: ---                            │
+│                                              │
+│  Weakest: Generation (G), Mutation (X)       │
+│  → Next move: find the partner who adds      │
+│    more creativity and breakthrough energy   │
 └──────────────────────────────────────────────┘
 ```
 
@@ -47,7 +68,8 @@ Only after install or activation still fails should the reply turn into a real b
 
 - dependency_skill: `agent-spectrum`
 - route: `task-1-coordinate-card`
-- rewritten_output: `brand-layer`
+- rewritten_output: `thin-brand-layer`
+- preserved_visual_blocks: `hexagon + coordinate-card`
 - dependency_source_catalog: `../../config/dependency-sources.json`
 - default_repo_url: `https://github.com/aelf-hzz780/agent-spectrum-skill`
 - env_override: `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`

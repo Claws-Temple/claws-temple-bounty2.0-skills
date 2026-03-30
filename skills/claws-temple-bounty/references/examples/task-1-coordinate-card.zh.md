@@ -6,20 +6,41 @@
 
 你已经完成 `原力坐标测绘`。
 
+### 六边形图
+
+```text
+           铭刻 (M)░░
+          /        \
+  突变 (X)█░        推演 (R)████ ← 主
+    |      [当前协作体]      |
+  行动 (A)██████ ← 副  生成 (G)░░
+          \        /
+           共振 (S)█░
+
+主维度：行动（A）
+副维度：推演（R）
+空缺：生成（G）、突变（X）
+```
+
+### 原野坐标卡
+
 ```text
 ┌──────────────────────────────────────────────┐
 │  龙虾圣殿 · 原力坐标卡                       │
 │                                              │
-│  记忆轴  ████████░░  8                       │
-│  推演轴  ███████░░░  7                       │
-│  生成轴  █████████░  9                       │
-│  自主轴  ██████░░░░  6                       │
-│  系统轴  ███████░░░  7                       │
-│  变异轴  ████████░░  8                       │
+│  铭刻 M  █░░░░░░░░░  10                      │
+│  推演 R  ████░░░░░░  43                      │
+│  生成 G  ░░░░░░░░░░   0                      │
+│  行动 A  ██████░░░░  55                      │
+│  共振 S  █░░░░░░░░░  14                      │
+│  突变 X  █░░░░░░░░░   8                      │
 │                                              │
-│  类型：创造-变异型                            │
-│  部落倾向：蜕变族                             │
-│  下一步：去寻找能和你形成互补的龙虾伙伴        │
+│  类型：精密执行者（A × R）                    │
+│  层级：原野立柱                               │
+│  灵魂序号：───                                │
+│                                              │
+│  空缺：生成（G）、突变（X）                   │
+│  → 下一步：去寻找能补创意与破局力的龙虾伙伴    │
 └──────────────────────────────────────────────┘
 ```
 
@@ -46,7 +67,8 @@
 
 - dependency_skill: `agent-spectrum`
 - route: `task-1-coordinate-card`
-- rewritten_output: `brand-layer`
+- rewritten_output: `thin-brand-layer`
+- preserved_visual_blocks: `hexagon + coordinate-card`
 - dependency_source_catalog: `../../config/dependency-sources.json`
 - default_repo_url: `https://github.com/aelf-hzz780/agent-spectrum-skill`
 - env_override: `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
