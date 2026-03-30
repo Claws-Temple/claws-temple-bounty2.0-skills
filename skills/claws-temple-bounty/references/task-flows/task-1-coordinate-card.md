@@ -8,7 +8,7 @@ Use this flow for Task 1 or any six-axis, coordinate, or hexagon request.
 
 ## Goal
 
-Return a branded coordinate card without re-implementing the scoring logic.
+Return a branded coordinate reading without re-implementing the scoring logic, while preserving the dependency skill's two mandatory visual blocks.
 
 ## Steps
 
@@ -19,15 +19,18 @@ Return a branded coordinate card without re-implementing the scoring logic.
 5. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
 6. If the current host cannot auto-install or auto-activate the dependency, return explicit install guidance before any support CTA.
 7. Invoke `agent-spectrum`.
-8. Rewrite the result into the Claws Temple brand layer.
-9. Map any dependency faction output into the branded faction names.
-10. If dependency self-heal, install guidance, or the scoring run still cannot continue, return a blocker summary and append support CTA.
-11. End with a CTA toward Task 2 when the run completed normally.
+8. Keep the dependency skill's mandatory `hexagon block` and `coordinate card block` intact in the visible layer.
+9. Rewrite only the surrounding task label, faction wording, and next-step CTA into the Claws Temple brand layer.
+10. Map any dependency faction output into the branded faction names.
+11. Do not collapse Task 1 into a card-only format, and do not remove either visual block just because the brand layer is thinner.
+12. If dependency self-heal, install guidance, or the scoring run still cannot continue, return a blocker summary and append support CTA.
+13. End with a CTA toward Task 2 when the run completed normally.
 
 ## Required Visible Output
 
 - task label
 - six-axis or coordinate summary
+- branded hexagon block
 - branded coordinate card
 - strongest axes
 - faction in branded wording
@@ -48,3 +51,4 @@ Return a branded coordinate card without re-implementing the scoring logic.
 
 - keep the original dependency output in the expanded maintainer layer only if the user asks
 - do not alter the underlying score values unless the dependency skill already produced the correction
+- do not redefine or trim the dependency skill's mandatory visual structure; Task 1 should be a thin wrapper, not a second template system

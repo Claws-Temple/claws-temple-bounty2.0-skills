@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.8`
+Version: `0.2.9`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -160,8 +160,11 @@ Use these strings when `cta_type = support`.
 
 ### Task 1 Replies
 
+- preserve both dependency visual blocks: the hexagon block and the coordinate card
 - show a coordinate card
+- show a hexagon or six-axis visual block before the coordinate card
 - translate faction or type wording into the selected brand language
+- keep the Task 1 brand wrapper thin; do not replace the dependency output with a card-only local template
 - if the dependency skill is missing or below the required runnable state, try dependency self-heal first
 - if the host cannot auto-install or auto-upgrade, give explicit install guidance before any support CTA
 - if dependency self-heal or the scoring run still cannot continue, explain the blocker and append support CTA

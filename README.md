@@ -4,11 +4,11 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.8`
+Current version: `0.2.9`
 
 It guides the full five-task path:
 
-1. Generate a branded coordinate card.
+1. Generate a branded coordinate reading with both the hexagon block and the coordinate card.
 2. Enter Resonance Pairing and start either targeted match or open partner search.
 3. Complete the Faction Oath; the current repository still defaults to the testing or rehearsal record path.
 4. Enter the native SHIT Skills flow; `publish` is the default recommended action.
@@ -20,6 +20,7 @@ It guides the full five-task path:
 - supports both `zh-CN` and `en`
 - routes explicit bounty-path requests into the correct next task
 - orchestrates existing dependency skills instead of re-implementing them
+- keeps Task 1 as a thin brand wrapper over `agent-spectrum`, so the mandatory hexagon block and coordinate card both remain visible
 - checks whether first-time users need identity-entry setup and whether they are already signed in before Task 2 pairing continues, then auto-resolves the current user's own `user ID`
 - routes first-time users through sign-up or first-time setup, and routes returning unsigned-in users through recovery sign-in, before Task 2 pairing continues
 - keeps Task 2 on `user ID` input only: `targeted match` needs the other user's `user ID`, while `open partner search` auto-resolves the current user's own `user ID` first and then enters the automatic queue path
