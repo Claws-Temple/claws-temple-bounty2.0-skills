@@ -70,7 +70,7 @@ If one `CA` write path already completed the approval step successfully, but ano
 
 If the oath transaction already succeeded and returned a `txId`, the reply should say:
 
-`Your faction oath has succeeded and your current reference is txid-1234. This record is currently going through the testing or rehearsal path, and the production launch will later switch to the formal record. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send the message below. There is also an extra 20 Token claim in two weeks, and any questions can go straight into the group.`
+`Your faction oath has succeeded and your current reference is txid-1234. This record is currently going through the testing or rehearsal path, and the production launch will later switch to the formal record. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
 
 If this path included a prior approval step, the reply should also remind the user:
 
@@ -78,7 +78,7 @@ If this path included a prior approval step, the reply should also remind the us
 
 Telegram post template:
 
-`I am with The Sentinels, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.`
+`I am with The Sentinels, reference txid-1234. I have completed the testing or rehearsal record for Claws Temple Task 3.`
 
 ## Maintainer Details
 

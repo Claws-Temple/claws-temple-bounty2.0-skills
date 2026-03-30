@@ -225,8 +225,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.9":
-        fail("dependency source catalog must be version 0.2.9")
+    if dependency_sources.get("version") != "0.2.10":
+        fail("dependency source catalog must be version 0.2.10")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -809,14 +809,57 @@ def main() -> None:
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
 
+    faction_config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    zh_template = faction_config["success_telegram_template"]["zh-CN"]
+    en_template = faction_config["success_telegram_template"]["en"]
+    zh_bonus = faction_config["success_bonus_note"]["zh-CN"]
+    en_bonus = faction_config["success_bonus_note"]["en"]
+    if "两周后可额外领取 20 Token" in zh_template or "有问题也欢迎在群里讨论" in zh_template:
+        fail("Task 3 Chinese Telegram template must not include the bonus-note sentence anymore")
+    if "extra 20 Token" in en_template or "questions are welcome in the group" in en_template:
+        fail("Task 3 English Telegram template must not include the bonus-note sentence anymore")
+    for marker in ("两周后可额外领取 20 Token", "有问题也欢迎在群里讨论"):
+        if marker not in zh_bonus:
+            fail(f"missing Task 3 Chinese bonus-note marker: {marker}")
+    for marker in ("extra 20 Token", "questions are welcome in the Telegram group"):
+        if marker not in en_bonus:
+            fail(f"missing Task 3 English bonus-note marker: {marker}")
+
     for marker in (
         "same verified `CA` write transport",
         "NODEVALIDATIONFAILED",
         "proposal my-info` as an auxiliary source",
         "`tx receipt`, `logs`, and allowance or balance deltas",
+        "fixed Telegram post template",
+        "bonus-note or discussion-note wording",
     ):
         if marker not in output_contract:
             fail(f"missing Task 3 transport/reconciliation marker: {marker}")
+
+    task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
+    task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
+    for marker in (
+        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息，两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+        "我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 测试版部落宣誓记录。",
+    ):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese success marker: {marker}")
+    for forbidden in (
+        "我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+    ):
+        if forbidden in task3_zh:
+            fail(f"legacy Task 3 Chinese combined template should be removed: {forbidden}")
+    for marker in (
+        "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message.",
+        "I am with The Sentinels, reference txid-1234. I have completed the testing or rehearsal record for Claws Temple Task 3.",
+    ):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English success marker: {marker}")
+    for forbidden in (
+        "I am with The Sentinels, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.",
+    ):
+        if forbidden in task3_en:
+            fail(f"legacy Task 3 English combined template should be removed: {forbidden}")
 
     for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
         if marker not in task4_flow:
