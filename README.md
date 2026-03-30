@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.9`
+Current version: `0.2.10`
 
 It guides the full five-task path:
 

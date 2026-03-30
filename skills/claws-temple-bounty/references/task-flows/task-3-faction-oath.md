@@ -55,7 +55,7 @@ Present four branded factions, map the selected faction to the current rehearsal
 32. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
 33. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
 34. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
-35. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, and render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
+35. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, give the separate bonus or discussion reminder from the config, and then render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
 36. If the config is marked as rehearsal-only, say clearly in the visible layer that the current oath record is a testing or rehearsal record and that the formal record will switch in the production launch.
 
 ## Required Visible Output
@@ -70,7 +70,7 @@ Present four branded factions, map the selected faction to the current rehearsal
 - automatic retry wording when authorization or vote confirmation is still being reconciled
 - submitted-state waiting explanation when relevant
 - blocker summary plus support CTA when the oath cannot continue automatically
-- `txId` plus Telegram follow-up template after success
+- `txId` plus Telegram follow-up prompt and template after success
 - next step after the oath
 
 ## Faction Display Mapping
@@ -82,7 +82,7 @@ Use the matching brand lexicon only for task labels, helper wording, and close-o
 
 - only the config file may carry exact proposal IDs and end times
 - use the exact dependency invocation contract from `config/faction-proposals.json` instead of repeating invocation parameters in this file
-- use the config file for the dependency minimum version, token symbol, vote amount, generic token-balance tool, generic token-allowance tool, and Telegram success template
+- use the config file for the dependency minimum version, token symbol, vote amount, generic token-balance tool, generic token-allowance tool, Telegram success template, and separate Telegram bonus note
 - `task3_execution_policy = ca_only_ai_completion`
 - `task3_password_policy = ask_once_for_ca_keystore_password`
 - `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`

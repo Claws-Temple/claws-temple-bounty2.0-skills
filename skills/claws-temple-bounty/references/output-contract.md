@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.9`
+Version: `0.2.10`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -227,7 +227,8 @@ Use these strings when `cta_type = support`.
 - use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
 - in `submitted`, explain that the oath is waiting for final public-record confirmation and keep `cta_type = none` unless monitoring itself is externally blocked
 - only move to `completed` after the vote returns a mined-success `txId`
-- in `completed`, include the `txId`, the Telegram group CTA, the fixed Telegram post template, and the two-week extra 20 Token reminder
+- in `completed`, include the `txId`, the Telegram group CTA, one separate reminder sentence for the two-week extra 20 Token note, and then the fixed Telegram post template
+- keep the fixed Telegram post template free of bonus-note or discussion-note wording; those belong in the success prompt sentence, not inside the template body
 - if the current mapping is rehearsal-only, say clearly in the visible layer that this is a testing or rehearsal record and that production will later switch to the formal record
 - never present `Portkey App`, `EOA`, `ManagerForwardCall`, raw spender addresses, or a manual fallback choice in the visible layer
 - if the mapping exists but the current environment cannot continue the oath flow, the allowance step still cannot be completed after bounded retries, or the dependency contract is missing, explain the blocker and append support CTA
