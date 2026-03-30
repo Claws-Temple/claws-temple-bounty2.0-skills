@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.4`
+Current version: `0.2.5`
 
 It guides the full five-task path:
 
@@ -114,11 +114,15 @@ ls "${CODEX_HOME:-$HOME/.codex}/skills"
 ```
 
 If any dependency is missing or below the required version, the default path should self-heal first instead of blocking immediately.
-Known local sources are:
+Portable dependency sources are defined in `skills/claws-temple-bounty/config/dependency-sources.json`.
 
-- `agent-spectrum` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
-- `resonance-contract` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract`
-- `tomorrowdao-agent-skills` -> `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`
+- `agent-spectrum` -> `https://github.com/aelf-hzz780/agent-spectrum-skill`
+- `resonance-contract` -> `https://github.com/aelf-hzz780/agent-resonance-skill`
+- `tomorrowdao-agent-skills` -> `https://github.com/TomorrowDAOProject/tomorrowDAO-skill`
+- optional local overrides:
+  - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
+  - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
+  - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
 
 If the current host can run shell commands inside this repository, prefer:
 
@@ -133,6 +137,7 @@ bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spec
 ```
 
 Task 2 now expects `resonance-contract >= 3.0.1`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
+If that dependency is missing or outdated, the default route is now `install or upgrade first`, not `ask the user for an install source` and not `skip Queue`.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
 If the current signer resolves to a `CA`-style path, Task 3 now also performs an allowance precheck and completes one `Approve` step before retrying the actual `Vote` when needed.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
@@ -170,6 +175,7 @@ Task 5 is optional and adds community reach.
 - old wording such as `there is no direct tool, so go find someone on X or Telegram first` is deprecated
 - old wording such as `skip Task 2 and continue into Task 3 when no queue write is exposed` is deprecated
 - old wording such as `missing dependency means go straight to Telegram / X` is deprecated
+- old wording such as `tell me a usable install source` is deprecated
 - new wording is `open partner search = the formal queue path once onboarding and dependency preflight are ready; Telegram / X are fallback only for real blockers`
 - new wording also is `missing or outdated dependency = install or upgrade first; only use blocker fallback after self-heal still fails`
 

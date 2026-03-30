@@ -33,7 +33,7 @@
 
 如果当前宿主没法自动安装，再给明确安装指引：
 
-`当前宿主还不能自动补齐这项依赖。我会先给你明确安装步骤，装好后我们就继续原力坐标测绘。`
+`当前宿主还不能自动补齐这项依赖。我会先给你明确安装或升级步骤，并附上默认仓库地址和可选本地覆盖方式，装好后我们就继续原力坐标测绘。`
 
 只有安装或激活后仍然不能继续，才进入真正的 blocker：
 
@@ -47,4 +47,6 @@
 - dependency_skill: `agent-spectrum`
 - route: `task-1-coordinate-card`
 - rewritten_output: `brand-layer`
-- self_heal_source: `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
+- dependency_source_catalog: `../../config/dependency-sources.json`
+- default_repo_url: `https://github.com/aelf-hzz780/agent-spectrum-skill`
+- env_override: `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`

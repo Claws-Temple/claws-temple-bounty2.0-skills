@@ -6,30 +6,33 @@ STRICT_DEPS="${STRICT_DEPS:-0}"
 CHECK_REMOTE_SKILL="${CHECK_REMOTE_SKILL:-0}"
 REMOTE_PROBE_MODE="${REMOTE_PROBE_MODE:-warn}"
 SKILLS_HOME="${CODEX_HOME:-$HOME/.codex}/skills"
-AGENT_SPECTRUM_SOURCE="/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum"
-RESONANCE_SOURCE="/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract"
-TOMORROWDAO_SOURCE="/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill"
+DEPENDENCY_CATALOG="$ROOT_DIR/skills/claws-temple-bounty/config/dependency-sources.json"
+
+get_catalog_field() {
+  local dep="$1"
+  local field="$2"
+  python3 - "$DEPENDENCY_CATALOG" "$dep" "$field" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+catalog = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+entry = catalog["dependencies"].get(sys.argv[2], {})
+print(entry.get(sys.argv[3], ""))
+PY
+}
 
 print_dep_source_hint() {
   local dep="$1"
-  local source=""
-  case "$dep" in
-    agent-spectrum|agent-spectrum:missing-skill-entry)
-      dep="agent-spectrum"
-      source="$AGENT_SPECTRUM_SOURCE"
-      ;;
-    resonance-contract|resonance-contract:missing-skill-entry)
-      dep="resonance-contract"
-      source="$RESONANCE_SOURCE"
-      ;;
-    tomorrowdao-agent-skills|tomorrowdao-agent-skills:missing-skill-entry)
-      dep="tomorrowdao-agent-skills"
-      source="$TOMORROWDAO_SOURCE"
-      ;;
-  esac
-  if [[ -n "$source" ]]; then
-    echo "[smoke-check] suggestion: install or refresh $dep from $source into $SKILLS_HOME/$dep"
-    echo "[smoke-check] suggestion: bash $ROOT_DIR/skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh $dep"
+  local normalized="$dep"
+  normalized="${normalized%%:*}"
+  local repo_url env_name
+  repo_url="$(get_catalog_field "$normalized" default_repo_url)"
+  env_name="$(get_catalog_field "$normalized" env_override)"
+  if [[ -n "$repo_url" ]]; then
+    echo "[smoke-check] suggestion: run bash $ROOT_DIR/skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh $normalized"
+    echo "[smoke-check] suggestion: default source repo -> $repo_url"
+    echo "[smoke-check] suggestion: optional local override -> export $env_name=/path/to/local/repo-or-skill"
   fi
 }
 
@@ -81,19 +84,23 @@ else
 fi
 
 echo "[smoke-check] checking resonance-contract dependency version"
-python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" "$RESONANCE_SOURCE" <<'PY'
+python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" "$DEPENDENCY_CATALOG" <<'PY'
 import re
 import sys
+import json
 from pathlib import Path
 
 skills_home = Path(sys.argv[2])
 strict = sys.argv[3] == "1"
-source_path = sys.argv[4]
+catalog = json.loads(Path(sys.argv[4]).read_text(encoding="utf-8"))
 issues: list[str] = []
 
 dep_dir = skills_home / "resonance-contract"
 skill_path = dep_dir / "SKILL.md"
-min_version = (3, 0, 1)
+dep_cfg = catalog["dependencies"]["resonance-contract"]
+min_version_raw = dep_cfg["min_version"]
+min_version = tuple(int(part) for part in min_version_raw.split("."))
+repo_url = dep_cfg["default_repo_url"]
 
 if not skill_path.exists():
     issues.append(f"missing SKILL.md in {dep_dir}")
@@ -107,8 +114,8 @@ else:
         actual = tuple(int(part) for part in raw.split("."))
         if actual < min_version:
             issues.append(
-                f"resonance-contract version {raw} is below required {'.'.join(map(str, min_version))}; "
-                f"upgrade or refresh from {source_path}"
+                f"resonance-contract version {raw} is below required {min_version_raw}; "
+                f"upgrade from {repo_url}"
             )
 
 if issues:
@@ -121,7 +128,7 @@ else:
 PY
 
 echo "[smoke-check] checking TomorrowDAO dependency version and Task 3 balance tool"
-python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" "$TOMORROWDAO_SOURCE" <<'PY'
+python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" "$DEPENDENCY_CATALOG" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -129,7 +136,7 @@ from pathlib import Path
 root = Path(sys.argv[1])
 skills_home = Path(sys.argv[2])
 strict = sys.argv[3] == "1"
-source_path = sys.argv[4]
+catalog = json.loads(Path(sys.argv[4]).read_text(encoding="utf-8"))
 config = json.loads((root / "skills" / "claws-temple-bounty" / "config" / "faction-proposals.json").read_text(encoding="utf-8"))
 dep_dir = skills_home / "tomorrowdao-agent-skills"
 issues: list[str] = []
@@ -138,16 +145,23 @@ def parse_version(raw: str) -> tuple[int, ...]:
     return tuple(int(part) for part in raw.split(".") if part.isdigit())
 
 pkg_path = dep_dir / "package.json"
+dep_cfg = catalog["dependencies"]["tomorrowdao-agent-skills"]
+catalog_min_version = dep_cfg["min_version"]
+repo_url = dep_cfg["default_repo_url"]
 if not pkg_path.exists():
     issues.append(f"missing package.json in {dep_dir}")
 else:
     pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
     actual_version = str(pkg.get("version") or "")
     min_version = config["dependency_min_version"]
+    if min_version != catalog_min_version:
+        issues.append(
+            f"dependency catalog min version {catalog_min_version} does not match Task 3 config {min_version}"
+        )
     if parse_version(actual_version) < parse_version(min_version):
         issues.append(
             f"tomorrowdao-agent-skills version {actual_version} is below required {min_version}; "
-            f"upgrade or refresh from {source_path}"
+            f"upgrade from {repo_url}"
         )
 
 tool_marker = config["token_balance_tool_name"]

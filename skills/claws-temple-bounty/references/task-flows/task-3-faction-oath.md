@@ -28,7 +28,7 @@ Present four branded factions, map the selected faction to the current rehearsal
    - confirm the proposal end time is still in the future
 6. Resolve the current signer or address before any token check or vote attempt.
 7. If `tomorrowdao-agent-skills` is missing or below the configured minimum version, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh tomorrowdao-agent-skills`.
-8. If that helper cannot run in the current host, try to install, refresh, or upgrade the dependency from `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`.
+8. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
 9. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
 10. Check that the installed dependency version is at least the configured minimum version.
 11. Check that the configured generic token-balance tool and generic token-allowance tool are available.

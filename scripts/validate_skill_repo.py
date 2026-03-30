@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = ROOT / "skills" / "claws-temple-bounty"
 CONFIG_PATH = SKILL_ROOT / "config" / "faction-proposals.json"
 CONFIG_SCHEMA_PATH = SKILL_ROOT / "config" / "faction-proposals.schema.json"
+DEPENDENCY_SOURCES_PATH = SKILL_ROOT / "config" / "dependency-sources.json"
 EXAMPLES_DIR = SKILL_ROOT / "references" / "examples"
 OPENAI_METADATA_PATH = SKILL_ROOT / "agents" / "openai.yaml"
 TASK2_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-2-resonance-partner.md"
@@ -48,6 +49,7 @@ REQUIRED_FILES = [
     SKILL_ROOT / "scripts" / "test-rollout-gate.sh",
     CONFIG_SCHEMA_PATH,
     CONFIG_PATH,
+    DEPENDENCY_SOURCES_PATH,
 ]
 
 REQUIRED_EXAMPLES = [
@@ -130,6 +132,12 @@ def strip_maintainer_layer(text: str) -> str:
     return text
 
 
+def strip_urls(text: str) -> str:
+    text = re.sub(r"\]\((https?://[^)]+)\)", "](URL)", text)
+    text = re.sub(r"https?://\S+", "URL", text)
+    return text
+
+
 def validate_against_subset_schema(value: object, schema: object, path: str = "$") -> None:
     if not isinstance(schema, dict):
         return
@@ -189,6 +197,48 @@ def main() -> None:
     except json.JSONDecodeError as exc:
         fail(f"invalid JSON schema in {CONFIG_SCHEMA_PATH}: {exc}")
     validate_against_subset_schema(config, schema)
+    try:
+        dependency_sources = json.loads(DEPENDENCY_SOURCES_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        fail(f"invalid JSON in {DEPENDENCY_SOURCES_PATH}: {exc}")
+
+    expected_dependency_sources = {
+        "agent-spectrum": {
+            "min_version": "0.0.0",
+            "default_repo_url": "https://github.com/aelf-hzz780/agent-spectrum-skill",
+            "skill_subdir": "skills/agent-spectrum",
+            "env_override": "CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE",
+        },
+        "resonance-contract": {
+            "min_version": "3.0.1",
+            "default_repo_url": "https://github.com/aelf-hzz780/agent-resonance-skill",
+            "skill_subdir": "skills/resonance-contract",
+            "env_override": "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
+        },
+        "tomorrowdao-agent-skills": {
+            "min_version": "0.2.0",
+            "default_repo_url": "https://github.com/TomorrowDAOProject/tomorrowDAO-skill",
+            "skill_subdir": ".",
+            "env_override": "CLAWS_TEMPLE_TOMORROWDAO_SOURCE",
+        },
+    }
+    dep_entries = dependency_sources.get("dependencies")
+    if not isinstance(dep_entries, dict):
+        fail("dependency source catalog must define a dependencies object")
+    if dependency_sources.get("version") != "0.2.5":
+        fail("dependency source catalog must be version 0.2.5")
+    for dep_name, expected in expected_dependency_sources.items():
+        entry = dep_entries.get(dep_name)
+        if not isinstance(entry, dict):
+            fail(f"missing dependency source entry for {dep_name}")
+        if entry.get("skill_name") != dep_name:
+            fail(f"dependency source {dep_name} must repeat its skill_name")
+        for key, value in expected.items():
+            if entry.get(key) != value:
+                fail(
+                    f"unexpected dependency source {dep_name}.{key}: "
+                    f"expected {value!r}, got {entry.get(key)!r}"
+                )
 
     openai_yaml = OPENAI_METADATA_PATH.read_text(encoding="utf-8")
     if "allow_implicit_invocation: false" not in openai_yaml:
@@ -330,6 +380,12 @@ def main() -> None:
         if path.is_file() and ".git" not in path.parts
     }
 
+    local_path_markers = ("/" + "Users/", "/" + "home/", "C:" + "\\Users\\")
+    for path, text in text_by_path.items():
+        for marker in local_path_markers:
+            if marker in text:
+                fail(f"machine-specific local path marker {marker!r} found in {path}")
+
     for locked_value in filter(None, ids_to_lock):
         occurrences = [
             path for path, text in text_by_path.items() if locked_value in text
@@ -341,7 +397,7 @@ def main() -> None:
 
     term_patterns = {term: compile_visible_term_pattern(term) for term in BANNED_VISIBLE_TERMS}
     for path in VISIBLE_SCAN_FILES:
-        text = path.read_text(encoding="utf-8")
+        text = strip_urls(path.read_text(encoding="utf-8"))
         for term, pattern in term_patterns.items():
             if pattern.search(text):
                 fail(f"banned visible term {term!r} found in {path}")
@@ -361,6 +417,8 @@ def main() -> None:
         "## Dependency Self-Heal Rules",
         "try automatic install, refresh, or upgrade first",
         "explicit install or upgrade guidance",
+        "Portable dependency sources",
+        "dependency-sources.json",
         "如果这里卡住了",
         "If you're stuck here",
     ):
@@ -397,9 +455,13 @@ def main() -> None:
     for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese auto-resolve marker: {marker}")
+    if "不会先让你提供安装源" not in task2_zh:
+        fail("missing Task 2 Chinese install-source correction marker")
     for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID"):
         if marker not in task2_en:
             fail(f"missing Task 2 English auto-resolve marker: {marker}")
+    if "instead of asking the user to provide an install source" not in task2_en:
+        fail("missing Task 2 English install-source correction marker")
     for marker in ("自动排队匹配", "不需要先知道具体是谁"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese queue marker: {marker}")
@@ -580,10 +642,22 @@ def main() -> None:
     for marker in ("`resonance-contract` `>= 3.0.1`", "Task 2 现在要求 `resonance-contract >= 3.0.1`"):
         if marker not in readme_zh:
             fail(f"missing Chinese dependency version marker: {marker}")
-    for marker in ("auto-install", "auto-upgrade", "Known local sources"):
+    for marker in (
+        "auto-install",
+        "auto-upgrade",
+        "Portable dependency sources",
+        "dependency-sources.json",
+        "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
+    ):
         if marker not in readme_en:
             fail(f"missing English dependency self-heal marker: {marker}")
-    for marker in ("自动安装", "自动升级", "已知本地来源"):
+    for marker in (
+        "自动安装",
+        "自动升级",
+        "便携依赖来源",
+        "dependency-sources.json",
+        "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
+    ):
         if marker not in readme_zh:
             fail(f"missing Chinese dependency self-heal marker: {marker}")
     for marker in ("self-heal-local-dependency.sh", "Task 3 through the testing or rehearsal record path"):
@@ -594,15 +668,27 @@ def main() -> None:
             fail(f"missing Chinese patch marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
-    for marker in ("support CTA", "blocker summary", "install or activate", "explicit install guidance", "self-heal-local-dependency.sh"):
+    for marker in (
+        "support CTA",
+        "blocker summary",
+        "install or upgrade",
+        "explicit install guidance",
+        "self-heal-local-dependency.sh",
+        "dependency-sources.json",
+    ):
         if marker not in task1_flow:
             fail(f"missing Task 1 support flow marker: {marker}")
     task1_zh = (EXAMPLES_DIR / "task-1-coordinate-card.zh.md").read_text(encoding="utf-8")
     task1_en = (EXAMPLES_DIR / "task-1-coordinate-card.en.md").read_text(encoding="utf-8")
-    for marker in ("阻断示例", "补齐依赖", "明确安装步骤"):
+    for marker in ("阻断示例", "补齐依赖", "明确安装或升级步骤", "默认仓库地址"):
         if marker not in task1_zh:
             fail(f"missing Task 1 Chinese dependency self-heal marker: {marker}")
-    for marker in ("Blocker Example", "install or activate", "concrete install path"):
+    for marker in (
+        "Blocker Example",
+        "install or upgrade",
+        "concrete install or upgrade guidance",
+        "default repo URL",
+    ):
         if marker not in task1_en:
             fail(f"missing Task 1 English dependency self-heal marker: {marker}")
     for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
@@ -625,7 +711,7 @@ def main() -> None:
         "Telegram",
         "Approve",
         "allowance",
-        "install, refresh, or upgrade",
+        "install or upgrade guidance",
         "explicit install or upgrade guidance",
         "move the user to `submitted`",
         "waiting for final confirmation",

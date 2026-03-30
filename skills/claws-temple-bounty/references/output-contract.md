@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.4`
+Version: `0.2.5`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -124,11 +124,14 @@ Required order:
 2. if the host cannot do that automatically, give explicit install or upgrade guidance
 3. only append support CTA after self-heal or guidance still cannot unblock the task
 
-Known local sources for self-heal:
+Portable dependency sources:
 
-- `agent-spectrum` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
-- `resonance-contract` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract`
-- `tomorrowdao-agent-skills` -> `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`
+- source catalog: `skills/claws-temple-bounty/config/dependency-sources.json`
+- default sources use public HTTPS repo URLs
+- optional local overrides:
+  - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
+  - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
+  - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
 
 ## Support CTA Strings
 
@@ -176,6 +179,7 @@ Use these strings when `cta_type = support`.
 - if the user chooses `targeted match`, ask for the other user's `user ID`
 - if the user does not already have a concrete partner, explain that `open partner search` is the automatic queue-matching path and does not need a preselected target
 - if `resonance-contract` is missing or below `3.0.1`, try dependency self-heal first
+- do not ask the user to provide their own install source when `resonance-contract` is missing or below `3.0.1`
 - if the host cannot auto-install or auto-upgrade `resonance-contract`, give explicit install or upgrade guidance before any support CTA
 - if dependency queue preflight can proceed, continue into the formal queue path and do not suggest skipping Task 2 or replacing queue with social posting
 - treat the Task 2 path as stable enough for Task 3 once the queue join is active or the direct pair submission has been sent

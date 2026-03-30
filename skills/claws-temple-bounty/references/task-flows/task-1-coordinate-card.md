@@ -15,8 +15,8 @@ Return a branded coordinate card without re-implementing the scoring logic.
 1. Determine whether the user wants a quick pass or a fuller read.
 2. If unspecified, default to the quick edition.
 3. Check whether `agent-spectrum` is already installed and usable.
-4. If the dependency is missing, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh agent-spectrum`.
-5. If that helper cannot run in the current host, try to install or activate the dependency from `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`.
+4. If the dependency is missing or below the configured minimum version, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh agent-spectrum`.
+5. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
 6. If the current host cannot auto-install or auto-activate the dependency, return explicit install guidance before any support CTA.
 7. Invoke `agent-spectrum`.
 8. Rewrite the result into the Claws Temple brand layer.

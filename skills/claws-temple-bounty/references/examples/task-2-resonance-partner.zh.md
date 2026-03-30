@@ -32,6 +32,7 @@
 如果你是老用户但这次还没有登录，我会先带你完成恢复登录，再继续后面的寻配步骤。
 如果你现在还没有具体对象，就直接走 `开放寻配`，这条路就是系统自动排队匹配。
 只要前面的身份入口和登录准备完成、当前用户ID也已经自动解析出来，我就会继续正式排队，不会因为没有预设对象就建议你绕开这一关或改走社交发帖。
+如果 `resonance-contract` 版本过低或还没装好，我会先帮你安装或升级，不会先让你提供安装源。
 只要 `开放寻配` 已经正式入队，或 `指定匹配` 请求已经发出，我就会把 `Task 2` 视为路径已稳定，可以继续带你进入 `Task 3`。
 
 ### 纠正示例
@@ -59,4 +60,7 @@
 - user_id_mapping: `用户ID = dependency ca_hash`
 - targeted_match_field: `counterparty_ca_hash`
 - open_partner_search_mode: `queue`
+- dependency_source_catalog: `../../config/dependency-sources.json`
+- default_repo_url: `https://github.com/aelf-hzz780/agent-resonance-skill`
+- env_override: `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
 - output_style: `brand-layer`

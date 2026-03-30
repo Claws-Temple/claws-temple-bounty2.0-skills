@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.4
+version: 0.2.5
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.4`
+- Current skill version: `0.2.5`
 
 ## Scope
 
@@ -60,14 +60,15 @@ Dependency rule:
 
 - prefer the locally available dependency skill when present
 - do not re-derive scoring, pairing, governance, or publishing logic from memory
-- if a required dependency is unavailable or below the minimum version, first try to install, refresh, or upgrade it from the known local source before returning any blocker
+- if a required dependency is unavailable or below the minimum version, first try to install, refresh, or upgrade it from the bundled dependency source catalog before returning any blocker
 - if the current host cannot auto-install or auto-upgrade, give explicit install or upgrade guidance before falling back to a blocker
 - only return a branded blocker summary after dependency self-heal or explicit install guidance still cannot unblock the task
 - prefer the bundled helper `skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh` when the current host can run shell commands inside this repository
-- known local dependency sources for self-heal:
-  - `agent-spectrum` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
-  - `resonance-contract` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract`
-  - `tomorrowdao-agent-skills` -> `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`
+- portable dependency source catalog: `skills/claws-temple-bounty/config/dependency-sources.json`
+- default repo sources are public HTTPS repos and may be overridden with:
+  - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
+  - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
+  - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
 - keep dependency names in maintainer-facing details, not in the default visible layer
 - for Task 2, first-time users must be asked whether their `identity entry` is already open and whether they are currently signed in before pairing continues
 - for Task 2, if the current user has not finished the `identity entry` path or is not currently signed in, route them into the smoother identity-entry path first
@@ -78,6 +79,7 @@ Dependency rule:
 - for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
 - for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is auto-resolved
 - for Task 2, once identity-entry onboarding finishes and dependency queue preflight can proceed, continue into the formal queue path; do not suggest skipping Task 2 or replacing queue with social posting
+- for Task 2, when `resonance-contract` is missing or below `3.0.1`, first try install or upgrade from the dependency source catalog; do not ask the user to provide an install source
 - for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
