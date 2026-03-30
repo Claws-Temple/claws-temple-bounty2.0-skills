@@ -18,7 +18,7 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 4. If the user is first-time, or the identity entry is not fully ready, route them into identity-entry setup first.
 5. If the user is first-time, explain that the smoother entry path starts with registration or first-time setup and ends with a usable `user ID`.
 6. If the user is returning but not currently signed in, explain that the smoother entry path starts with recovery sign-in and ends with a usable `user ID`.
-7. If `resonance-contract` is missing or below `3.0.1`, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh resonance-contract`.
+7. If `resonance-contract` is missing or below `4.0.0`, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh resonance-contract`.
 8. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
 9. Do not ask the user to provide an install source for `resonance-contract`.
 10. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
@@ -68,6 +68,7 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 
 - dependency-specific account routing, local-context preparation, and read-before-write logic stay inside the dependency skill
 - the dependency write path is `CA only`, but the default visible layer should not say `CA`, `AA`, or `EOA`
+- the dependency contract is now aligned with `resonance-contract 4.0.0`; there is no user-side `EOA` route to preserve in this skill
 - user-facing `identity entry` maps to dependency local account-context readiness; first-time setup may create that context, while returning-user recovery sign-in may restore it
 - the current user's own `用户ID / user ID` should be auto-resolved from dependency context once onboarding is ready; the user should not be asked to type it manually for queue participation
 - user-facing `用户ID / user ID` maps to dependency `ca_hash`

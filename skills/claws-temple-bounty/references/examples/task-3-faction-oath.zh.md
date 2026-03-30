@@ -41,7 +41,7 @@
 
 如果当前不是正常等待，而是授权、依赖、或记录确认本身被外部环境卡住，就应该明确告诉用户：
 
-`当前部落宣誓还不能继续，不是因为方向或 Token 不够，而是这一步的外部执行环境还没走通。我先把你停在这里，等这个阻断解除后再继续。`
+`当前部落宣誓还不能继续，不是因为方向或 Token 不够，而是这一步的 CA 自动执行路径在完成授权、提交和记录确认后仍然没有完全走通。我先把你停在这里，等这个阻断解除后再继续。`
 
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
@@ -51,6 +51,18 @@
 如果 `AIBOUNTY` 余额已经够了，但当前路径还差一次投票授权，回复应该明确告诉用户：
 
 `你现在已经满足进入部落宣誓所需的 2 个 AIBOUNTY 条件，但这次宣誓还差最后一步授权。我会先补齐本次投票所需的授权，授权成功后再继续发出部落宣誓。`
+
+### 密码示例
+
+如果当前 `CA` 上下文已经准备好，但 keystore 密码还没拿到，回复应该明确告诉用户：
+
+`我已经确认你当前的身份入口可以继续这次部落宣誓，但这一步还差一次 CA keystore 密码确认。我只需要你提供这一次密码，拿到后我会继续自动完成后面的授权、宣誓提交和结果确认。`
+
+### 自动重试示例
+
+如果授权或宣誓提交没有一次走通，但系统还在自动补救，回复应该明确告诉用户：
+
+`这一步还在自动重试中，我正在重新校验授权状态、宣誓状态和公开记录确认。只要这条自动路径还能继续，我就不会把执行工作交还给你。`
 
 ### 成功示例
 
@@ -72,5 +84,8 @@
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
 - active_environment: `test`
 - dependency_min_version: `0.2.0`
-- ca_vote_path: `allowance precheck -> Approve if needed -> Vote`
+- task3_execution_policy: `ca_only_ai_completion`
+- task3_password_policy: `ask_once_for_ca_keystore_password`
+- task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
+- ca_vote_path: `allowance precheck -> Approve if needed -> Vote -> receipt + my-info reconciliation`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`
