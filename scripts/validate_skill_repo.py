@@ -225,8 +225,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.10":
-        fail("dependency source catalog must be version 0.2.10")
+    if dependency_sources.get("version") != "0.2.11":
+        fail("dependency source catalog must be version 0.2.11")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):

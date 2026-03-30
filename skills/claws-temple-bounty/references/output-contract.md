@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.10`
+Version: `0.2.11`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 

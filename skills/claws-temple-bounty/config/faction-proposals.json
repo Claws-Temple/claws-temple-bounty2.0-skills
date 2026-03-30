@@ -1,5 +1,5 @@
 {
-  "version": "0.2.10",
+  "version": "0.2.11",
   "environment": "test",
   "is_test_only": true,
   "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
