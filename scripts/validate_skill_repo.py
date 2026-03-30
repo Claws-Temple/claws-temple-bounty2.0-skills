@@ -686,6 +686,8 @@ def main() -> None:
         "same verified `CA` write transport",
         "NODEVALIDATIONFAILED",
         "proposal my-info",
+        "dependency-tool input alias",
+        "underlying `votingItemId`",
     ):
         if marker not in skill_text:
             fail(f"missing Task 3 execution policy marker in canonical skill: {marker}")
@@ -734,6 +736,12 @@ def main() -> None:
     for marker in ("同一条已经验证成功的 `CA` 写入路径", "NODEVALIDATIONFAILED", "`proposal my-info`"):
         if marker not in readme_zh:
             fail(f"missing Chinese Task 3 transport marker: {marker}")
+    for marker in ("dependency-tool input alias", "`votingItemId`", "raw contract ABI field name"):
+        if marker not in readme_en:
+            fail(f"missing English Task 3 alias-normalization marker: {marker}")
+    for marker in ("依赖工具输入别名", "`votingItemId`", "raw forward-call `Vote`"):
+        if marker not in readme_zh:
+            fail(f"missing Chinese Task 3 alias-normalization marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
     for marker in (
@@ -805,6 +813,8 @@ def main() -> None:
         "task3_execution_policy = ca_only_ai_completion",
         "task3_password_policy = ask_once_for_ca_keystore_password",
         "task3_retry_policy = bounded_ca_retries_with_state_reconciliation",
+        "dependency-tool input alias",
+        "underlying `votingItemId`",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
@@ -832,6 +842,8 @@ def main() -> None:
         "`tx receipt`, `logs`, and allowance or balance deltas",
         "fixed Telegram post template",
         "bonus-note or discussion-note wording",
+        "dependency-tool input alias",
+        "underlying `votingItemId`",
     ):
         if marker not in output_contract:
             fail(f"missing Task 3 transport/reconciliation marker: {marker}")

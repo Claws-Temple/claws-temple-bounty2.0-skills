@@ -45,7 +45,7 @@ Present four branded factions, map the selected faction to the current rehearsal
 22. If allowance is already sufficient after an `Approve` timeout or uncertain receipt, continue into `Vote` instead of repeating authorization blindly.
 23. Do not blindly mix a successful `CA` approval transport with a different direct vote transport. If another path is attempted and returns `NODEVALIDATIONFAILED` with `Insufficient allowance` while allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`.
 24. Keep the visible layer natural during the allowance step. Tell the user that one more authorization step is being completed before the oath can be sent, but keep raw contract path and approval tx details in the maintainer layer unless the user asks.
-25. Invoke the actual vote only after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact vote payload contract from the config file.
+25. Invoke the actual vote only after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact dependency-tool vote payload contract from the config file and do not reinterpret `proposalId` there as a raw contract ABI field name.
 26. For `Vote`, prefer receipt, event logs, and allowance or balance deltas as the primary reconciliation signals.
 27. Treat `proposal my-info` as an auxiliary source only. If it is unavailable or returns no user record, continue the flow with receipt and log based reconciliation instead of failing immediately.
 28. If `Vote` returns a timeout, validation failure, or another uncertain send result, re-check proposal availability, allowance, primary reconciliation signals, and then `proposal my-info` when available before retrying.
@@ -86,6 +86,8 @@ Use the matching brand lexicon only for task labels, helper wording, and close-o
 - `task3_execution_policy = ca_only_ai_completion`
 - `task3_password_policy = ask_once_for_ca_keystore_password`
 - `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
+- `proposalId` in the config vote payload is the dependency-tool input alias for the configured vote tool, not a promise about the raw contract ABI field name
+- if an implementation ever has to bypass the dependency tool, it must reproduce the dependency normalization from `proposalId` to the underlying `votingItemId` before any raw contract packing or forwarding
 - do not present `Portkey App`, `EOA`, `ManagerForwardCall`, or manual route choices in the visible layer
 - when the current signer path is `CA`, the fastest unblock is inside this skill: read allowance, send `Approve` through the existing `CA` write path, then keep that same verified `CA` write transport for `Vote`
 - if a different vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch instead of a real allowance failure
