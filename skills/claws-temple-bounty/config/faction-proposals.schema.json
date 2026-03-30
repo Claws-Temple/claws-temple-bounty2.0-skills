@@ -79,6 +79,9 @@
         "network_id",
         "preflight_mode",
         "send_mode",
+        "preferred_ca_write_transport",
+        "validation_failure_switch_rule",
+        "state_reconciliation_priority",
         "vote_payload"
       ],
       "properties": {
@@ -88,6 +91,13 @@
         "network_id": { "type": "string" },
         "preflight_mode": { "type": "string" },
         "send_mode": { "type": "string" },
+        "preferred_ca_write_transport": { "type": "string" },
+        "validation_failure_switch_rule": { "type": "string" },
+        "state_reconciliation_priority": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "string" }
+        },
         "vote_payload": {
           "type": "object",
           "required": [

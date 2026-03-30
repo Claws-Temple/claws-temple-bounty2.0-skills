@@ -225,8 +225,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.7":
-        fail("dependency source catalog must be version 0.2.7")
+    if dependency_sources.get("version") != "0.2.8":
+        fail("dependency source catalog must be version 0.2.8")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -285,6 +285,9 @@ def main() -> None:
         "network_id",
         "preflight_mode",
         "send_mode",
+        "preferred_ca_write_transport",
+        "validation_failure_switch_rule",
+        "state_reconciliation_priority",
         "vote_payload",
     ):
         if not dependency_invocation.get(key):
@@ -303,6 +306,17 @@ def main() -> None:
         fail("expected token_balance_tool_name to be tomorrowdao_token_balance_view")
     if config["token_allowance_tool_name"] != "tomorrowdao_token_allowance_view":
         fail("expected token_allowance_tool_name to be tomorrowdao_token_allowance_view")
+    if dependency_invocation["preferred_ca_write_transport"] != "reuse_the_same_verified_ca_write_path_for_approve_and_vote":
+        fail("expected Task 3 to prefer one consistent verified CA write transport")
+    if dependency_invocation["validation_failure_switch_rule"] != "if_vote_returns_NODEVALIDATIONFAILED_with_insufficient_allowance_after_allowance_is_sufficient_switch_back_to_the_verified_ca_write_path":
+        fail("expected Task 3 validation-failure switch rule to be configured")
+    if dependency_invocation["state_reconciliation_priority"] != [
+        "tx_receipt",
+        "vote_logs",
+        "allowance_or_balance_delta",
+        "proposal_my_info",
+    ]:
+        fail("expected Task 3 state reconciliation priority to prefer receipt/logs before proposal_my_info")
     if vote_payload["vote_option_field"] != "voteOption":
         fail("expected dependency_invocation.vote_payload.vote_option_field to use voteOption")
     if vote_payload["vote_option_value"] != 0:
@@ -437,6 +451,13 @@ def main() -> None:
     ):
         if marker not in output_contract:
             fail(f"missing Task 4 native contract marker: {marker}")
+    for marker in (
+        "only show the current user's `user ID` when the current-turn dependency result actually returned that value",
+        "do not reuse remembered values, example literals, or placeholders as if they were real runtime output",
+        "if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`",
+    ):
+        if marker not in output_contract:
+            fail(f"missing Task 2 runtime-resolution guard marker: {marker}")
 
     task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
     task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
@@ -452,12 +473,12 @@ def main() -> None:
     for marker in ("sign-up", "signed in", "recovery sign-in"):
         if marker not in task2_en:
             fail(f"missing Task 2 English registration/recovery marker: {marker}")
-    for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID"):
+    for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID", "本回合真实解析成功后"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese auto-resolve marker: {marker}")
     if "不会先让你提供安装源" not in task2_zh:
         fail("missing Task 2 Chinese install-source correction marker")
-    for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID"):
+    for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID", "current-turn dependency result"):
         if marker not in task2_en:
             fail(f"missing Task 2 English auto-resolve marker: {marker}")
     if "instead of asking the user to provide an install source" not in task2_en:
@@ -488,9 +509,23 @@ def main() -> None:
     for banned in ("自己的用户ID是否已经拿到", "自己的用户ID也已经准备好", "请提供你自己的用户ID"):
         if banned in task2_zh_visible:
             fail(f"Task 2 Chinese visible layer must not ask for the current user's own user ID: {banned}")
+    for banned in ("uid-9UP8S", "uid-"):
+        if banned == "uid-" and "<resolved-user-id-from-current-turn>" in task2_zh:
+            continue
+        if banned in task2_zh and banned != "uid-":
+            fail(f"Task 2 Chinese example must not contain literal-looking fixed user IDs or unsafe resolution wording: {banned}")
+        if banned == "uid-" and "uid-" in task2_zh_visible:
+            fail("Task 2 Chinese visible layer must not contain literal-looking fixed user IDs")
     for banned in ("your own `user ID` is already ready", "your own user ID is ready", "provide your own user ID"):
         if banned in task2_en_visible:
             fail(f"Task 2 English visible layer must not ask for the current user's own user ID: {banned}")
+    for banned in ("uid-9UP8S", "uid-"):
+        if banned == "uid-" and "<resolved-user-id-from-current-turn>" in task2_en:
+            continue
+        if banned in task2_en and banned != "uid-":
+            fail(f"Task 2 English example must not contain literal-looking fixed user IDs or unsafe resolution wording: {banned}")
+        if banned == "uid-" and "uid-" in task2_en_visible:
+            fail("Task 2 English visible layer must not contain literal-looking fixed user IDs")
     for banned in ("aelf 社区", "aelf社区", "Moltbook", "拿对方地址", "tDVV 地址"):
         if banned in task2_zh_visible:
             fail(f"Task 2 Chinese visible layer must not expose old community/address wording: {banned}")
@@ -648,6 +683,9 @@ def main() -> None:
         "CA-only + AI-only completion",
         "ask the user for the `CA keystore` password only once",
         "bounded automatic retries with state reconciliation",
+        "same verified `CA` write transport",
+        "NODEVALIDATIONFAILED",
+        "proposal my-info",
     ):
         if marker not in skill_text:
             fail(f"missing Task 3 execution policy marker in canonical skill: {marker}")
@@ -690,6 +728,12 @@ def main() -> None:
     for marker in ("CA-only + AI-only", "keystore 密码", "手动完成"):
         if marker not in readme_zh:
             fail(f"missing Chinese Task 3 execution marker: {marker}")
+    for marker in ("same verified `CA` write transport", "NODEVALIDATIONFAILED", "proposal my-info"):
+        if marker not in readme_en:
+            fail(f"missing English Task 3 transport marker: {marker}")
+    for marker in ("同一条已经验证成功的 `CA` 写入路径", "NODEVALIDATIONFAILED", "`proposal my-info`"):
+        if marker not in readme_zh:
+            fail(f"missing Chinese Task 3 transport marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
     for marker in (
@@ -743,12 +787,24 @@ def main() -> None:
         "CA keystore",
         "3s -> 8s -> 15s",
         "proposal my-info",
+        "same verified `CA` write transport",
+        "transport mismatch",
+        "receipt or logs already show",
         "task3_execution_policy = ca_only_ai_completion",
         "task3_password_policy = ask_once_for_ca_keystore_password",
         "task3_retry_policy = bounded_ca_retries_with_state_reconciliation",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
+
+    for marker in (
+        "same verified `CA` write transport",
+        "NODEVALIDATIONFAILED",
+        "proposal my-info` as an auxiliary source",
+        "`tx receipt`, `logs`, and allowance or balance deltas",
+    ):
+        if marker not in output_contract:
+            fail(f"missing Task 3 transport/reconciliation marker: {marker}")
 
     for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
         if marker not in task4_flow:

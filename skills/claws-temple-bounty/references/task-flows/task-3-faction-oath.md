@@ -39,19 +39,24 @@ Present four branded factions, map the selected faction to the current rehearsal
 16. In `waiting for tokens`, tell the user to return after Task 2 pairing succeeds or invite friends to pair so they can build toward the required 2 AIBOUNTY.
 17. Treat `waiting for tokens` as a normal unmet-threshold state, not as a support CTA state, unless the token-balance check itself is externally blocked.
 18. Query the current allowance for the vote token against the current vote contract before sending the vote.
-19. If the allowance is below the configured vote amount, send `Approve` first through the available `CA` write path.
-20. Retry `Approve` at most 3 times using bounded backoff `3s -> 8s -> 15s`. After each attempt or timeout, re-check allowance before deciding whether another approval attempt is still necessary.
-21. If allowance is already sufficient after an `Approve` timeout or uncertain receipt, continue into `Vote` instead of repeating authorization blindly.
-22. Keep the visible layer natural during the allowance step. Tell the user that one more authorization step is being completed before the oath can be sent, but keep raw contract path and approval tx details in the maintainer layer unless the user asks.
-23. Invoke the actual vote only after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact vote payload contract from the config file.
-24. If `Vote` returns a timeout, validation failure, or another uncertain send result, re-check proposal availability, allowance, and `proposal my-info` before retrying.
-25. Retry `Vote` at most 3 times using bounded backoff `3s -> 8s -> 15s`.
-26. If `proposal my-info` already shows that the vote state changed but the final receipt is not confirmed yet, move the user to `submitted` and continue polling for final confirmation.
-27. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
-28. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
-29. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
-30. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, and render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
-31. If the config is marked as rehearsal-only, say clearly in the visible layer that the current oath record is a testing or rehearsal record and that the formal record will switch in the production launch.
+19. If the allowance is below the configured vote amount, send `Approve` first through the active `CA` write path.
+20. Once one `CA` write path has already succeeded for `Approve`, keep that same verified `CA` write transport as the preferred path for the final `Vote`.
+21. Retry `Approve` at most 3 times using bounded backoff `3s -> 8s -> 15s`. After each attempt or timeout, re-check allowance before deciding whether another approval attempt is still necessary.
+22. If allowance is already sufficient after an `Approve` timeout or uncertain receipt, continue into `Vote` instead of repeating authorization blindly.
+23. Do not blindly mix a successful `CA` approval transport with a different direct vote transport. If another path is attempted and returns `NODEVALIDATIONFAILED` with `Insufficient allowance` while allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`.
+24. Keep the visible layer natural during the allowance step. Tell the user that one more authorization step is being completed before the oath can be sent, but keep raw contract path and approval tx details in the maintainer layer unless the user asks.
+25. Invoke the actual vote only after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact vote payload contract from the config file.
+26. For `Vote`, prefer receipt, event logs, and allowance or balance deltas as the primary reconciliation signals.
+27. Treat `proposal my-info` as an auxiliary source only. If it is unavailable or returns no user record, continue the flow with receipt and log based reconciliation instead of failing immediately.
+28. If `Vote` returns a timeout, validation failure, or another uncertain send result, re-check proposal availability, allowance, primary reconciliation signals, and then `proposal my-info` when available before retrying.
+29. Retry `Vote` at most 3 times using bounded backoff `3s -> 8s -> 15s`.
+30. If the receipt or logs already show that the vote state changed but the final confirmation is not settled yet, move the user to `submitted` and continue polling for final confirmation.
+31. If `proposal my-info` also shows that the vote state changed but the final receipt is not confirmed yet, keep the user in `submitted` and continue polling instead of declaring failure.
+32. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
+33. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
+34. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
+35. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, and render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
+36. If the config is marked as rehearsal-only, say clearly in the visible layer that the current oath record is a testing or rehearsal record and that the formal record will switch in the production launch.
 
 ## Required Visible Output
 
@@ -82,7 +87,9 @@ Use the matching brand lexicon only for task labels, helper wording, and close-o
 - `task3_password_policy = ask_once_for_ca_keystore_password`
 - `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
 - do not present `Portkey App`, `EOA`, `ManagerForwardCall`, or manual route choices in the visible layer
-- when the current signer path is `CA`, the fastest unblock is inside this skill: read allowance, send `Approve` through the existing `CA` write path, reconcile allowance state, then retry the `Vote`
+- when the current signer path is `CA`, the fastest unblock is inside this skill: read allowance, send `Approve` through the existing `CA` write path, then keep that same verified `CA` write transport for `Vote`
+- if a different vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch instead of a real allowance failure
+- use `proposal my-info` as an auxiliary reconciliation helper, not as the only source of truth for vote-state confirmation
 - the spender for the allowance check and approval must be the current vote contract address from the dependency runtime, not a new hardcoded visible-layer constant
 - if `environment = test` or `is_test_only = true`, mention the production blocker in the maintainer layer
 - do not repeat raw IDs in any other reference file

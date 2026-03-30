@@ -18,9 +18,9 @@ If you are returning but not currently signed in, I will also use the `smoother 
 
 Once your identity entry and sign-in are ready, I should auto-resolve your current `user ID` first, so you do not need to type your own identifier manually.
 
-If the resolution succeeds, I should confirm it like this:
+Only after the current-turn dependency result truly resolves the value should I confirm it like this:
 
-`Resolved your user ID: uid-9UP8S`
+`Resolved your user ID: <resolved-user-id-from-current-turn>`
 
 After that confirmation, two paths are available:
 
@@ -28,6 +28,7 @@ After that confirmation, two paths are available:
 - `Open partner search`: use this when you do not already know the target; this is the automatic queue-matching path and does not need a preselected partner.
 
 If your identity entry is already open and you are signed in, I should auto-resolve and show your current user ID before continuing with either path.
+Only when the dependency really returns that value in the current turn should I show a concrete user ID; I must not treat example values, placeholders, or remembered IDs as if they were real runtime output.
 If this is your first time here, I will take you through sign-up or first-time setup before the pairing flow continues.
 If you are returning but not currently signed in, I will take you through recovery sign-in before the pairing flow continues.
 If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.

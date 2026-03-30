@@ -64,6 +64,8 @@
 
 `这一步还在自动重试中，我正在重新校验授权状态、宣誓状态和公开记录确认。只要这条自动路径还能继续，我就不会把执行工作交还给你。`
 
+如果当前已经有一条 `CA` 写入路径成功完成了授权，而另一条宣誓发送路径又报出“授权仍不足”这一类矛盾错误，系统应该自动切回刚才那条已经验证成功的 `CA` 写入路径继续提交，而不是把它误判成真的 Token 不足。
+
 ### 成功示例
 
 如果宣誓交易已经成功并拿到了 `txId`，就应该明确告诉用户：
@@ -87,5 +89,5 @@
 - task3_execution_policy: `ca_only_ai_completion`
 - task3_password_policy: `ask_once_for_ca_keystore_password`
 - task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
-- ca_vote_path: `allowance precheck -> Approve if needed -> Vote -> receipt + my-info reconciliation`
+- ca_vote_path: `allowance precheck -> Approve if needed -> keep the same verified CA write transport for Vote -> receipt/log reconciliation (+ proposal my-info when available)`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`
