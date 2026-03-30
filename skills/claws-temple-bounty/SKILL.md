@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.10
+version: 0.2.11
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.10`
+- Current skill version: `0.2.11`
 
 ## Scope
 
@@ -87,6 +87,8 @@ Dependency rule:
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
 - for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, token-allowance precheck, vote payload fields, and success Telegram follow-up
+- for Task 3, treat `vote_payload.proposal_id_field = proposalId` as the dependency-tool input alias for `tomorrowdao_dao_vote`, not as a raw contract ABI field name
+- for Task 3, when using `tomorrowdao_dao_vote`, pass the configured `proposalId` field and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call `Vote` with an unnormalized `proposalId` payload
 - for Task 3, use `CA-only + AI-only completion` as the execution policy; do not offer a user-facing manual path, app handoff, or non-CA route
 - for Task 3, if the `CA` context is present but the keystore password is not yet available, ask the user for the `CA keystore` password only once and then continue automatically
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount

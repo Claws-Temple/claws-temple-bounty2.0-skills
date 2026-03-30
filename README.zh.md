@@ -4,7 +4,7 @@
 
 这个仓库提供一个面向多宿主的 `claws-temple-bounty` 编排型 skill，用来串联 `龙虾圣殿 Bounty 2.0` 的完整五段任务路径。
 
-当前版本：`0.2.10`
+当前版本：`0.2.11`
 
 完整路径包括：
 
@@ -144,6 +144,7 @@ Task 3 现在采用 `CA-only + AI-only` 执行策略：如果当前 `CA` signer 
 如果当前签名路径属于 `CA`，Task 3 会做 allowance 预检，并对 `Approve` 与 `Vote` 执行带状态校验的有限次自动重试，只有这些自动路径都耗尽后才会真正进入 blocker。
 Task 3 现在会优先让 `Approve` 与 `Vote` 走同一条已经验证成功的 `CA` 写入路径；如果另一条投票发送路径在 allowance 已经足够后还报出 `NODEVALIDATIONFAILED` 这类授权不足错误，系统会自动切回那条已验证成功的 `CA` 写入路径，而不是把它误判成真实 Token 不足。
 `proposal my-info` 现在只作为辅助状态校验来源，Task 3 的主确认信号会优先看 mined receipt、投票日志，以及 allowance 或余额变化。
+Task 3 配置里的 `proposalId` 是配置内依赖投票工具使用的 `依赖工具输入别名`，不是底层合约原始 ABI 字段名；依赖会在最终发出 `Vote` 前把它规范化成底层 `votingItemId`，所以宿主实现不能拿未规范化的 `proposalId` 直接 raw forward-call `Vote`。
 Task 3 不再给用户 `手动完成`、`Portkey App` 或 `EOA` 这类回退分支。
 对 Task 2 来说，如果只是本地还没登录，不应直接视为 blocker；新用户注册和老用户恢复登录都属于正常 onboarding 路径。
 

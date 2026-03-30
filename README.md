@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.10`
+Current version: `0.2.11`
 
 It guides the full five-task path:
 
@@ -144,6 +144,7 @@ Task 3 now follows a `CA-only + AI-only` execution policy: if the current `CA` s
 If the current signer resolves to `CA`, Task 3 performs allowance precheck plus bounded `Approve` and `Vote` retries with state reconciliation before it ever returns a final blocker.
 Task 3 now prefers one consistent verified `CA` write transport for both `Approve` and `Vote`; if a different vote path returns `NODEVALIDATIONFAILED` with an allowance-style error after allowance is already sufficient, the flow should switch back to the same verified `CA` write transport instead of treating that as a real allowance shortage.
 `proposal my-info` is now treated as an auxiliary reconciliation helper for Task 3, while mined receipts, vote logs, and allowance or balance deltas are the primary confirmation signals.
+`proposalId` in the Task 3 config is the dependency-tool input alias for the configured vote tool, not a raw contract ABI field name; the dependency normalizes it to the underlying `votingItemId` before the final `Vote` call, so hosts must not raw forward-call `Vote` with an unnormalized `proposalId` payload.
 Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices in the user-facing flow.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
 

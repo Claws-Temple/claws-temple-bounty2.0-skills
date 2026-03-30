@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.10`
+Version: `0.2.11`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -217,6 +217,8 @@ Use these strings when `cta_type = support`.
 - treat `waiting for tokens` as a normal unmet-threshold state with `cta_type = none`; do not append support CTA unless the balance check itself is externally blocked
 - when the current signer path is `CA`, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
 - when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send `Approve` first through the active `CA` write path, then re-check allowance before each retry
+- for `Vote`, treat `vote_payload.proposal_id_field = proposalId` as the dependency-tool input alias for `tomorrowdao_dao_vote`, not as a raw contract ABI field name
+- when using the dependency tool, pass `proposalId` exactly as configured and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call the DAO `Vote` contract with an unnormalized `proposalId` payload
 - after a successful `Approve`, prefer the same verified `CA` write transport for the final `Vote` instead of switching to a different write path
 - for `Approve`, retry at most 3 times with state reconciliation before each attempt; if allowance is already sufficient after a timeout, continue directly to `Vote`
 - for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and primary state signals from `tx receipt`, `logs`, and allowance or balance deltas
