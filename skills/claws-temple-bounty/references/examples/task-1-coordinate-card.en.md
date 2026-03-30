@@ -34,7 +34,7 @@ If the current environment is missing the Task 1 dependency, the default order s
 
 If the current host cannot do that automatically, the reply should first give explicit install guidance:
 
-`This host cannot auto-install that dependency yet. I will give you a concrete install path first, and then we can continue the coordinate reading.`
+`This host cannot auto-install that dependency yet. I will first give you concrete install or upgrade guidance, including the default repo URL and the optional local override, and then we can continue the coordinate reading.`
 
 Only after install or activation still fails should the reply turn into a real blocker:
 
@@ -48,4 +48,6 @@ Only after install or activation still fails should the reply turn into a real b
 - dependency_skill: `agent-spectrum`
 - route: `task-1-coordinate-card`
 - rewritten_output: `brand-layer`
-- self_heal_source: `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
+- dependency_source_catalog: `../../config/dependency-sources.json`
+- default_repo_url: `https://github.com/aelf-hzz780/agent-spectrum-skill`
+- env_override: `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`

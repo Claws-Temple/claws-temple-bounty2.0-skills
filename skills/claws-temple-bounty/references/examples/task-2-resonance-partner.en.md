@@ -32,6 +32,7 @@ If this is your first time here, I will take you through sign-up or first-time s
 If you are returning but not currently signed in, I will take you through recovery sign-in before the pairing flow continues.
 If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.
 Once identity entry, sign-in, and current-user ID resolution are ready, I should continue into the formal queue flow instead of suggesting a skip or social-posting substitute.
+If `resonance-contract` is missing or outdated, I should install or upgrade it first instead of asking the user to provide an install source.
 Once the `Open partner search` queue join is active, or the `Targeted match` submission has already been sent, I should treat `Task 2` as stable enough to hand off into `Task 3`.
 
 ### Correction Example
@@ -59,4 +60,7 @@ If sign-up, recovery sign-in, dependency self-heal, identity-entry setup fails, 
 - user_id_mapping: `user-facing user ID = dependency ca_hash`
 - targeted_match_field: `counterparty_ca_hash`
 - open_partner_search_mode: `queue`
+- dependency_source_catalog: `../../config/dependency-sources.json`
+- default_repo_url: `https://github.com/aelf-hzz780/agent-resonance-skill`
+- env_override: `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
 - output_style: `brand-layer`

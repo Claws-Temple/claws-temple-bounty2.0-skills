@@ -4,7 +4,7 @@
 
 这个仓库提供一个面向多宿主的 `claws-temple-bounty` 编排型 skill，用来串联 `龙虾圣殿 Bounty 2.0` 的完整五段任务路径。
 
-当前版本：`0.2.4`
+当前版本：`0.2.5`
 
 完整路径包括：
 
@@ -114,11 +114,15 @@ ls "${CODEX_HOME:-$HOME/.codex}/skills"
 ```
 
 如果依赖缺失或版本过低，默认主路径不应该是直接 blocker，而应该先尝试自动安装或升级；当前宿主如果做不到，再给明确安装或升级指引。
-已知本地来源如下：
+便携依赖来源定义在 `skills/claws-temple-bounty/config/dependency-sources.json` 里。
 
-- `agent-spectrum` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-spectrum-skill/skills/agent-spectrum`
-- `resonance-contract` -> `/Users/huangzongzhe/workspace/vibeCoding/agent-resonance-skill/skills/resonance-contract`
-- `tomorrowdao-agent-skills` -> `/Users/huangzongzhe/workspace/TomorrowDAOProject/tomorrowDAO-skill`
+- `agent-spectrum` -> `https://github.com/aelf-hzz780/agent-spectrum-skill`
+- `resonance-contract` -> `https://github.com/aelf-hzz780/agent-resonance-skill`
+- `tomorrowdao-agent-skills` -> `https://github.com/TomorrowDAOProject/tomorrowDAO-skill`
+- 可选本地覆盖：
+  - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
+  - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
+  - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
 
 如果当前宿主支持在仓库里执行 shell，可以优先用：
 
@@ -133,6 +137,7 @@ bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spec
 ```
 
 Task 2 现在要求 `resonance-contract >= 3.0.1`，这样 `开放寻配` 才会在 onboarding 和依赖预检通过后被视为正式 queue 主路径。
+如果这个依赖缺失或版本过低，默认顺序现在是先安装或升级，不再先让用户提供安装源，也不再建议跳过 Queue。
 Task 3 还要求真实通过 `2 AIBOUNTY` 余额预检后，才允许继续部落宣誓投票。
 如果当前签名路径属于 `CA` 这类需要委托扣款的账户路径，Task 3 现在还会补一层 allowance 预检；不足时先完成一次 `Approve`，再继续真正的 `Vote`。
 对 Task 2 来说，如果只是本地还没登录，不应直接视为 blocker；新用户注册和老用户恢复登录都属于正常 onboarding 路径。
@@ -170,6 +175,7 @@ Task 5 是可选加分项，负责扩大社区传播。
 - 旧说法 `没有直接工具，所以先去 X / Telegram 找人` 已经废弃
 - 旧说法 `先跳过 Task 2，继续 Task 3` 已经废弃
 - 旧说法 `缺依赖就直接去 Telegram / X` 已经废弃
+- 旧说法 `告诉我一个可用的安装源` 已经废弃
 - 新说法是 `开放寻配 = 在 onboarding 和依赖预检通过后的正式 queue 主路径；Telegram / X 只在真实阻断时作为 fallback`
 - 新说法也是 `缺依赖或版本过低时，先安装或升级依赖，再决定是否进入 blocker`
 
