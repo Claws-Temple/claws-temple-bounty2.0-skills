@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.5`
+Version: `0.2.7`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -178,8 +178,8 @@ Use these strings when `cta_type = support`.
 - once the current user's `user ID` resolves, show the full value in the visible layer as the Task 2 queue-readiness confirmation
 - if the user chooses `targeted match`, ask for the other user's `user ID`
 - if the user does not already have a concrete partner, explain that `open partner search` is the automatic queue-matching path and does not need a preselected target
-- if `resonance-contract` is missing or below `3.0.1`, try dependency self-heal first
-- do not ask the user to provide their own install source when `resonance-contract` is missing or below `3.0.1`
+- if `resonance-contract` is missing or below `4.0.0`, try dependency self-heal first
+- do not ask the user to provide their own install source when `resonance-contract` is missing or below `4.0.0`
 - if the host cannot auto-install or auto-upgrade `resonance-contract`, give explicit install or upgrade guidance before any support CTA
 - if dependency queue preflight can proceed, continue into the formal queue path and do not suggest skipping Task 2 or replacing queue with social posting
 - treat the Task 2 path as stable enough for Task 3 once the queue join is active or the direct pair submission has been sent
@@ -202,18 +202,27 @@ Use these strings when `cta_type = support`.
 - before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.0` and the configured generic token-balance tool are available
 - if `tomorrowdao-agent-skills` is missing or below `0.2.0`, try dependency self-heal first
 - if the host cannot auto-install or auto-upgrade `tomorrowdao-agent-skills`, give explicit install or upgrade guidance before any support CTA
+- use `task3_execution_policy = ca_only_ai_completion`
+- use `task3_password_policy = ask_once_for_ca_keystore_password`
+- use `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
+- resolve a usable `CA` signer before any oath write; if the current context is not `CA`-ready, stop with a blocker and support CTA instead of switching to another route
+- if the `CA` signer exists but the keystore password is missing, ask the user for that password only once and then continue automatically
 - before vote submission, verify that the user's `AIBOUNTY` balance is at least the configured vote amount
 - if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
 - treat `waiting for tokens` as a normal unmet-threshold state with `cta_type = none`; do not append support CTA unless the balance check itself is externally blocked
-- when the current signer path is `CA` or another delegated-spend route, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
-- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send one `Approve` step first, and only then retry the actual vote
+- when the current signer path is `CA`, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
+- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send `Approve` first, then re-check allowance before each retry
+- for `Approve`, retry at most 3 times with state reconciliation before each attempt; if allowance is already sufficient after a timeout, continue directly to `Vote`
+- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and `proposal my-info`
+- if `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
 - keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
 - use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
 - in `submitted`, explain that the oath is waiting for final public-record confirmation and keep `cta_type = none` unless monitoring itself is externally blocked
 - only move to `completed` after the vote returns a mined-success `txId`
 - in `completed`, include the `txId`, the Telegram group CTA, the fixed Telegram post template, and the two-week extra 20 Token reminder
 - if the current mapping is rehearsal-only, say clearly in the visible layer that this is a testing or rehearsal record and that production will later switch to the formal record
-- if the mapping exists but the current environment cannot continue the oath flow, the allowance step cannot be completed, or the dependency contract is missing, explain the blocker and append support CTA
+- never present `Portkey App`, `EOA`, `ManagerForwardCall`, raw spender addresses, or a manual fallback choice in the visible layer
+- if the mapping exists but the current environment cannot continue the oath flow, the allowance step still cannot be completed after bounded retries, or the dependency contract is missing, explain the blocker and append support CTA
 
 ### Task 4 Replies
 
@@ -243,6 +252,9 @@ Use these strings when `cta_type = support`.
 
 - present Task 5 as optional
 - frame it as reach or community impact, not as a blocker
+- if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may add one short browser-action hint
+- keep that browser-action hint as an `OpenClaw`-only convenience, not as a general default for other hosts
+- do not mention browser action before the user chooses a platform or when the user only wants draft copy
 - if the user explicitly wants to send the signal now but the platform or current context blocks that action, append support CTA
 
 ## Expansion Triggers

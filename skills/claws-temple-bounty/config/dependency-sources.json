@@ -1,5 +1,5 @@
 {
-  "version": "0.2.5",
+  "version": "0.2.7",
   "dependencies": {
     "agent-spectrum": {
       "skill_name": "agent-spectrum",
@@ -10,7 +10,7 @@
     },
     "resonance-contract": {
       "skill_name": "resonance-contract",
-      "min_version": "3.0.1",
+      "min_version": "4.0.0",
       "default_repo_url": "https://github.com/aelf-hzz780/agent-resonance-skill",
       "skill_subdir": "skills/resonance-contract",
       "env_override": "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE"

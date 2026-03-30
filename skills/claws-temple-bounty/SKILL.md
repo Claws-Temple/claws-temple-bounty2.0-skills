@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.5
+version: 0.2.7
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.5`
+- Current skill version: `0.2.7`
 
 ## Scope
 
@@ -51,10 +51,10 @@ Keep all visible fixed strings monolingual after selection.
 Use these dependencies explicitly when the relevant task is requested:
 
 - Task 1 -> `agent-spectrum`
-- Task 2 -> `resonance-contract` version `>= 3.0.1`
+- Task 2 -> `resonance-contract` version `>= 4.0.0`
 - Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.0`
 - Task 4 -> preferred live skill at `https://www.shitskills.net/skill.md`
-- Task 5 -> `resonance-contract` version `>= 3.0.1` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
+- Task 5 -> `resonance-contract` version `>= 4.0.0` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
 
 Dependency rule:
 
@@ -79,14 +79,19 @@ Dependency rule:
 - for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
 - for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is auto-resolved
 - for Task 2, once identity-entry onboarding finishes and dependency queue preflight can proceed, continue into the formal queue path; do not suggest skipping Task 2 or replacing queue with social posting
-- for Task 2, when `resonance-contract` is missing or below `3.0.1`, first try install or upgrade from the dependency source catalog; do not ask the user to provide an install source
+- for Task 2, when `resonance-contract` is missing or below `4.0.0`, first try install or upgrade from the dependency source catalog; do not ask the user to provide an install source
 - for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
 - for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, token-allowance precheck, vote payload fields, and success Telegram follow-up
+- for Task 3, use `CA-only + AI-only completion` as the execution policy; do not offer a user-facing manual path, app handoff, or non-CA route
+- for Task 3, if the `CA` context is present but the keystore password is not yet available, ask the user for the `CA keystore` password only once and then continue automatically
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
-- for Task 3, when the current signer resolves to a `CA` account or another delegated-spend path, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
-- for Task 3, when the allowance is below the configured vote amount, send one `Approve` transaction first through the available `CA` write path, wait for mined success, and only then retry the actual `Vote`
+- for Task 3, resolve a `CA` signer before any write; if the current signer is not `CA` or no usable `CA` context is ready, stop with a branded blocker instead of switching execution routes
+- for Task 3, when the current signer resolves to `CA`, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
+- for Task 3, when the allowance is below the configured vote amount, send `Approve` first through the available `CA` write path and reconcile state before each retry
+- for Task 3, use bounded automatic retries with state reconciliation for both `Approve` and `Vote`; do not ask the user whether they want manual completion or another retry
+- for Task 3, keep retry timing, receipt polling, and allowance reconciliation in maintainer-facing details; the visible layer should only describe the current automatic stage naturally
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
 - for Task 3, if the current mapping is still rehearsal-only, the visible layer must say clearly that the current oath record is a testing or rehearsal record and that production will use a later formal record
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
@@ -94,6 +99,8 @@ Dependency rule:
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl` only when the user chooses `publish` or another action that actually needs them
 - for Task 4, treat missing native prerequisites such as `GitHub repo URL`, missing content fields, or an unchosen action as checklist gaps, not support blockers
 - for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
+- for Task 5, if the current host is `OpenClaw`, the user has already chosen `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may mention that browser action can be used directly in `OpenClaw`
+- for Task 5, do not mention browser action before the platform is chosen, when the user only wants draft copy, or in hosts other than `OpenClaw`
 
 ## Required First Step
 
@@ -184,6 +191,7 @@ Do not trigger this skill when:
 - Do not expose raw IDs, proposal IDs, transaction IDs, dependency skill names, or config keys in the default visible layer.
 - Task 2 may show the fully resolved current user's own `user ID` in the default visible layer as a controlled exception for queue readiness confirmation.
 - Do not directly show any original faction names from the dependency layer to ordinary users.
+- Do not present `Portkey App`, `EOA`, `ManagerForwardCall`, `manual fallback`, or raw spender addresses in the default visible layer.
 - Rewrite faction display names by reading them from the Task 3 config file. Use the active brand lexicon only for surrounding task labels and helper wording.
 - If any task enters a real blocker or externally stalled state that the agent cannot resolve automatically in the current turn, append the support CTA from the bundled output contract.
 - Do not declare Task 4 locally completed unless the user confirms that the requested native SHIT Skills action actually succeeded.

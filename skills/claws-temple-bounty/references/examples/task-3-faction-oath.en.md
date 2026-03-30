@@ -41,7 +41,7 @@ If the oath vote has already been sent but the final result is still waiting to 
 
 If this is not a normal wait but an external execution blocker on approval, dependency, or confirmation, the reply should say:
 
-`The faction oath still cannot continue, and this is not just a normal waiting state. The external execution path is still blocked here, so I am pausing the flow until that blocker is cleared.`
+`The faction oath still cannot continue, and this is not just a normal waiting state. The CA automatic execution path is still blocked here even after authorization, submission, and confirmation retries, so I am pausing the flow until that blocker is cleared.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -51,6 +51,18 @@ If this is not a normal wait but an external execution blocker on approval, depe
 If the user already has enough `AIBOUNTY` but this path still needs one vote authorization step, the reply should say:
 
 `You already meet the 2 AIBOUNTY requirement for the faction oath, but this path still needs one final authorization step. I will complete that approval first, and then continue with the actual oath vote.`
+
+### Password Example
+
+If the current `CA` context is already available but the keystore password is still missing, the reply should say:
+
+`I have already confirmed that your current identity entry can continue this faction oath, but this step still needs the CA keystore password once. After you provide it, I will continue the authorization, oath submission, and confirmation automatically.`
+
+### Automatic-Retry Example
+
+If approval or vote submission did not settle on the first attempt but the system is still auto-reconciling state, the reply should say:
+
+`This step is still in automatic retry, and I am re-checking authorization state, oath state, and public-record confirmation. As long as this automatic path can continue, I will not hand the execution back to you.`
 
 ### Success Example
 
@@ -72,5 +84,8 @@ Telegram post template:
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
 - active_environment: `test`
 - dependency_min_version: `0.2.0`
-- ca_vote_path: `allowance precheck -> Approve if needed -> Vote`
+- task3_execution_policy: `ca_only_ai_completion`
+- task3_password_policy: `ask_once_for_ca_keystore_password`
+- task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
+- ca_vote_path: `allowance precheck -> Approve if needed -> Vote -> receipt + my-info reconciliation`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`

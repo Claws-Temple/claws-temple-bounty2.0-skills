@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.5`
+Current version: `0.2.7`
 
 It guides the full five-task path:
 
@@ -99,7 +99,7 @@ Enable and verify:
 ## Required Dependencies
 
 - Local skill: `agent-spectrum`
-- Local skill: `resonance-contract` `>= 3.0.1`
+- Local skill: `resonance-contract` `>= 4.0.0`
 - Local skill: `tomorrowdao-agent-skills` `>= 0.2.0`
 - Remote live skill for Task 4: `https://www.shitskills.net/skill.md`
 
@@ -136,10 +136,12 @@ For example:
 bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spectrum
 ```
 
-Task 2 now expects `resonance-contract >= 3.0.1`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
+Task 2 now expects `resonance-contract >= 4.0.0`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
 If that dependency is missing or outdated, the default route is now `install or upgrade first`, not `ask the user for an install source` and not `skip Queue`.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
-If the current signer resolves to a `CA`-style path, Task 3 now also performs an allowance precheck and completes one `Approve` step before retrying the actual `Vote` when needed.
+Task 3 now follows a `CA-only + AI-only` execution policy: if the current `CA` signer is available but the keystore password is missing, the agent may ask for that password once and then continue automatically.
+If the current signer resolves to `CA`, Task 3 performs allowance precheck plus bounded `Approve` and `Vote` retries with state reconciliation before it ever returns a final blocker.
+Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices in the user-facing flow.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
 
 ## Usage
@@ -169,6 +171,7 @@ Use $claws-temple-bounty to help this user finish only Task 4 and tell them exac
 Task 1 through Task 3 can be completed inside this skill, but the current repository still ships Task 3 through the testing or rehearsal record path by default.
 Task 4 must be completed in the native `SHIT Skills` flow for the `Claws Temple Bounty 2.0` qualification path, and `publish` is the default recommended action.
 Task 5 is optional and adds community reach.
+For `OpenClaw`, Task 5 may also mention direct browser action once the user already picked `Telegram` or `X` and explicitly wants to send right now.
 
 ## Migration Note
 

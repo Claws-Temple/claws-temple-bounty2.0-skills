@@ -210,7 +210,7 @@ def main() -> None:
             "env_override": "CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE",
         },
         "resonance-contract": {
-            "min_version": "3.0.1",
+            "min_version": "4.0.0",
             "default_repo_url": "https://github.com/aelf-hzz780/agent-resonance-skill",
             "skill_subdir": "skills/resonance-contract",
             "env_override": "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
@@ -225,8 +225,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.5":
-        fail("dependency source catalog must be version 0.2.5")
+    if dependency_sources.get("version") != "0.2.7":
+        fail("dependency source catalog must be version 0.2.7")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -533,6 +533,12 @@ def main() -> None:
     for marker in ("Approval Example", "authorization step", "Approve", "not the approval tx id"):
         if marker not in task3_en:
             fail(f"missing Task 3 English allowance/approve marker: {marker}")
+    for marker in ("密码示例", "CA keystore", "自动重试示例", "自动重试中"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese CA-password or retry marker: {marker}")
+    for marker in ("Password Example", "CA keystore password", "Automatic-Retry Example", "automatic retry"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English CA-password or retry marker: {marker}")
     waiting_tokens_section_zh = task3_zh.split("### 等待 Token 示例", 1)[1].split("###", 1)[0]
     waiting_tokens_section_en = task3_en.split("### Waiting-for-Tokens Example", 1)[1].split("###", 1)[0]
     for banned in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
@@ -541,6 +547,11 @@ def main() -> None:
     for banned in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
         if banned in waiting_tokens_section_en:
             fail(f"Task 3 waiting-for-tokens section must not append support CTA: {banned}")
+    task3_zh_visible = strip_maintainer_layer(task3_zh)
+    task3_en_visible = strip_maintainer_layer(task3_en)
+    for banned in ("Portkey App", "EOA", "ManagerForwardCall", "手动完成", "Asylum"):
+        if banned in task3_zh_visible or banned in task3_en_visible:
+            fail(f"Task 3 visible layer must not expose deprecated fallback wording: {banned}")
 
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     task4_en = (EXAMPLES_DIR / "task-4-curio-board.en.md").read_text(encoding="utf-8")
@@ -630,16 +641,23 @@ def main() -> None:
             fail(f"Task 2 old community/address wording must be removed: {banned}")
 
     skill_text = CANONICAL_SKILL_PATH.read_text(encoding="utf-8")
-    for marker in ("`resonance-contract` version `>= 3.0.1`", "`tomorrowdao-agent-skills` version `>= 0.2.0`"):
+    for marker in ("`resonance-contract` version `>= 4.0.0`", "`tomorrowdao-agent-skills` version `>= 0.2.0`"):
         if marker not in skill_text:
             fail(f"missing dependency version contract marker: {marker}")
+    for marker in (
+        "CA-only + AI-only completion",
+        "ask the user for the `CA keystore` password only once",
+        "bounded automatic retries with state reconciliation",
+    ):
+        if marker not in skill_text:
+            fail(f"missing Task 3 execution policy marker in canonical skill: {marker}")
 
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_zh = (ROOT / "README.zh.md").read_text(encoding="utf-8")
-    for marker in ("`resonance-contract` `>= 3.0.1`", "Task 2 now expects `resonance-contract >= 3.0.1`"):
+    for marker in ("`resonance-contract` `>= 4.0.0`", "Task 2 now expects `resonance-contract >= 4.0.0`"):
         if marker not in readme_en:
             fail(f"missing English dependency version marker: {marker}")
-    for marker in ("`resonance-contract` `>= 3.0.1`", "Task 2 现在要求 `resonance-contract >= 3.0.1`"):
+    for marker in ("`resonance-contract` `>= 4.0.0`", "Task 2 现在要求 `resonance-contract >= 4.0.0`"):
         if marker not in readme_zh:
             fail(f"missing Chinese dependency version marker: {marker}")
     for marker in (
@@ -666,6 +684,12 @@ def main() -> None:
     for marker in ("self-heal-local-dependency.sh", "测试版记录流程"):
         if marker not in readme_zh:
             fail(f"missing Chinese patch marker: {marker}")
+    for marker in ("CA-only + AI-only", "keystore password", "manual fallback"):
+        if marker not in readme_en:
+            fail(f"missing English Task 3 execution marker: {marker}")
+    for marker in ("CA-only + AI-only", "keystore 密码", "手动完成"):
+        if marker not in readme_zh:
+            fail(f"missing Chinese Task 3 execution marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
     for marker in (
@@ -716,6 +740,12 @@ def main() -> None:
         "move the user to `submitted`",
         "waiting for final confirmation",
         "testing or rehearsal record",
+        "CA keystore",
+        "3s -> 8s -> 15s",
+        "proposal my-info",
+        "task3_execution_policy = ca_only_ai_completion",
+        "task3_password_policy = ask_once_for_ca_keystore_password",
+        "task3_retry_policy = bounded_ca_retries_with_state_reconciliation",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
@@ -731,12 +761,15 @@ def main() -> None:
     for marker in ("support CTA", "genuinely stuck on sending", "clickable `Telegram group` link", "clickable `X` link"):
         if marker not in task5_flow:
             fail(f"missing Task 5 support flow marker: {marker}")
+    for marker in ("OpenClaw", "browser action", "Telegram` or `X`"):
+        if marker not in task5_flow:
+            fail(f"missing Task 5 OpenClaw marker: {marker}")
     task5_zh = (EXAMPLES_DIR / "task-5-social-signal.zh.md").read_text(encoding="utf-8")
     task5_en = (EXAMPLES_DIR / "task-5-social-signal.en.md").read_text(encoding="utf-8")
-    for marker in ("TG / X / 奇物志", "如果你已经确定平台", "如果你只是想先看入口"):
+    for marker in ("TG / X / 奇物志", "如果你已经确定平台", "如果你只是想先看入口", "OpenClaw", "浏览器操作"):
         if marker not in task5_zh:
             fail(f"missing Task 5 Chinese platform-choice marker: {marker}")
-    for marker in ("TG / X / Curio Board", "If you already know the platform", "If you only want the destination links"):
+    for marker in ("TG / X / Curio Board", "If you already know the platform", "If you only want the destination links", "OpenClaw", "browser action"):
         if marker not in task5_en:
             fail(f"missing Task 5 English platform-choice marker: {marker}")
 
@@ -795,6 +828,10 @@ def main() -> None:
         for marker in ("allowance", "Approve"):
             if marker not in text:
                 fail(f"missing Task 3 allowance marker {marker!r} in {path}")
+    for label, text in (("task3_zh_visible", task3_zh_visible), ("task3_en_visible", task3_en_visible)):
+        for banned in ("Portkey App", "EOA 私钥", "EOA signing", "manual fallback", "手动完成", "Asylum"):
+            if banned in text:
+                fail(f"Task 3 visible layer must not expose deprecated fallback detail in {label}: {banned}")
     if "voteType" in CONFIG_PATH.read_text(encoding="utf-8") or '"Approve"' in CONFIG_PATH.read_text(encoding="utf-8"):
         fail("old Task 3 voteType/Approve contract must be removed from config")
 
