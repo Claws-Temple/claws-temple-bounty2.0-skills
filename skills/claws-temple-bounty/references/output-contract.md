@@ -175,7 +175,9 @@ Use these strings when `cta_type = support`.
 - if the user is first-time, explain that the smoother identity-entry path starts with sign-up or first-time setup before the pairing flow and ends with a usable `user ID`
 - if the user is returning but not currently signed in, explain that the smoother identity-entry path starts with recovery sign-in before the pairing flow and ends with a usable `user ID`
 - if identity entry and sign-in are ready, auto-resolve the current user's own `user ID` instead of asking the user to type it manually
-- once the current user's `user ID` resolves, show the full value in the visible layer as the Task 2 queue-readiness confirmation
+- only show the current user's `user ID` when the current-turn dependency result actually returned that value; do not reuse remembered values, example literals, or placeholders as if they were real runtime output
+- once the current-turn dependency result resolves the current user's `user ID`, show the full value in the visible layer as the Task 2 queue-readiness confirmation
+- if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`
 - if the user chooses `targeted match`, ask for the other user's `user ID`
 - if the user does not already have a concrete partner, explain that `open partner search` is the automatic queue-matching path and does not need a preselected target
 - if `resonance-contract` is missing or below `4.0.0`, try dependency self-heal first

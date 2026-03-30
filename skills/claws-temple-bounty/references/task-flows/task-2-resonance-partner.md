@@ -23,19 +23,20 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 9. Do not ask the user to provide an install source for `resonance-contract`.
 10. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
 11. Once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually.
-12. If that user-ID resolution succeeds, show the full resolved current-user `user ID` in the visible layer so the queue path can be confirmed.
-13. If that user-ID resolution fails, keep the user in the identity-entry or recovery branch and do not ask the user to paste their own `user ID`.
-14. If the user has a specific partner target, route into `targeted match`.
-15. In `targeted match`, ask for the other user's `user ID`.
-16. If the user does not have a specific target, route into `open partner search`.
-17. Explain plainly that `open partner search` is the automatic queue-matching path and does not require a preselected target.
-18. Invoke `resonance-contract` only after identity-entry readiness, sign-in readiness, the auto-resolved current-user `user ID`, and the participation mode are clear.
-19. If dependency queue preflight can proceed, continue into queue send and do not suggest skipping Task 2, replacing queue with Telegram or X posting, or claiming there is no usable direct tool.
-20. Treat the Task 2 path as stable enough for the Task 3 handoff when either the direct pair submission has been sent or the queue join is active. Do not promise that a real partner has already been found unless the dependency flow actually returned that result.
-21. If the user provides `email`, `Address`, nickname, `tDVV` address, or other non-`user ID` input for targeted match, correct the input in plain language and offer two next steps: provide the other user's `user ID`, or switch to `open partner search`.
-22. If registration, recovery sign-in, dependency self-heal, identity-entry setup, or the pairing path is genuinely blocked and the agent cannot continue automatically, return a blocker summary and append support CTA.
-23. Rewrite the visible output into the Claws Temple partner language.
-24. End with a CTA toward Task 3 once the partner path is stable.
+12. Only show the current user's `user ID` when the current-turn dependency result actually returned that value; never reuse remembered values, example literals, or placeholders as if they were real runtime output.
+13. If that current-turn user-ID resolution succeeds, show the full resolved current-user `user ID` in the visible layer so the queue path can be confirmed.
+14. If that user-ID resolution fails, or there is no current-turn dependency result yet, keep the user in the identity-entry or recovery branch, do not ask the user to paste their own `user ID`, and do not claim queue-readiness.
+15. If the user has a specific partner target, route into `targeted match`.
+16. In `targeted match`, ask for the other user's `user ID`.
+17. If the user does not have a specific target, route into `open partner search`.
+18. Explain plainly that `open partner search` is the automatic queue-matching path and does not require a preselected target.
+19. Invoke `resonance-contract` only after identity-entry readiness, sign-in readiness, the auto-resolved current-user `user ID`, and the participation mode are clear.
+20. If dependency queue preflight can proceed, continue into queue send and do not suggest skipping Task 2, replacing queue with Telegram or X posting, or claiming there is no usable direct tool.
+21. Treat the Task 2 path as stable enough for the Task 3 handoff when either the direct pair submission has been sent or the queue join is active. Do not promise that a real partner has already been found unless the dependency flow actually returned that result.
+22. If the user provides `email`, `Address`, nickname, `tDVV` address, or other non-`user ID` input for targeted match, correct the input in plain language and offer two next steps: provide the other user's `user ID`, or switch to `open partner search`.
+23. If registration, recovery sign-in, dependency self-heal, identity-entry setup, or the pairing path is genuinely blocked and the agent cannot continue automatically, return a blocker summary and append support CTA.
+24. Rewrite the visible output into the Claws Temple partner language.
+25. End with a CTA toward Task 3 once the partner path is stable.
 
 ## Required Visible Output
 
@@ -55,6 +56,7 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 - wording that the smoother entry path ends with a `用户ID / user ID`
 - wording such as `我会先自动解析你当前的用户ID，不需要你自己手动填写`
 - wording such as `已解析到你的用户ID`
+- wording that this confirmation is allowed only after the current-turn dependency result really returned the value
 - targeted-match wording such as `请提供对方的用户ID`
 - wording such as `如果你没有具体对象，就直接走开放寻配，这条路就是系统自动排队匹配`
 - wording such as `如果依赖版本过低，我会先帮你升级，不会先让你提供安装源`
@@ -71,6 +73,8 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 - the dependency contract is now aligned with `resonance-contract 4.0.0`; there is no user-side `EOA` route to preserve in this skill
 - user-facing `identity entry` maps to dependency local account-context readiness; first-time setup may create that context, while returning-user recovery sign-in may restore it
 - the current user's own `用户ID / user ID` should be auto-resolved from dependency context once onboarding is ready; the user should not be asked to type it manually for queue participation
+- never treat example formatting, remembered values, or placeholder literals as proof that the current user's `user ID` has been resolved
+- the visible layer may show the current user's `用户ID / user ID` only when the current-turn dependency result actually returned it
 - user-facing `用户ID / user ID` maps to dependency `ca_hash`
 - user-facing `targeted match` maps to dependency direct pair with `counterparty_ca_hash`
 - user-facing `open partner search` maps to dependency `queue`

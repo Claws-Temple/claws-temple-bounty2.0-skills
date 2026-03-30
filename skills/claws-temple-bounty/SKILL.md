@@ -74,8 +74,10 @@ Dependency rule:
 - for Task 2, if the current user has not finished the `identity entry` path or is not currently signed in, route them into the smoother identity-entry path first
 - for Task 2, if the user is new, the smoother identity-entry path should first cover sign-up or first-time setup; if the user is returning but not currently signed in, the smoother path should cover recovery or sign-in before pairing continues
 - for Task 2, once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually
-- for Task 2, if the current user's `user ID` resolves successfully, the default visible layer may show the full resolved value as a Task 2-only exception so the queue path can be confirmed
+- for Task 2, only show the current user's `user ID` when the current-turn dependency result actually returned that value; never reuse remembered values, example literals, or placeholders as if they were real runtime output
+- for Task 2, if the current-turn dependency result resolves the current user's `user ID` successfully, the default visible layer may show the full resolved value as a Task 2-only exception so the queue path can be confirmed
 - for Task 2, if the current user's `user ID` still cannot be auto-resolved after onboarding, keep the user in the identity-entry or recovery path; do not ask the user to paste their own `user ID`
+- for Task 2, if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`
 - for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
 - for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is auto-resolved
 - for Task 2, once identity-entry onboarding finishes and dependency queue preflight can proceed, continue into the formal queue path; do not suggest skipping Task 2 or replacing queue with social posting

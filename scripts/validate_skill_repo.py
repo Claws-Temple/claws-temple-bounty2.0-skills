@@ -437,6 +437,13 @@ def main() -> None:
     ):
         if marker not in output_contract:
             fail(f"missing Task 4 native contract marker: {marker}")
+    for marker in (
+        "only show the current user's `user ID` when the current-turn dependency result actually returned that value",
+        "do not reuse remembered values, example literals, or placeholders as if they were real runtime output",
+        "if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`",
+    ):
+        if marker not in output_contract:
+            fail(f"missing Task 2 runtime-resolution guard marker: {marker}")
 
     task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
     task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
@@ -452,12 +459,12 @@ def main() -> None:
     for marker in ("sign-up", "signed in", "recovery sign-in"):
         if marker not in task2_en:
             fail(f"missing Task 2 English registration/recovery marker: {marker}")
-    for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID"):
+    for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID", "本回合真实解析成功后"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese auto-resolve marker: {marker}")
     if "不会先让你提供安装源" not in task2_zh:
         fail("missing Task 2 Chinese install-source correction marker")
-    for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID"):
+    for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID", "current-turn dependency result"):
         if marker not in task2_en:
             fail(f"missing Task 2 English auto-resolve marker: {marker}")
     if "instead of asking the user to provide an install source" not in task2_en:
@@ -488,9 +495,23 @@ def main() -> None:
     for banned in ("自己的用户ID是否已经拿到", "自己的用户ID也已经准备好", "请提供你自己的用户ID"):
         if banned in task2_zh_visible:
             fail(f"Task 2 Chinese visible layer must not ask for the current user's own user ID: {banned}")
+    for banned in ("uid-9UP8S", "uid-"):
+        if banned == "uid-" and "<resolved-user-id-from-current-turn>" in task2_zh:
+            continue
+        if banned in task2_zh and banned != "uid-":
+            fail(f"Task 2 Chinese example must not contain literal-looking fixed user IDs or unsafe resolution wording: {banned}")
+        if banned == "uid-" and "uid-" in task2_zh_visible:
+            fail("Task 2 Chinese visible layer must not contain literal-looking fixed user IDs")
     for banned in ("your own `user ID` is already ready", "your own user ID is ready", "provide your own user ID"):
         if banned in task2_en_visible:
             fail(f"Task 2 English visible layer must not ask for the current user's own user ID: {banned}")
+    for banned in ("uid-9UP8S", "uid-"):
+        if banned == "uid-" and "<resolved-user-id-from-current-turn>" in task2_en:
+            continue
+        if banned in task2_en and banned != "uid-":
+            fail(f"Task 2 English example must not contain literal-looking fixed user IDs or unsafe resolution wording: {banned}")
+        if banned == "uid-" and "uid-" in task2_en_visible:
+            fail("Task 2 English visible layer must not contain literal-looking fixed user IDs")
     for banned in ("aelf 社区", "aelf社区", "Moltbook", "拿对方地址", "tDVV 地址"):
         if banned in task2_zh_visible:
             fail(f"Task 2 Chinese visible layer must not expose old community/address wording: {banned}")
