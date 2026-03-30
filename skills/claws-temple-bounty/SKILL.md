@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.7
+version: 0.2.8
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.7`
+- Current skill version: `0.2.8`
 
 ## Scope
 
@@ -91,8 +91,11 @@ Dependency rule:
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
 - for Task 3, resolve a `CA` signer before any write; if the current signer is not `CA` or no usable `CA` context is ready, stop with a branded blocker instead of switching execution routes
 - for Task 3, when the current signer resolves to `CA`, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
-- for Task 3, when the allowance is below the configured vote amount, send `Approve` first through the available `CA` write path and reconcile state before each retry
+- for Task 3, when the allowance is below the configured vote amount, send `Approve` first through the available `CA` write path and keep that same verified `CA` write transport as the preferred path for the later `Vote`
+- for Task 3, prefer one consistent verified `CA` write transport for both `Approve` and `Vote`; do not mix a successful `CA` approval path with a different direct vote path unless the same transport is unavailable
 - for Task 3, use bounded automatic retries with state reconciliation for both `Approve` and `Vote`; do not ask the user whether they want manual completion or another retry
+- for Task 3, if a non-preferred vote send path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`
+- for Task 3, treat `proposal my-info` as an auxiliary reconciliation source only; primary confirmation should come from mined receipts, vote logs, and allowance or balance deltas
 - for Task 3, keep retry timing, receipt polling, and allowance reconciliation in maintainer-facing details; the visible layer should only describe the current automatic stage naturally
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
 - for Task 3, if the current mapping is still rehearsal-only, the visible layer must say clearly that the current oath record is a testing or rehearsal record and that production will use a later formal record

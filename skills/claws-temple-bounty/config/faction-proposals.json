@@ -1,5 +1,5 @@
 {
-  "version": "0.2.7",
+  "version": "0.2.8",
   "environment": "test",
   "is_test_only": true,
   "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
@@ -25,6 +25,14 @@
     "network_id": "tDVV",
     "preflight_mode": "simulate",
     "send_mode": "send",
+    "preferred_ca_write_transport": "reuse_the_same_verified_ca_write_path_for_approve_and_vote",
+    "validation_failure_switch_rule": "if_vote_returns_NODEVALIDATIONFAILED_with_insufficient_allowance_after_allowance_is_sufficient_switch_back_to_the_verified_ca_write_path",
+    "state_reconciliation_priority": [
+      "tx_receipt",
+      "vote_logs",
+      "allowance_or_balance_delta",
+      "proposal_my_info"
+    ],
     "vote_payload": {
       "proposal_id_field": "proposalId",
       "vote_option_field": "voteOption",

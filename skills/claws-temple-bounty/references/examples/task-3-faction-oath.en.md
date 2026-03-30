@@ -64,6 +64,8 @@ If approval or vote submission did not settle on the first attempt but the syste
 
 `This step is still in automatic retry, and I am re-checking authorization state, oath state, and public-record confirmation. As long as this automatic path can continue, I will not hand the execution back to you.`
 
+If one `CA` write path already completed the approval step successfully, but another vote-send path still reports an allowance-style failure, the system should switch back to the already verified `CA` write transport instead of treating that as a real token shortfall.
+
 ### Success Example
 
 If the oath transaction already succeeded and returned a `txId`, the reply should say:
@@ -87,5 +89,5 @@ Telegram post template:
 - task3_execution_policy: `ca_only_ai_completion`
 - task3_password_policy: `ask_once_for_ca_keystore_password`
 - task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
-- ca_vote_path: `allowance precheck -> Approve if needed -> Vote -> receipt + my-info reconciliation`
+- ca_vote_path: `allowance precheck -> Approve if needed -> keep the same verified CA write transport for Vote -> receipt/log reconciliation (+ proposal my-info when available)`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`

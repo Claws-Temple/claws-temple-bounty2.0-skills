@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.7`
+Version: `0.2.8`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -213,9 +213,12 @@ Use these strings when `cta_type = support`.
 - if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
 - treat `waiting for tokens` as a normal unmet-threshold state with `cta_type = none`; do not append support CTA unless the balance check itself is externally blocked
 - when the current signer path is `CA`, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
-- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send `Approve` first, then re-check allowance before each retry
+- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send `Approve` first through the active `CA` write path, then re-check allowance before each retry
+- after a successful `Approve`, prefer the same verified `CA` write transport for the final `Vote` instead of switching to a different write path
 - for `Approve`, retry at most 3 times with state reconciliation before each attempt; if allowance is already sufficient after a timeout, continue directly to `Vote`
-- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and `proposal my-info`
+- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and primary state signals from `tx receipt`, `logs`, and allowance or balance deltas
+- treat `proposal my-info` as an auxiliary source; if it is unavailable or returns no user record, continue with receipt and log based reconciliation instead of failing the flow immediately
+- if a non-preferred vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, switch back to the same verified `CA` write transport that already succeeded for `Approve`
 - if `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
 - keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
 - use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
