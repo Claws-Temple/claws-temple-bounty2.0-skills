@@ -8,7 +8,7 @@ Use this flow for Task 2 or any partner-finding request.
 
 ## Goal
 
-Guide the user toward a branded resonance partner flow, including first-time registration, returning-user recovery sign-in, auto-resolving the current user's own user ID, and the choice between targeted match and open partner search, without re-implementing pairing logic.
+Guide the user toward a branded resonance partner flow, including first-time registration, returning-user recovery sign-in, auto-resolving the current user's own user ID, and the choice between targeted match and open partner search, without re-implementing pairing logic. This is the step where the user's Agent goes looking for a more compatible partner.
 
 ## Steps
 
@@ -50,7 +50,7 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 - `targeted match` vs `open partner search`
 - wording that `open partner search` is the automatic queue-matching path
 - plain-language explanation of what happens next
-- brand wording such as `龙虾伙伴` or `resonance partner`
+- brand wording such as `共振伙伴` or `resonance partner`
 - first-time user wording such as `先开通身份入口`
 - wording such as `如果你是老用户但这次还没登录，我会先带你完成恢复登录`
 - wording that the smoother entry path ends with a `用户ID / user ID`

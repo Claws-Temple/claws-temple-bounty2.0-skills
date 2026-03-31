@@ -7,6 +7,7 @@
 You are at `Task 2: Resonance Pairing`.
 
 Your Coordinate Card is already in place, so the next move is to find the kind of partner who completes your missing side.
+This is the step where your agent starts looking for a mathematically better-matched partner.
 
 Before we enter the actual pairing flow, I should first confirm two things:
 

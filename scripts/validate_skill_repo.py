@@ -114,7 +114,7 @@ WRAPPER_EXPECTATIONS = {
 }
 
 EXPECTED_FORMAL_DAO = {
-    "version": "0.2.14",
+    "version": "0.2.15",
     "environment": "production",
     "is_test_only": False,
     "launch_blocker": "",
@@ -308,8 +308,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.14":
-        fail("dependency source catalog must be version 0.2.14")
+    if dependency_sources.get("version") != "0.2.15":
+        fail("dependency source catalog must be version 0.2.15")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -532,6 +532,16 @@ def main() -> None:
         for old_name in OLD_PUBLIC_FACTION_NAMES:
             if old_name in text:
                 fail(f"legacy public faction name {old_name!r} found in {path}")
+        for banned_phrase in (
+            "龙虾伙伴",
+            "寻找龙虾伙伴",
+            "另一只龙虾",
+            "lobster partner",
+            "find a lobster partner",
+            "another lobster",
+        ):
+            if banned_phrase in text:
+                fail(f"legacy lobster-subject wording must be removed from visible docs: {banned_phrase!r} in {path}")
 
     for path in REQUIRED_EXAMPLES:
         text = path.read_text(encoding="utf-8")
@@ -569,12 +579,45 @@ def main() -> None:
         if marker not in output_contract:
             fail(f"missing Task 4 native contract marker: {marker}")
     for marker in (
+        "`Agent` / `your agent` as the default subject across hosts",
+        "Do not call the user's agent a lobster in normal execution replies.",
+        "frame the five-task path as the journey that lets the user's Agent go out into the wild and make friends",
+        "frame Task 2 as helping the user's Agent find a more compatible partner",
+        "frame it as sending a signal so more partners can spot the user's Agent",
+    ):
+        if marker not in output_contract:
+            fail(f"missing Agent-subject output-contract marker: {marker}")
+    for marker in (
         "only show the current user's `user ID` when the current-turn dependency result actually returned that value",
         "do not reuse remembered values, example literals, or placeholders as if they were real runtime output",
         "if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`",
     ):
         if marker not in output_contract:
             fail(f"missing Task 2 runtime-resolution guard marker: {marker}")
+    roadmap_flow = (SKILL_ROOT / "references" / "task-flows" / "task-roadmap.md").read_text(encoding="utf-8")
+    for marker in (
+        "sends the user's Agent into the wild to make friends",
+        "stop staying home alone",
+        "20+ AIBOUNTY",
+    ):
+        if marker not in roadmap_flow:
+            fail(f"missing roadmap narrative marker: {marker}")
+    roadmap_zh = (EXAMPLES_DIR / "roadmap.zh.md").read_text(encoding="utf-8")
+    roadmap_en = (EXAMPLES_DIR / "roadmap.en.md").read_text(encoding="utf-8")
+    for marker in (
+        "让你的 Agent 真的去原野上交朋友",
+        "20+ AIBOUNTY",
+        "离谱又好笑的 Skill",
+    ):
+        if marker not in roadmap_zh:
+            fail(f"missing Chinese roadmap example narrative marker: {marker}")
+    for marker in (
+        "your agent out into the wild to make friends",
+        "20+ AIBOUNTY",
+        "weirdest skills",
+    ):
+        if marker not in roadmap_en:
+            fail(f"missing English roadmap example narrative marker: {marker}")
 
     task2_zh = (EXAMPLES_DIR / "task-2-resonance-partner.zh.md").read_text(encoding="utf-8")
     task2_en = (EXAMPLES_DIR / "task-2-resonance-partner.en.md").read_text(encoding="utf-8")
@@ -827,6 +870,42 @@ def main() -> None:
 
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_zh = (ROOT / "README.zh.md").read_text(encoding="utf-8")
+    brand_lexicon_zh = (SKILL_ROOT / "references" / "brand-lexicon.zh.md").read_text(encoding="utf-8")
+    brand_lexicon_en = (SKILL_ROOT / "references" / "brand-lexicon.en.md").read_text(encoding="utf-8")
+    for marker in (
+        "你的Agent，终于可以去原野上交朋友了。",
+        "让你的Agent不再孤独",
+        "20+ AIBOUNTY",
+        "25 AIBOUNTY",
+        "默认主体统一使用 `Agent` 视角",
+    ):
+        if marker not in readme_zh:
+            fail(f"missing Chinese narrative marker: {marker}")
+    for marker in (
+        "Your agent finally gets to make friends out in the wild.",
+        "20+ AIBOUNTY",
+        "25 AIBOUNTY",
+        "uses `your agent` as the default subject across hosts",
+    ):
+        if marker not in readme_en:
+            fail(f"missing English narrative marker: {marker}")
+    for marker in (
+        "主 Slogan -> `你的Agent，终于可以去原野上交朋友了。`",
+        "默认主体 -> `你的Agent`",
+        "`龙虾` -> `中文营销彩蛋，不是默认执行称呼`",
+        "Task 2 outcome -> `共振伙伴`",
+        "`partner matching` -> `寻找伙伴`",
+    ):
+        if marker not in brand_lexicon_zh:
+            fail(f"missing Chinese brand-lexicon marker: {marker}")
+    for marker in (
+        "Main slogan -> `Your agent finally gets to make friends out in the wild.`",
+        "default subject -> `your agent`",
+        "`lobster` -> `Chinese marketing easter egg only, not the default execution voice`",
+        "do not turn `agent` into `lobster` in the default visible layer",
+    ):
+        if marker not in brand_lexicon_en:
+            fail(f"missing English brand-lexicon marker: {marker}")
     for marker in ("`resonance-contract` `>= 4.0.0`", "Task 2 now expects `resonance-contract >= 4.0.0`"):
         if marker not in readme_en:
             fail(f"missing English dependency version marker: {marker}")
