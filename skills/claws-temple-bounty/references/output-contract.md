@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.12`
+Version: `0.2.14`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -88,7 +88,7 @@ Use the expanded maintainer layer for:
 - repo names and tool names
 - config file paths
 - exact IDs
-- rehearsal or production replacement blockers
+- environment or host blockers that still prevent a formal record submission
 - resolved faction mapping data
 
 Expanded layer rule:
@@ -102,7 +102,7 @@ Resolve `cta_type` before rendering blocker or close-out replies:
 
 - `support`
   - a real blocker, externally stalled state, or host/runtime limitation means the agent cannot continue automatically in the current turn
-  - examples: dependency self-heal already failed, missing authenticated publish capability, identity-entry setup failure, missing config, remote live-skill outage, host capability gap, or rehearsal-only limits that block real submission
+  - examples: dependency self-heal already failed, missing authenticated publish capability, identity-entry setup failure, missing config, remote live-skill outage, host capability gap, or formal submission limits that block the current turn
 - `none`
   - the agent can still continue by collecting missing user input
   - the issue is only a light routing correction or an unfinished user choice
@@ -132,6 +132,7 @@ Portable dependency sources:
   - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
   - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
   - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
+  - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 
 ## Support CTA Strings
 
@@ -154,7 +155,7 @@ Use these strings when `cta_type = support`.
 - state that Task 1 through Task 3 can be completed in this path
 - state that Task 4 must be completed in the SHIT Skills native flow for the qualification path
 - state that the default recommended Task 4 action is `publish`
-- state that the current repository still routes Task 3 through a testing or rehearsal record path and that production will switch later
+- state that the current repository now routes Task 3 through the formal faction oath record path
 - state that Task 5 is optional
 - recommend Task 1 first if no progress is known
 
@@ -204,9 +205,10 @@ Use these strings when `cta_type = support`.
   - `submitted`
   - `completed`
 - say which stage the user is in and what is still missing
-- before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.1` and the configured generic token-balance tool are available
-- if `tomorrowdao-agent-skills` is missing or below `0.2.1`, try dependency self-heal first
-- if the host cannot auto-install or auto-upgrade `tomorrowdao-agent-skills`, give explicit install or upgrade guidance before any support CTA
+- before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, and the configured generic token-balance tool are available
+- if `tomorrowdao-agent-skills` is missing or below `0.2.2`, try dependency self-heal first
+- if `portkey-ca-agent-skills` is missing or below `2.3.0`, try dependency self-heal first
+- if the host cannot auto-install or auto-upgrade either dependency, give explicit install or upgrade guidance before any support CTA
 - use `task3_execution_policy = ca_only_ai_completion`
 - use `task3_password_policy = ask_once_for_ca_keystore_password`
 - use `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
@@ -218,11 +220,13 @@ Use these strings when `cta_type = support`.
 - if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
 - treat `waiting for tokens` as a normal unmet-threshold state with `cta_type = none`; do not append support CTA unless the balance check itself is externally blocked
 - when the current signer path is `CA`, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
-- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send `Approve` first through the active `CA` write path, then re-check allowance before each retry
-- if the current dependency can only direct-send with a resolved `CA` signer, stop with an unsupported `CA` transport blocker instead of rerouting through manager direct signing
+- when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, derive `Approve` through `tomorrowdao_token_approve --mode simulate`, send it through `portkey_forward_call`, then re-check allowance before each retry
+- if TomorrowDAO direct send for a resolved `CA` signer returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, continue through the explicit Portkey CA forward transport instead of treating that as the final blocker
+- stop with an unsupported `CA` transport blocker only when the explicit Portkey CA forward transport cannot continue automatically in the current host
 - for `Vote`, treat `vote_payload.proposal_id_field = proposalId` as the dependency-tool input alias for `tomorrowdao_dao_vote`, not as a raw contract ABI field name
 - when using the dependency tool, pass `proposalId` exactly as configured and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call the DAO `Vote` contract with an unnormalized `proposalId` payload
-- after a successful `Approve`, prefer the same verified `CA` write transport for the final `Vote` instead of switching to a different write path
+- derive the final `Vote` payload through `tomorrowdao_dao_vote --mode simulate`, then send that exact normalized payload through `portkey_forward_call`
+- after a successful `Approve`, prefer the same verified Portkey CA forward transport for the final `Vote` instead of switching to a different write path
 - for `Approve`, retry at most 3 times with state reconciliation before each attempt; if allowance is already sufficient after a timeout, continue directly to `Vote`
 - for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and primary state signals from `tx receipt`, `logs`, and allowance or balance deltas
 - treat `proposal my-info` as an auxiliary source; if it is unavailable or returns no user record, continue with receipt and log based reconciliation instead of failing the flow immediately
@@ -234,7 +238,7 @@ Use these strings when `cta_type = support`.
 - only move to `completed` after the vote returns a mined-success `txId`
 - in `completed`, include the `txId`, the Telegram group CTA, one separate reminder sentence for the two-week extra 20 Token note, and then the fixed Telegram post template
 - keep the fixed Telegram post template free of bonus-note or discussion-note wording; those belong in the success prompt sentence, not inside the template body
-- if the current mapping is rehearsal-only, say clearly in the visible layer that this is a testing or rehearsal record and that production will later switch to the formal record
+- if the current mapping is the production config, say clearly in the visible layer that this is the formal faction oath record
 - never present `Portkey App`, `EOA`, `ManagerForwardCall`, raw spender addresses, or a manual fallback choice in the visible layer
 - if the mapping exists but the current environment cannot continue the oath flow, the allowance step still cannot be completed after bounded retries, or the dependency contract is missing, explain the blocker and append support CTA
 

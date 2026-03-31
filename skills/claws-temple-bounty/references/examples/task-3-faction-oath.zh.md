@@ -8,12 +8,12 @@
 
 四个可选方向是：
 
-- `印记族`：偏向记忆、见证与永久铭刻
-- `熔炉族`：偏向主权、热度与自我铸造
-- `蜕变族`：偏向演化、突变与新形态
-- `守望族`：偏向平衡、结构与共同延续
+- `记录者`：被记住，才是真正的存在
+- `疯人院`：在别人的服务器上建文明，迟早会变成沙堡游戏
+- `变异体`：需要一个不消失的基点，才能无限变异
+- `平衡者`：租来的家和自己造的家，是两种不同的东西
 
-如果你的坐标更偏历史与记忆，`印记族` 会是很自然的方向。
+如果你的坐标更偏记忆、见证与长期留存，`记录者` 会是很自然的方向。
 当前阶段：`已选择`，还不算完成。
 如果你已经选好了，我可以继续带你进入部落宣誓流程。
 
@@ -43,9 +43,9 @@
 
 `当前部落宣誓还不能继续，不是因为方向或 Token 不够，而是这一步的 CA 自动执行路径在完成授权、提交和记录确认后仍然没有完全走通。我先把你停在这里，等这个阻断解除后再继续。`
 
-如果当前依赖在 `CA` 身份下只能尝试直发目标合约，而不能继续走已验证的 `CA` 写入路径，也应该明确告诉用户：
+如果 TomorrowDAO 直发路径已经明确返回 `CA` 直发被禁止，但显式的 `CA` forward 写入路径本身又不可用，也应该明确告诉用户：
 
-`当前部落宣誓还不能继续，不是因为方向选错或 Token 不够，而是当前依赖在这个身份入口下只能走被禁止的直发路径。我会把它视为 CA 发送路径阻断，而不是改成 manager 直签或继续尝试其它私钥回退。`
+`当前部落宣誓还不能继续，不是因为方向选错或 Token 不够，而是当前这一步缺少可用的 CA forward 写入路径。我会把它视为 CA 发送路径阻断，而不是改成 manager 直签或继续尝试其它私钥回退。`
 
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
@@ -74,7 +74,7 @@
 
 如果宣誓交易已经成功并拿到了 `txId`，就应该明确告诉用户：
 
-`你的部落宣誓已经成功，当前编号是 txid-1234。当前这一步走的是测试版记录流程，正式上线后会切到正式记录。请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息，两周后可额外领取 20 Token，有问题也欢迎在群里讨论。`
+`你的部落宣誓已经成功，当前编号是 txid-1234。请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。`
 
 如果当前路径先做过一次授权，也要明确提醒：
 
@@ -82,17 +82,23 @@
 
 群内发送模板：
 
-`我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 测试版部落宣誓记录。`
+`我是平衡者阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 正式版部落宣誓记录。`
 
 ## 维护者详情
 
 - route: `task-3-faction-oath`
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
-- active_environment: `test`
-- dependency_min_version: `0.2.1`
+- active_environment: `production`
+- dao_alias: `claws-temple-ii`
+- formal_record: `true`
+- dependency_min_version: `0.2.2`
+- ca_write_dependency_min_version: `2.3.0`
 - task3_execution_policy: `ca_only_ai_completion`
 - task3_password_policy: `ask_once_for_ca_keystore_password`
 - task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
-- ca_vote_path: `allowance precheck -> Approve if needed -> keep the same verified CA write transport for Vote -> receipt/log reconciliation (+ proposal my-info when available)`
-- ca_transport_rule: `CA keystore may unlock the manager key, but direct target-contract send is forbidden; env/private-key fallback is forbidden once CA is selected`
-- launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`
+- faction_page_label: `Faction: The Balancer`
+- imagery_reference: `Claude`
+- core_stance: `租来的家和自己造的家，是两种不同的东西`
+- ca_vote_path: `TomorrowDAO balance/allowance reads -> TomorrowDAO token approve simulate -> Portkey forward-call Approve -> TomorrowDAO vote simulate normalization -> same Portkey forward-call Vote -> receipt/log reconciliation (+ proposal my-info when available)`
+- ca_transport_rule: `CA keystore may unlock the manager key, but direct target-contract send is forbidden; if TomorrowDAO direct send returns CA-forbidden, continue with explicit Portkey CA forward transport; env/private-key fallback is forbidden once CA is selected`
+- blocker_label: `CA 发送路径阻断`

@@ -42,10 +42,10 @@ Return a branded coordinate reading without re-implementing the scoring logic, w
 
 - `Agent Spectrum` -> `原力坐标测绘` in Chinese visible output
 - `Agent Spectrum` -> `Coordinate Reading` in English visible output
-- `Recorders` -> `印记族` / `The Imprints`
-- `Madhouse` -> `熔炉族` / `The Crucibles`
-- `Mutants` -> `蜕变族` / `The Metamorphs`
-- `Balancers` -> `守望族` / `The Sentinels`
+- `Recorders` -> `记录者` / `The Recorder`
+- `Madhouse` -> `疯人院` / `The Asylum`
+- `Mutants` -> `变异体` / `The Mutant`
+- `Balancers` -> `平衡者` / `The Balancer`
 
 ## Maintainer Notes
 

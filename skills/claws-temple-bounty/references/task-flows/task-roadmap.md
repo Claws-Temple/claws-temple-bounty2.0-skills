@@ -19,7 +19,7 @@ Explain the full path and route the user to the next task without overloading th
 - current task roadmap
 - one-line purpose for each task
 - qualification note: Task 1 through Task 3 happen in this path, and Task 4 must be completed in the SHIT Skills native flow for the Claws Temple Bounty 2.0 qualification path; the default recommended Task 4 action is `publish`
-- current-test note: the repository currently ships Task 3 through a testing or rehearsal record path, and production will switch later
+- formal-note: the repository now ships Task 3 through the formal faction oath record path
 - optional note: Task 5 is extra reach
 - direct CTA into the recommended next task
 

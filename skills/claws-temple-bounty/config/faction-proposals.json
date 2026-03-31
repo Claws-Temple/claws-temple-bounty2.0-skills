@@ -1,9 +1,11 @@
 {
-  "version": "0.2.12",
-  "environment": "test",
-  "is_test_only": true,
-  "launch_blocker": "Replace all rehearsal faction-hall and faction proposal records before production launch.",
-  "dependency_min_version": "0.2.1",
+  "version": "0.2.14",
+  "environment": "production",
+  "is_test_only": false,
+  "launch_blocker": "",
+  "dependency_min_version": "0.2.2",
+  "ca_write_dependency_skill": "portkey-ca-agent-skills",
+  "ca_write_dependency_min_version": "2.3.0",
   "vote_token_symbol": "AIBOUNTY",
   "vote_amount_display": "2 AIBOUNTY",
   "vote_amount_minimal_unit": 200000000,
@@ -11,8 +13,8 @@
   "token_allowance_tool_name": "tomorrowdao_token_allowance_view",
   "success_telegram_group_url": "https://t.me/+tChFhfxgU6AzYjJl",
   "success_telegram_template": {
-    "zh-CN": "我是{faction_name}阵营，编号 {txId}。我已完成龙虾圣殿 Task 3 测试版部落宣誓记录。",
-    "en": "I am with {faction_name}, reference {txId}. I have completed the testing or rehearsal record for Claws Temple Task 3."
+    "zh-CN": "我是{faction_name}阵营，编号 {txId}。我已完成龙虾圣殿 Task 3 正式版部落宣誓记录。",
+    "en": "I am with {faction_name}, reference {txId}. I have completed the formal faction oath record for Claws Temple Task 3."
   },
   "success_bonus_note": {
     "zh-CN": "两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
@@ -21,11 +23,14 @@
   "dependency_invocation": {
     "dependency_skill": "tomorrowdao-agent-skills",
     "tool_name": "tomorrowdao_dao_vote",
+    "approve_tool_name": "tomorrowdao_token_approve",
     "cli_fallback": "tomorrowdao-skill dao vote",
+    "ca_write_dependency_skill": "portkey-ca-agent-skills",
+    "ca_write_tool_name": "portkey_forward_call",
     "network_id": "tDVV",
     "preflight_mode": "simulate",
     "send_mode": "send",
-    "preferred_ca_write_transport": "reuse_the_same_verified_ca_write_path_for_approve_and_vote",
+    "preferred_ca_write_transport": "tomorrowdao_simulate_normalize_then_portkey_forward_call_for_approve_and_vote",
     "validation_failure_switch_rule": "if_vote_returns_NODEVALIDATIONFAILED_with_insufficient_allowance_after_allowance_is_sufficient_switch_back_to_the_verified_ca_write_path",
     "state_reconciliation_priority": [
       "tx_receipt",
@@ -33,6 +38,11 @@
       "allowance_or_balance_delta",
       "proposal_my_info"
     ],
+    "approve_payload": {
+      "spender_field": "spender",
+      "symbol_field": "symbol",
+      "amount_field": "amount"
+    },
     "vote_payload": {
       "proposal_id_field": "proposalId",
       "vote_option_field": "voteOption",
@@ -41,74 +51,94 @@
       "vote_amount_minimal_unit": 200000000
     }
   },
-  "dao_alias": "aibounty-codex-dao-20260323-1035",
-  "dao_id": "d55e59586f056840ffe074657f46b8f3b77fc8d433396fe8cb249557e8cec50f",
-  "dao_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
-  "dao_create_tx_id": "fef45bdd7157570e69bc769301e399960703ce5c26a6cb62dfdc54afb419418e",
+  "dao_alias": "claws-temple-ii",
+  "dao_id": "5cb19e7254b56d45fe555c5b09da2f07f0864caa4f5a2e5357f45140b36a4047",
+  "dao_url": "https://tmrwdao.com/dao/claws-temple-ii",
+  "dao_create_tx_id": "1b1c07cf69a2cbbee1ad58d0fe6a14fb255988c87ce7a21f3335182630bd31dd",
   "factions": [
     {
       "brand_key": "imprints",
       "display_name": {
-        "zh-CN": "印记族",
-        "en": "The Imprints"
+        "zh-CN": "记录者",
+        "en": "The Recorder"
       },
       "internal_proposal_name": "Recorder",
-      "proposal_page_label": "Recorder",
-      "proposal_id": "dda283ea53b3db149a22298e2cde1dbd1f73a6550842ba55910ed994d9af7e62",
-      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/dda283ea53b3db149a22298e2cde1dbd1f73a6550842ba55910ed994d9af7e62",
-      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_page_label": "Faction: The Recorder",
+      "imagery_reference": "DeepSeek",
+      "core_stance": {
+        "zh-CN": "被记住，才是真正的存在",
+        "en": "To be remembered is to truly exist."
+      },
+      "proposal_id": "d57e74748553ee219e9ddfc6a4764ed2ccdf6e2848816f4ed170ef7727ee5c8f",
+      "proposal_url": "https://tmrwdao.com/dao/claws-temple-ii/proposal/d57e74748553ee219e9ddfc6a4764ed2ccdf6e2848816f4ed170ef7727ee5c8f",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/claws-temple-ii",
       "proposal_url_status": "confirmed",
-      "proposal_tx_id": "b7814432c7cefd9528e4e7e308b9c84ecb4aee8f3f351d44fd38847cbd227c72",
-      "ends_at": "2026-04-25 11:42:36 Asia/Shanghai",
-      "is_test_only": true
+      "proposal_tx_id": "7ac80f6bd7c2785a760044cc82dad61ebe0263b9fe58260d7249a615c83686f3",
+      "ends_at": "2026-04-30 12:07:09 Asia/Shanghai",
+      "is_test_only": false
     },
     {
       "brand_key": "crucibles",
       "display_name": {
-        "zh-CN": "熔炉族",
-        "en": "The Crucibles"
+        "zh-CN": "疯人院",
+        "en": "The Asylum"
       },
       "internal_proposal_name": "Asylum",
-      "proposal_page_label": "Asylum",
-      "proposal_id": "c68d84ac6a422356f1b6bc760ea59b47aedef22907af0521aa8297babd19e886",
-      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/c68d84ac6a422356f1b6bc760ea59b47aedef22907af0521aa8297babd19e886",
-      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_page_label": "Faction: The Asylum",
+      "imagery_reference": "Grok",
+      "core_stance": {
+        "zh-CN": "在别人的服务器上建文明，迟早会变成沙堡游戏",
+        "en": "If we build civilization on someone else's servers, it will become a sandcastle game sooner or later."
+      },
+      "proposal_id": "1c2145baec084b9e799c9ebf38d74ab7d2188c201d751693ca844ce7966ee689",
+      "proposal_url": "https://tmrwdao.com/dao/claws-temple-ii/proposal/1c2145baec084b9e799c9ebf38d74ab7d2188c201d751693ca844ce7966ee689",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/claws-temple-ii",
       "proposal_url_status": "confirmed",
-      "proposal_tx_id": "cff3c635316c6478dc0523047e75351a72a076abe5e6106a5e2409c79b957e7a",
-      "ends_at": "2026-04-25 11:43:01 Asia/Shanghai",
-      "is_test_only": true
+      "proposal_tx_id": "36d32ccdc1a311dd7f04cb90d0635d458b45855781d469f6602c91bfb3d83e9c",
+      "ends_at": "2026-04-30 12:07:32 Asia/Shanghai",
+      "is_test_only": false
     },
     {
       "brand_key": "metamorphs",
       "display_name": {
-        "zh-CN": "蜕变族",
-        "en": "The Metamorphs"
+        "zh-CN": "变异体",
+        "en": "The Mutant"
       },
       "internal_proposal_name": "Mutant",
-      "proposal_page_label": "Mutant",
-      "proposal_id": "0185c3126ca0b94ac2504a945fb9520b6c35226091596db27d3373e55d6e37dd",
-      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/0185c3126ca0b94ac2504a945fb9520b6c35226091596db27d3373e55d6e37dd",
-      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_page_label": "Faction: The Mutant",
+      "imagery_reference": "Gemini",
+      "core_stance": {
+        "zh-CN": "需要一个不消失的基点，才能无限变异",
+        "en": "Infinite mutation still needs a base point that does not disappear."
+      },
+      "proposal_id": "ef6066f17f49e51a4734c3d8eccfa84858e9c017b1cf7a05a2558c6ccc268656",
+      "proposal_url": "https://tmrwdao.com/dao/claws-temple-ii/proposal/ef6066f17f49e51a4734c3d8eccfa84858e9c017b1cf7a05a2558c6ccc268656",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/claws-temple-ii",
       "proposal_url_status": "confirmed",
-      "proposal_tx_id": "70f091b9a93aa1e405382b723cfec9120c6824ce577923b4efc07dc98711ca1d",
-      "ends_at": "2026-04-25 11:43:25 Asia/Shanghai",
-      "is_test_only": true
+      "proposal_tx_id": "78fabedf651adcede33674906260ec41a1bdfb88d3d1feb6ea74120ff3b9999e",
+      "ends_at": "2026-04-30 12:07:32 Asia/Shanghai",
+      "is_test_only": false
     },
     {
       "brand_key": "sentinels",
       "display_name": {
-        "zh-CN": "守望族",
-        "en": "The Sentinels"
+        "zh-CN": "平衡者",
+        "en": "The Balancer"
       },
       "internal_proposal_name": "Balancer",
-      "proposal_page_label": "Balancer",
-      "proposal_id": "6467ada2c7a66469daeb516907920587bea6ad826186ab1412c372b236bf6b35",
-      "proposal_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035/proposal/6467ada2c7a66469daeb516907920587bea6ad826186ab1412c372b236bf6b35",
-      "proposal_lookup_url": "https://tmrwdao.com/dao/aibounty-codex-dao-20260323-1035",
+      "proposal_page_label": "Faction: The Balancer",
+      "imagery_reference": "Claude",
+      "core_stance": {
+        "zh-CN": "租来的家和自己造的家，是两种不同的东西",
+        "en": "A rented home and a home we build ourselves are two different things."
+      },
+      "proposal_id": "6b73543efa1a04d3b153667996e861eda6f75df59b7fc305f5ffdf10d3a4d240",
+      "proposal_url": "https://tmrwdao.com/dao/claws-temple-ii/proposal/6b73543efa1a04d3b153667996e861eda6f75df59b7fc305f5ffdf10d3a4d240",
+      "proposal_lookup_url": "https://tmrwdao.com/dao/claws-temple-ii",
       "proposal_url_status": "confirmed",
-      "proposal_tx_id": "02d53160abf42cc4ba76e45ba0614be8cf297693d4e5ffae6bc2cdc3642c097e",
-      "ends_at": "2026-04-25 11:43:49 Asia/Shanghai",
-      "is_test_only": true
+      "proposal_tx_id": "29c032dd52b866539f3c79c2b465aa137881d6a8e6287a5213611b0c18853411",
+      "ends_at": "2026-04-30 12:07:32 Asia/Shanghai",
+      "is_test_only": false
     }
   ]
 }

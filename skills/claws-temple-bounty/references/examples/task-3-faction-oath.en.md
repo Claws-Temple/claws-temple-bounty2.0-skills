@@ -8,12 +8,12 @@ You are at `Task 3: Faction Belonging`.
 
 The four branded factions are:
 
-- `The Imprints`: memory, witness, and lasting marks
-- `The Crucibles`: sovereignty, heat, and self-built foundations
-- `The Metamorphs`: evolution, mutation, and new forms
-- `The Sentinels`: balance, structure, and shared continuity
+- `The Recorder`: to be remembered is to truly exist
+- `The Asylum`: if we build civilization on someone else's servers, it will become a sandcastle game sooner or later
+- `The Mutant`: infinite mutation still needs a base point that does not disappear
+- `The Balancer`: a rented home and a home we build ourselves are two different things
 
-If your coordinate card leans toward history and memory, `The Imprints` is a natural fit.
+If your coordinate card leans toward memory, witness, and long-term permanence, `The Recorder` is a natural fit.
 Current stage: `selected`, not completed yet.
 If you want, I can take your choice and continue the oath flow now.
 
@@ -43,9 +43,9 @@ If this is not a normal wait but an external execution blocker on approval, depe
 
 `The faction oath still cannot continue, and this is not just a normal waiting state. The CA automatic execution path is still blocked here even after authorization, submission, and confirmation retries, so I am pausing the flow until that blocker is cleared.`
 
-If the current dependency can only attempt direct target-contract send after resolving a `CA` identity, the reply should also make that blocker explicit:
+If TomorrowDAO direct send already reports that `CA` direct send is forbidden, but the explicit `CA` forward transport itself is unavailable, the reply should also make that blocker explicit:
 
-`The faction oath still cannot continue, and this is not because your faction choice or tokens are wrong. The current dependency can only attempt a forbidden direct-send path for this CA identity, so I am treating it as a CA transport blocker instead of switching to manager direct signing or another private-key fallback.`
+`The faction oath still cannot continue, and this is not because your faction choice or tokens are wrong. This step is missing a usable CA forward transport, so I am treating it as a CA transport blocker instead of switching to manager direct signing or another private-key fallback.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -74,7 +74,7 @@ If one `CA` write path already completed the approval step successfully, but ano
 
 If the oath transaction already succeeded and returned a `txId`, the reply should say:
 
-`Your faction oath has succeeded and your current reference is txid-1234. This record is currently going through the testing or rehearsal path, and the production launch will later switch to the formal record. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
+`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
 
 If this path included a prior approval step, the reply should also remind the user:
 
@@ -82,17 +82,23 @@ If this path included a prior approval step, the reply should also remind the us
 
 Telegram post template:
 
-`I am with The Sentinels, reference txid-1234. I have completed the testing or rehearsal record for Claws Temple Task 3.`
+`I am with The Balancer, reference txid-1234. I have completed the formal faction oath record for Claws Temple Task 3.`
 
 ## Maintainer Details
 
 - route: `task-3-faction-oath`
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
-- active_environment: `test`
-- dependency_min_version: `0.2.1`
+- active_environment: `production`
+- dao_alias: `claws-temple-ii`
+- formal_record: `true`
+- dependency_min_version: `0.2.2`
+- ca_write_dependency_min_version: `2.3.0`
 - task3_execution_policy: `ca_only_ai_completion`
 - task3_password_policy: `ask_once_for_ca_keystore_password`
 - task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
-- ca_vote_path: `allowance precheck -> Approve if needed -> keep the same verified CA write transport for Vote -> receipt/log reconciliation (+ proposal my-info when available)`
-- ca_transport_rule: `CA keystore may unlock the manager key, but direct target-contract send is forbidden; env/private-key fallback is forbidden once CA is selected`
-- launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`
+- faction_page_label: `Faction: The Balancer`
+- imagery_reference: `Claude`
+- core_stance: `A rented home and a home we build ourselves are two different things.`
+- ca_vote_path: `TomorrowDAO balance/allowance reads -> TomorrowDAO token approve simulate -> Portkey forward-call Approve -> TomorrowDAO vote simulate normalization -> same Portkey forward-call Vote -> receipt/log reconciliation (+ proposal my-info when available)`
+- ca_transport_rule: `CA keystore may unlock the manager key, but direct target-contract send is forbidden; if TomorrowDAO direct send returns CA-forbidden, continue with explicit Portkey CA forward transport; env/private-key fallback is forbidden once CA is selected`
+- blocker_label: `CA transport blocker`
