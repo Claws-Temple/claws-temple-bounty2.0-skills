@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.11`
+Version: `0.2.12`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -204,19 +204,22 @@ Use these strings when `cta_type = support`.
   - `submitted`
   - `completed`
 - say which stage the user is in and what is still missing
-- before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.0` and the configured generic token-balance tool are available
-- if `tomorrowdao-agent-skills` is missing or below `0.2.0`, try dependency self-heal first
+- before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.1` and the configured generic token-balance tool are available
+- if `tomorrowdao-agent-skills` is missing or below `0.2.1`, try dependency self-heal first
 - if the host cannot auto-install or auto-upgrade `tomorrowdao-agent-skills`, give explicit install or upgrade guidance before any support CTA
 - use `task3_execution_policy = ca_only_ai_completion`
 - use `task3_password_policy = ask_once_for_ca_keystore_password`
 - use `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
 - resolve a usable `CA` signer before any oath write; if the current context is not `CA`-ready, stop with a blocker and support CTA instead of switching to another route
 - if the `CA` signer exists but the keystore password is missing, ask the user for that password only once and then continue automatically
+- if the `CA` keystore unlocks a manager key, treat that manager key only as part of the verified `CA` write path; it must not authorize direct target-contract send by itself
+- once `CA` is selected, direct target-contract send and env or private-key fallback are forbidden for Task 3 writes
 - before vote submission, verify that the user's `AIBOUNTY` balance is at least the configured vote amount
 - if the user's balance is below the configured vote amount, move to `waiting for tokens` and suggest either returning after Task 2 pairing succeeds or inviting friends to pair
 - treat `waiting for tokens` as a normal unmet-threshold state with `cta_type = none`; do not append support CTA unless the balance check itself is externally blocked
 - when the current signer path is `CA`, verify that the configured generic token-allowance tool is available and check the current `AIBOUNTY` allowance against the current vote contract
 - when the allowance is below the configured vote amount, explain in the visible layer that one more authorization step is needed, send `Approve` first through the active `CA` write path, then re-check allowance before each retry
+- if the current dependency can only direct-send with a resolved `CA` signer, stop with an unsupported `CA` transport blocker instead of rerouting through manager direct signing
 - for `Vote`, treat `vote_payload.proposal_id_field = proposalId` as the dependency-tool input alias for `tomorrowdao_dao_vote`, not as a raw contract ABI field name
 - when using the dependency tool, pass `proposalId` exactly as configured and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call the DAO `Vote` contract with an unnormalized `proposalId` payload
 - after a successful `Approve`, prefer the same verified `CA` write transport for the final `Vote` instead of switching to a different write path

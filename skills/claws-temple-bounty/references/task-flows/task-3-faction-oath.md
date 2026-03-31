@@ -23,40 +23,42 @@ Present four branded factions, map the selected faction to the current rehearsal
 5. Run a rehearsal-safe preflight:
    - confirm the selected faction entry exists
    - confirm the dependency invocation contract exists in the config file
-   - confirm the dependency minimum version exists and is `0.2.0` or above
+   - confirm the dependency minimum version exists and is `0.2.1` or above
    - confirm the required proposal id is present
    - confirm the proposal end time is still in the future
 6. Resolve the current signer or address before any token check or vote attempt.
 7. Accept only a usable `CA` signer for Task 3 writes. If the current context is not `CA`-ready, stop with a branded blocker instead of switching to another signer route.
 8. If the `CA` signer exists but the keystore password is missing, ask the user for the `CA keystore` password only once and then continue automatically.
-9. If `tomorrowdao-agent-skills` is missing or below the configured minimum version, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh tomorrowdao-agent-skills`.
-10. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
-11. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
-12. Check that the installed dependency version is at least the configured minimum version.
-13. Check that the configured generic token-balance tool and generic token-allowance tool are available.
-14. Query the configured vote token balance with the configured token symbol.
-15. If the balance is below the configured vote amount, stop before vote submission and move the user to `waiting for tokens`.
-16. In `waiting for tokens`, tell the user to return after Task 2 pairing succeeds or invite friends to pair so they can build toward the required 2 AIBOUNTY.
-17. Treat `waiting for tokens` as a normal unmet-threshold state, not as a support CTA state, unless the token-balance check itself is externally blocked.
-18. Query the current allowance for the vote token against the current vote contract before sending the vote.
-19. If the allowance is below the configured vote amount, send `Approve` first through the active `CA` write path.
-20. Once one `CA` write path has already succeeded for `Approve`, keep that same verified `CA` write transport as the preferred path for the final `Vote`.
-21. Retry `Approve` at most 3 times using bounded backoff `3s -> 8s -> 15s`. After each attempt or timeout, re-check allowance before deciding whether another approval attempt is still necessary.
-22. If allowance is already sufficient after an `Approve` timeout or uncertain receipt, continue into `Vote` instead of repeating authorization blindly.
-23. Do not blindly mix a successful `CA` approval transport with a different direct vote transport. If another path is attempted and returns `NODEVALIDATIONFAILED` with `Insufficient allowance` while allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`.
-24. Keep the visible layer natural during the allowance step. Tell the user that one more authorization step is being completed before the oath can be sent, but keep raw contract path and approval tx details in the maintainer layer unless the user asks.
-25. Invoke the actual vote only after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact dependency-tool vote payload contract from the config file and do not reinterpret `proposalId` there as a raw contract ABI field name.
-26. For `Vote`, prefer receipt, event logs, and allowance or balance deltas as the primary reconciliation signals.
-27. Treat `proposal my-info` as an auxiliary source only. If it is unavailable or returns no user record, continue the flow with receipt and log based reconciliation instead of failing immediately.
-28. If `Vote` returns a timeout, validation failure, or another uncertain send result, re-check proposal availability, allowance, primary reconciliation signals, and then `proposal my-info` when available before retrying.
-29. Retry `Vote` at most 3 times using bounded backoff `3s -> 8s -> 15s`.
-30. If the receipt or logs already show that the vote state changed but the final confirmation is not settled yet, move the user to `submitted` and continue polling for final confirmation.
-31. If `proposal my-info` also shows that the vote state changed but the final receipt is not confirmed yet, keep the user in `submitted` and continue polling instead of declaring failure.
-32. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
-33. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
-34. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
-35. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, give the separate bonus or discussion reminder from the config, and then render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
-36. If the config is marked as rehearsal-only, say clearly in the visible layer that the current oath record is a testing or rehearsal record and that the formal record will switch in the production launch.
+9. If the current `CA` context unlocks a manager key, treat that key as part of the verified `CA` write path only; do not reinterpret it as permission for direct target-contract send.
+10. If `tomorrowdao-agent-skills` is missing or below the configured minimum version, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh tomorrowdao-agent-skills`.
+11. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
+12. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
+13. Check that the installed dependency version is at least the configured minimum version.
+14. If the dependency resolves the current signer as `CA` but can only attempt direct target-contract send, stop with an unsupported `CA` transport blocker; do not reroute into manager direct signing, env fallback, or other private-key direct-send paths.
+15. Check that the configured generic token-balance tool and generic token-allowance tool are available.
+16. Query the configured vote token balance with the configured token symbol.
+17. If the balance is below the configured vote amount, stop before vote submission and move the user to `waiting for tokens`.
+18. In `waiting for tokens`, tell the user to return after Task 2 pairing succeeds or invite friends to pair so they can build toward the required 2 AIBOUNTY.
+19. Treat `waiting for tokens` as a normal unmet-threshold state, not as a support CTA state, unless the token-balance check itself is externally blocked.
+20. Query the current allowance for the vote token against the current vote contract before sending the vote.
+21. If the allowance is below the configured vote amount, send `Approve` first through the active `CA` write path.
+22. Once one `CA` write path has already succeeded for `Approve`, keep that same verified `CA` write transport as the preferred path for the final `Vote`.
+23. Retry `Approve` at most 3 times using bounded backoff `3s -> 8s -> 15s`. After each attempt or timeout, re-check allowance before deciding whether another approval attempt is still necessary.
+24. If allowance is already sufficient after an `Approve` timeout or uncertain receipt, continue into `Vote` instead of repeating authorization blindly.
+25. Do not blindly mix a successful `CA` approval transport with a different direct vote transport. If another path is attempted and returns `NODEVALIDATIONFAILED` with `Insufficient allowance` while allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`.
+26. Keep the visible layer natural during the allowance step. Tell the user that one more authorization step is being completed before the oath can be sent, but keep raw contract path and approval tx details in the maintainer layer unless the user asks.
+27. Invoke the actual vote only after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact dependency-tool vote payload contract from the config file and do not reinterpret `proposalId` there as a raw contract ABI field name.
+28. For `Vote`, prefer receipt, event logs, and allowance or balance deltas as the primary reconciliation signals.
+29. Treat `proposal my-info` as an auxiliary source only. If it is unavailable or returns no user record, continue the flow with receipt and log based reconciliation instead of failing immediately.
+30. If `Vote` returns a timeout, validation failure, or another uncertain send result, re-check proposal availability, allowance, primary reconciliation signals, and then `proposal my-info` when available before retrying.
+31. Retry `Vote` at most 3 times using bounded backoff `3s -> 8s -> 15s`.
+32. If the receipt or logs already show that the vote state changed but the final confirmation is not settled yet, move the user to `submitted` and continue polling for final confirmation.
+33. If `proposal my-info` also shows that the vote state changed but the final receipt is not confirmed yet, keep the user in `submitted` and continue polling instead of declaring failure.
+34. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
+35. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
+36. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
+37. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, give the separate bonus or discussion reminder from the config, and then render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
+38. If the config is marked as rehearsal-only, say clearly in the visible layer that the current oath record is a testing or rehearsal record and that the formal record will switch in the production launch.
 
 ## Required Visible Output
 
@@ -86,8 +88,11 @@ Use the matching brand lexicon only for task labels, helper wording, and close-o
 - `task3_execution_policy = ca_only_ai_completion`
 - `task3_password_policy = ask_once_for_ca_keystore_password`
 - `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
+- `CA` keystore unlock may expose the manager key, but that manager key alone still must not authorize direct target-contract send
 - `proposalId` in the config vote payload is the dependency-tool input alias for the configured vote tool, not a promise about the raw contract ABI field name
 - if an implementation ever has to bypass the dependency tool, it must reproduce the dependency normalization from `proposalId` to the underlying `votingItemId` before any raw contract packing or forwarding
+- once `CA` is selected, env or private-key fallback must not continue the write path if they would become direct target-contract send
+- if the dependency can only direct-send with a resolved `CA` signer, stop with an unsupported `CA` transport blocker instead of rerouting
 - do not present `Portkey App`, `EOA`, `ManagerForwardCall`, or manual route choices in the visible layer
 - when the current signer path is `CA`, the fastest unblock is inside this skill: read allowance, send `Approve` through the existing `CA` write path, then keep that same verified `CA` write transport for `Vote`
 - if a different vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch instead of a real allowance failure

@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.11
+version: 0.2.12
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.11`
+- Current skill version: `0.2.12`
 
 ## Scope
 
@@ -52,7 +52,7 @@ Use these dependencies explicitly when the relevant task is requested:
 
 - Task 1 -> `agent-spectrum`
 - Task 2 -> `resonance-contract` version `>= 4.0.0`
-- Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.0`
+- Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.1`
 - Task 4 -> preferred live skill at `https://www.shitskills.net/skill.md`
 - Task 5 -> `resonance-contract` version `>= 4.0.0` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
 
@@ -93,9 +93,11 @@ Dependency rule:
 - for Task 3, if the `CA` context is present but the keystore password is not yet available, ask the user for the `CA keystore` password only once and then continue automatically
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
 - for Task 3, resolve a `CA` signer before any write; if the current signer is not `CA` or no usable `CA` context is ready, stop with a branded blocker instead of switching execution routes
+- for Task 3, if the current `CA` context unlocks a manager key, treat that key only as part of the verified `CA` write path; it must not authorize direct target-contract send by itself
 - for Task 3, when the current signer resolves to `CA`, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
 - for Task 3, when the allowance is below the configured vote amount, send `Approve` first through the available `CA` write path and keep that same verified `CA` write transport as the preferred path for the later `Vote`
 - for Task 3, prefer one consistent verified `CA` write transport for both `Approve` and `Vote`; do not mix a successful `CA` approval path with a different direct vote path unless the same transport is unavailable
+- for Task 3, once `CA` is selected, direct target-contract send and env or private-key fallback are forbidden; if the current dependency can only direct-send for `CA`, stop with an unsupported `CA` transport blocker instead of rerouting
 - for Task 3, use bounded automatic retries with state reconciliation for both `Approve` and `Vote`; do not ask the user whether they want manual completion or another retry
 - for Task 3, if a non-preferred vote send path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`
 - for Task 3, treat `proposal my-info` as an auxiliary reconciliation source only; primary confirmation should come from mined receipts, vote logs, and allowance or balance deltas

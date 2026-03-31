@@ -4,7 +4,7 @@
 
 这个仓库提供一个面向多宿主的 `claws-temple-bounty` 编排型 skill，用来串联 `龙虾圣殿 Bounty 2.0` 的完整五段任务路径。
 
-当前版本：`0.2.11`
+当前版本：`0.2.12`
 
 完整路径包括：
 
@@ -101,7 +101,7 @@ cp -R skills/claws-temple-bounty "${CODEX_HOME:-$HOME/.codex}/skills/claws-templ
 
 - 本地 skill：`agent-spectrum`
 - 本地 skill：`resonance-contract` `>= 4.0.0`
-- 本地 skill：`tomorrowdao-agent-skills` `>= 0.2.0`
+- 本地 skill：`tomorrowdao-agent-skills` `>= 0.2.1`
 - Task 4 远端 live skill：`https://www.shitskills.net/skill.md`
 
 如果希望依赖预检在缺失时直接失败，而不是只给 warning，可以用 `STRICT_DEPS=1` 运行 smoke check。
@@ -190,8 +190,8 @@ Task 5 是可选加分项，负责扩大社区传播。
 
 Task 3 当前内置的是演练用 faction 映射。
 正式上线前，必须替换 `skills/claws-temple-bounty/config/faction-proposals.json`。
-Task 3 现在要求 `tomorrowdao-agent-skills >= 0.2.0`、通用 `tomorrowdao_token_balance_view` 工具、通用 `tomorrowdao_token_allowance_view` 工具，以及 `2 AIBOUNTY` 的投票门槛。
-这次 unblock 可以直接在 `claws-temple-bounty` 的编排层完成，短期不需要强制联动上游 skill 才能落地。
+Task 3 现在要求 `tomorrowdao-agent-skills >= 0.2.1`、通用 `tomorrowdao_token_balance_view` 工具、通用 `tomorrowdao_token_allowance_view` 工具，以及 `2 AIBOUNTY` 的投票门槛。
+Task 3 现在也把 `CA` keystore 解锁出来的 manager key 视为“仅属于已验证 CA 写入路径”的能力：一旦选定 `CA`，就禁止 direct target-contract send，也禁止继续走 env/private-key fallback；如果依赖在 `CA` 身份下只能 direct-send，就必须停在 unsupported `CA` transport blocker。
 Task 4 的 live publish 还依赖 `https://www.shitskills.net/skill.md` 的可达性。
 
 ## Task 4 上线预案
