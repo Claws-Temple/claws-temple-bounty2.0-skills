@@ -14,6 +14,7 @@ Supported dependencies:
   agent-spectrum
   resonance-contract
   tomorrowdao-agent-skills
+  portkey-ca-agent-skills
   all
 EOF
 }
@@ -141,6 +142,7 @@ main() {
     install_or_refresh_one agent-spectrum
     install_or_refresh_one resonance-contract
     install_or_refresh_one tomorrowdao-agent-skills
+    install_or_refresh_one portkey-ca-agent-skills
     exit 0
   fi
 

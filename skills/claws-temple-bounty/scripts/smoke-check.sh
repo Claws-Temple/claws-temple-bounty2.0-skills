@@ -59,7 +59,7 @@ PY
 
 echo "[smoke-check] checking local dependency skills"
 missing_deps=()
-for dep in agent-spectrum resonance-contract tomorrowdao-agent-skills; do
+for dep in agent-spectrum resonance-contract tomorrowdao-agent-skills portkey-ca-agent-skills; do
   if [[ ! -d "$SKILLS_HOME/$dep" ]]; then
     missing_deps+=("$dep")
     continue
@@ -127,7 +127,7 @@ else:
     print("[smoke-check] resonance-contract dependency version verified")
 PY
 
-echo "[smoke-check] checking TomorrowDAO dependency version and Task 3 balance tool"
+echo "[smoke-check] checking TomorrowDAO dependency version and Task 3 preflight tools"
 python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" "$DEPENDENCY_CATALOG" <<'PY'
 import json
 import sys
@@ -164,7 +164,12 @@ else:
             f"upgrade from {repo_url}"
         )
 
-tool_marker = config["token_balance_tool_name"]
+tool_markers = [
+    config["token_balance_tool_name"],
+    config["token_allowance_tool_name"],
+    config["dependency_invocation"]["approve_tool_name"],
+    config["dependency_invocation"]["tool_name"],
+]
 server_path = dep_dir / "src" / "mcp" / "server.ts"
 openclaw_path = dep_dir / "openclaw.json"
 cli_path = dep_dir / "tomorrowdao_skill.ts"
@@ -172,13 +177,23 @@ for path in (server_path, openclaw_path):
     if not path.exists():
         issues.append(f"missing expected dependency file: {path}")
         continue
-    if tool_marker not in path.read_text(encoding="utf-8"):
-        issues.append(f"{tool_marker} not found in {path}")
-cli_marker = "token-balance-view"
+    text = path.read_text(encoding="utf-8")
+    for tool_marker in tool_markers:
+        if tool_marker not in text:
+            issues.append(f"{tool_marker} not found in {path}")
+cli_markers = (
+    "token-balance-view",
+    "token-allowance-view",
+    "tokenApprove",
+    "daoVote",
+)
 if not cli_path.exists():
     issues.append(f"missing expected dependency file: {cli_path}")
-elif cli_marker not in cli_path.read_text(encoding="utf-8"):
-    issues.append(f"{cli_marker} not found in {cli_path}")
+else:
+    cli_text = cli_path.read_text(encoding="utf-8")
+    for cli_marker in cli_markers:
+        if cli_marker not in cli_text:
+            issues.append(f"{cli_marker} not found in {cli_path}")
 
 if issues:
     joined = "; ".join(issues)
@@ -186,7 +201,68 @@ if issues:
         raise SystemExit(joined)
     print(f"[smoke-check] warning: {joined}")
 else:
-    print("[smoke-check] tomorrowdao dependency version and token balance tool verified")
+    print("[smoke-check] tomorrowdao dependency version and Task 3 preflight tools verified")
+PY
+
+echo "[smoke-check] checking Portkey CA dependency version and forward-call tool"
+python3 - "$ROOT_DIR" "$SKILLS_HOME" "$STRICT_DEPS" "$DEPENDENCY_CATALOG" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+skills_home = Path(sys.argv[2])
+strict = sys.argv[3] == "1"
+catalog = json.loads(Path(sys.argv[4]).read_text(encoding="utf-8"))
+issues: list[str] = []
+
+dep_dir = skills_home / "portkey-ca-agent-skills"
+skill_path = dep_dir / "SKILL.md"
+pkg_path = dep_dir / "package.json"
+server_path = dep_dir / "src" / "mcp" / "server.ts"
+catalog_min = catalog["dependencies"]["portkey-ca-agent-skills"]["min_version"]
+repo_url = catalog["dependencies"]["portkey-ca-agent-skills"]["default_repo_url"]
+
+def parse_version(raw: str) -> tuple[int, ...]:
+    return tuple(int(part) for part in raw.split(".") if part.isdigit())
+
+if not skill_path.exists():
+    issues.append(f"missing SKILL.md in {dep_dir}")
+else:
+    text = skill_path.read_text(encoding="utf-8")
+    match = re.search(r'^version:\s*"?([0-9]+\.[0-9]+\.[0-9]+)"?\s*$', text, re.MULTILINE)
+    if not match:
+      issues.append(f"could not resolve portkey-ca-agent-skills version from {skill_path}")
+    elif parse_version(match.group(1)) < parse_version(catalog_min):
+      issues.append(
+          f"portkey-ca-agent-skills version {match.group(1)} is below required {catalog_min}; upgrade from {repo_url}"
+      )
+
+if not pkg_path.exists():
+    issues.append(f"missing package.json in {dep_dir}")
+else:
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+    actual_version = str(pkg.get("version") or "")
+    if parse_version(actual_version) < parse_version(catalog_min):
+        issues.append(
+            f"portkey-ca-agent-skills package version {actual_version} is below required {catalog_min}; "
+            f"upgrade from {repo_url}"
+        )
+
+if not server_path.exists():
+    issues.append(f"missing expected dependency file: {server_path}")
+else:
+    text = server_path.read_text(encoding="utf-8")
+    if "portkey_forward_call" not in text:
+        issues.append("portkey_forward_call not found in portkey-ca-agent-skills MCP server")
+
+if issues:
+    joined = "; ".join(issues)
+    if strict:
+        raise SystemExit(joined)
+    print(f"[smoke-check] warning: {joined}")
+else:
+    print("[smoke-check] portkey-ca-agent-skills dependency version and CA write tool verified")
 PY
 
 if [[ "$CHECK_REMOTE_SKILL" == "1" ]]; then

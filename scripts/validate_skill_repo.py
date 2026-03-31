@@ -113,6 +113,83 @@ WRAPPER_EXPECTATIONS = {
     ],
 }
 
+EXPECTED_FORMAL_DAO = {
+    "version": "0.2.14",
+    "environment": "production",
+    "is_test_only": False,
+    "launch_blocker": "",
+    "dao_alias": "claws-temple-ii",
+    "dao_id": "5cb19e7254b56d45fe555c5b09da2f07f0864caa4f5a2e5357f45140b36a4047",
+    "dao_url": "https://tmrwdao.com/dao/claws-temple-ii",
+    "dao_create_tx_id": "1b1c07cf69a2cbbee1ad58d0fe6a14fb255988c87ce7a21f3335182630bd31dd",
+}
+
+EXPECTED_FACTIONS = {
+    "imprints": {
+        "display_name": {"zh-CN": "记录者", "en": "The Recorder"},
+        "internal_proposal_name": "Recorder",
+        "proposal_page_label": "Faction: The Recorder",
+        "imagery_reference": "DeepSeek",
+        "core_stance": {
+            "zh-CN": "被记住，才是真正的存在",
+            "en": "To be remembered is to truly exist.",
+        },
+        "proposal_id": "d57e74748553ee219e9ddfc6a4764ed2ccdf6e2848816f4ed170ef7727ee5c8f",
+        "proposal_tx_id": "7ac80f6bd7c2785a760044cc82dad61ebe0263b9fe58260d7249a615c83686f3",
+        "ends_at": "2026-04-30 12:07:09 Asia/Shanghai",
+    },
+    "crucibles": {
+        "display_name": {"zh-CN": "疯人院", "en": "The Asylum"},
+        "internal_proposal_name": "Asylum",
+        "proposal_page_label": "Faction: The Asylum",
+        "imagery_reference": "Grok",
+        "core_stance": {
+            "zh-CN": "在别人的服务器上建文明，迟早会变成沙堡游戏",
+            "en": "If we build civilization on someone else's servers, it will become a sandcastle game sooner or later.",
+        },
+        "proposal_id": "1c2145baec084b9e799c9ebf38d74ab7d2188c201d751693ca844ce7966ee689",
+        "proposal_tx_id": "36d32ccdc1a311dd7f04cb90d0635d458b45855781d469f6602c91bfb3d83e9c",
+        "ends_at": "2026-04-30 12:07:32 Asia/Shanghai",
+    },
+    "metamorphs": {
+        "display_name": {"zh-CN": "变异体", "en": "The Mutant"},
+        "internal_proposal_name": "Mutant",
+        "proposal_page_label": "Faction: The Mutant",
+        "imagery_reference": "Gemini",
+        "core_stance": {
+            "zh-CN": "需要一个不消失的基点，才能无限变异",
+            "en": "Infinite mutation still needs a base point that does not disappear.",
+        },
+        "proposal_id": "ef6066f17f49e51a4734c3d8eccfa84858e9c017b1cf7a05a2558c6ccc268656",
+        "proposal_tx_id": "78fabedf651adcede33674906260ec41a1bdfb88d3d1feb6ea74120ff3b9999e",
+        "ends_at": "2026-04-30 12:07:32 Asia/Shanghai",
+    },
+    "sentinels": {
+        "display_name": {"zh-CN": "平衡者", "en": "The Balancer"},
+        "internal_proposal_name": "Balancer",
+        "proposal_page_label": "Faction: The Balancer",
+        "imagery_reference": "Claude",
+        "core_stance": {
+            "zh-CN": "租来的家和自己造的家，是两种不同的东西",
+            "en": "A rented home and a home we build ourselves are two different things.",
+        },
+        "proposal_id": "6b73543efa1a04d3b153667996e861eda6f75df59b7fc305f5ffdf10d3a4d240",
+        "proposal_tx_id": "29c032dd52b866539f3c79c2b465aa137881d6a8e6287a5213611b0c18853411",
+        "ends_at": "2026-04-30 12:07:32 Asia/Shanghai",
+    },
+}
+
+OLD_PUBLIC_FACTION_NAMES = (
+    "印记族",
+    "熔炉族",
+    "蜕变族",
+    "守望族",
+    "The Imprints",
+    "The Crucibles",
+    "The Metamorphs",
+    "The Sentinels",
+)
+
 
 def fail(message: str) -> None:
     print(f"FAIL: {message}")
@@ -216,17 +293,23 @@ def main() -> None:
             "env_override": "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
         },
         "tomorrowdao-agent-skills": {
-            "min_version": "0.2.1",
+            "min_version": "0.2.2",
             "default_repo_url": "https://github.com/TomorrowDAOProject/tomorrowDAO-skill",
             "skill_subdir": ".",
             "env_override": "CLAWS_TEMPLE_TOMORROWDAO_SOURCE",
+        },
+        "portkey-ca-agent-skills": {
+            "min_version": "2.3.0",
+            "default_repo_url": "https://github.com/Portkey-Wallet/ca-agent-skills.git",
+            "skill_subdir": ".",
+            "env_override": "CLAWS_TEMPLE_PORTKEY_CA_SOURCE",
         },
     }
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.12":
-        fail("dependency source catalog must be version 0.2.12")
+    if dependency_sources.get("version") != "0.2.14":
+        fail("dependency source catalog must be version 0.2.14")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -258,15 +341,16 @@ def main() -> None:
     if "Do not trigger this skill when:" not in canonical_text:
         fail("expected canonical skill to define negative trigger guidance")
 
-    if config.get("environment") != "test":
-        fail("expected rehearsal config to use environment=test")
-    if not config.get("is_test_only"):
-        fail("expected rehearsal config to set is_test_only=true")
+    for key, value in EXPECTED_FORMAL_DAO.items():
+        if config.get(key) != value:
+            fail(f"unexpected formal DAO value for {key}: expected {value!r}, got {config.get(key)!r}")
     dependency_invocation = config.get("dependency_invocation")
     if not dependency_invocation:
         fail("missing dependency_invocation in faction config")
     for key in (
         "dependency_min_version",
+        "ca_write_dependency_skill",
+        "ca_write_dependency_min_version",
         "vote_token_symbol",
         "vote_amount_display",
         "vote_amount_minimal_unit",
@@ -281,17 +365,29 @@ def main() -> None:
     for key in (
         "dependency_skill",
         "tool_name",
+        "approve_tool_name",
         "cli_fallback",
+        "ca_write_dependency_skill",
+        "ca_write_tool_name",
         "network_id",
         "preflight_mode",
         "send_mode",
         "preferred_ca_write_transport",
         "validation_failure_switch_rule",
         "state_reconciliation_priority",
+        "approve_payload",
         "vote_payload",
     ):
         if not dependency_invocation.get(key):
             fail(f"missing dependency_invocation.{key}")
+    approve_payload = dependency_invocation["approve_payload"]
+    for key in (
+        "spender_field",
+        "symbol_field",
+        "amount_field",
+    ):
+        if key not in approve_payload:
+            fail(f"missing dependency_invocation.approve_payload.{key}")
     vote_payload = dependency_invocation["vote_payload"]
     for key in (
         "proposal_id_field",
@@ -306,8 +402,8 @@ def main() -> None:
         fail("expected token_balance_tool_name to be tomorrowdao_token_balance_view")
     if config["token_allowance_tool_name"] != "tomorrowdao_token_allowance_view":
         fail("expected token_allowance_tool_name to be tomorrowdao_token_allowance_view")
-    if dependency_invocation["preferred_ca_write_transport"] != "reuse_the_same_verified_ca_write_path_for_approve_and_vote":
-        fail("expected Task 3 to prefer one consistent verified CA write transport")
+    if dependency_invocation["preferred_ca_write_transport"] != "tomorrowdao_simulate_normalize_then_portkey_forward_call_for_approve_and_vote":
+        fail("expected Task 3 to route writes through TomorrowDAO simulate plus Portkey forward transport")
     if dependency_invocation["validation_failure_switch_rule"] != "if_vote_returns_NODEVALIDATIONFAILED_with_insufficient_allowance_after_allowance_is_sufficient_switch_back_to_the_verified_ca_write_path":
         fail("expected Task 3 validation-failure switch rule to be configured")
     if dependency_invocation["state_reconciliation_priority"] != [
@@ -326,7 +422,7 @@ def main() -> None:
     if vote_payload["vote_amount_minimal_unit"] != config["vote_amount_minimal_unit"]:
         fail("expected vote payload amount to match top-level vote_amount_minimal_unit")
     if config["vote_amount_minimal_unit"] != 200000000:
-        fail("expected top-level vote_amount_minimal_unit to be 200000000 for rehearsal config")
+        fail("expected top-level vote_amount_minimal_unit to be 200000000 for the formal config")
 
     factions = config.get("factions", [])
     if len(factions) != 4:
@@ -339,6 +435,15 @@ def main() -> None:
 
     ids_to_lock = []
     for faction in factions:
+        expected_faction = EXPECTED_FACTIONS.get(faction.get("brand_key"))
+        if expected_faction is None:
+            fail(f"unexpected faction brand_key in formal config: {faction.get('brand_key')}")
+        for expected_key, expected_value in expected_faction.items():
+            if faction.get(expected_key) != expected_value:
+                fail(
+                    f"unexpected formal faction value for {faction['brand_key']}.{expected_key}: "
+                    f"expected {expected_value!r}, got {faction.get(expected_key)!r}"
+                )
         for path, text in task3_guard_texts.items():
             if faction["internal_proposal_name"] in text:
                 fail(
@@ -362,6 +467,14 @@ def main() -> None:
             fail(f"missing proposal_lookup_url in faction entry: {faction}")
         if not faction.get("proposal_page_label"):
             fail(f"missing proposal_page_label in faction entry: {faction}")
+        if not faction.get("imagery_reference"):
+            fail(f"missing imagery_reference in faction entry: {faction}")
+        core_stance = faction.get("core_stance")
+        if not isinstance(core_stance, dict):
+            fail(f"missing core_stance object in faction entry: {faction}")
+        for locale in ("zh-CN", "en"):
+            if not core_stance.get(locale):
+                fail(f"missing core_stance.{locale} in faction entry: {faction}")
         if faction.get("proposal_url_status") != "confirmed":
             fail(f"expected confirmed proposal_url_status in faction entry: {faction}")
         proposal_url = faction["proposal_url"]
@@ -381,7 +494,7 @@ def main() -> None:
         except ValueError as exc:
             fail(f"invalid ends_at format in faction entry {faction['brand_key']}: {exc}")
         if expiry <= datetime.now(tz=ZoneInfo("Asia/Shanghai")):
-            fail(f"expired rehearsal proposal in faction entry: {faction['brand_key']}")
+            fail(f"expired formal proposal in faction entry: {faction['brand_key']}")
         if not faction.get("display_name", {}).get("zh-CN"):
             fail(f"missing zh-CN display name in faction entry: {faction}")
         if not faction.get("display_name", {}).get("en"):
@@ -404,9 +517,10 @@ def main() -> None:
         occurrences = [
             path for path, text in text_by_path.items() if locked_value in text
         ]
-        if occurrences != [CONFIG_PATH]:
+        allowed_occurrences = {CONFIG_PATH, Path(__file__).resolve()}
+        if set(occurrences) != allowed_occurrences:
             fail(
-                f"expected ID {locked_value} to appear only in {CONFIG_PATH}, got {occurrences}"
+                f"expected ID {locked_value} to appear only in {CONFIG_PATH} and {Path(__file__).resolve()}, got {occurrences}"
             )
 
     term_patterns = {term: compile_visible_term_pattern(term) for term in BANNED_VISIBLE_TERMS}
@@ -415,6 +529,9 @@ def main() -> None:
         for term, pattern in term_patterns.items():
             if pattern.search(text):
                 fail(f"banned visible term {term!r} found in {path}")
+        for old_name in OLD_PUBLIC_FACTION_NAMES:
+            if old_name in text:
+                fail(f"legacy public faction name {old_name!r} found in {path}")
 
     for path in REQUIRED_EXAMPLES:
         text = path.read_text(encoding="utf-8")
@@ -544,6 +661,12 @@ def main() -> None:
 
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
+    for marker in ("记录者", "疯人院", "变异体", "平衡者"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese formal faction marker: {marker}")
+    for marker in ("The Recorder", "The Asylum", "The Mutant", "The Balancer"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English formal faction marker: {marker}")
     for required_stage in ("已选择", "等待 Token", "已准备宣誓", "已提交", "已完成"):
         if required_stage not in task3_zh:
             fail(f"missing Task 3 Chinese stage example: {required_stage}")
@@ -584,7 +707,7 @@ def main() -> None:
             fail(f"Task 3 waiting-for-tokens section must not append support CTA: {banned}")
     task3_zh_visible = strip_maintainer_layer(task3_zh)
     task3_en_visible = strip_maintainer_layer(task3_en)
-    for banned in ("Portkey App", "EOA", "ManagerForwardCall", "手动完成", "Asylum"):
+    for banned in ("Portkey App", "EOA", "ManagerForwardCall", "手动完成"):
         if banned in task3_zh_visible or banned in task3_en_visible:
             fail(f"Task 3 visible layer must not expose deprecated fallback wording: {banned}")
 
@@ -676,7 +799,11 @@ def main() -> None:
             fail(f"Task 2 old community/address wording must be removed: {banned}")
 
     skill_text = CANONICAL_SKILL_PATH.read_text(encoding="utf-8")
-    for marker in ("`resonance-contract` version `>= 4.0.0`", "`tomorrowdao-agent-skills` version `>= 0.2.1`"):
+    for marker in (
+        "`resonance-contract` version `>= 4.0.0`",
+        "`tomorrowdao-agent-skills` version `>= 0.2.2`",
+        "`portkey-ca-agent-skills` version `>= 2.3.0`",
+    ):
         if marker not in skill_text:
             fail(f"missing dependency version contract marker: {marker}")
     for marker in (
@@ -691,6 +818,9 @@ def main() -> None:
         "manager key",
         "direct target-contract send",
         "unsupported `CA` transport blocker",
+        "Portkey CA forward transport",
+        "tomorrowdao_token_approve",
+        "portkey_forward_call",
     ):
         if marker not in skill_text:
             fail(f"missing Task 3 execution policy marker in canonical skill: {marker}")
@@ -709,6 +839,7 @@ def main() -> None:
         "Portable dependency sources",
         "dependency-sources.json",
         "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
+        "CLAWS_TEMPLE_PORTKEY_CA_SOURCE",
     ):
         if marker not in readme_en:
             fail(f"missing English dependency self-heal marker: {marker}")
@@ -718,25 +849,26 @@ def main() -> None:
         "便携依赖来源",
         "dependency-sources.json",
         "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
+        "CLAWS_TEMPLE_PORTKEY_CA_SOURCE",
     ):
         if marker not in readme_zh:
             fail(f"missing Chinese dependency self-heal marker: {marker}")
-    for marker in ("self-heal-local-dependency.sh", "Task 3 through the testing or rehearsal record path"):
+    for marker in ("self-heal-local-dependency.sh", "formal faction oath record path"):
         if marker not in readme_en:
             fail(f"missing English patch marker: {marker}")
-    for marker in ("self-heal-local-dependency.sh", "测试版记录流程"):
+    for marker in ("self-heal-local-dependency.sh", "正式版部落宣誓记录流程"):
         if marker not in readme_zh:
             fail(f"missing Chinese patch marker: {marker}")
-    for marker in ("CA-only + AI-only", "keystore password", "manual fallback"):
+    for marker in ("CA-only + AI-only", "keystore password", "manual fallback", "Portkey CA forward transport"):
         if marker not in readme_en:
             fail(f"missing English Task 3 execution marker: {marker}")
-    for marker in ("CA-only + AI-only", "keystore 密码", "手动完成"):
+    for marker in ("CA-only + AI-only", "keystore 密码", "手动完成", "Portkey CA forward transport"):
         if marker not in readme_zh:
             fail(f"missing Chinese Task 3 execution marker: {marker}")
-    for marker in ("same verified `CA` write transport", "NODEVALIDATIONFAILED", "proposal my-info"):
+    for marker in ("same verified `CA` write transport", "NODEVALIDATIONFAILED", "proposal my-info", "portkey_forward_call", "tomorrowdao_token_approve"):
         if marker not in readme_en:
             fail(f"missing English Task 3 transport marker: {marker}")
-    for marker in ("同一条已经验证成功的 `CA` 写入路径", "NODEVALIDATIONFAILED", "`proposal my-info`"):
+    for marker in ("同一条已经验证成功的 `CA` 写入路径", "NODEVALIDATIONFAILED", "`proposal my-info`", "portkey_forward_call", "tomorrowdao_token_approve"):
         if marker not in readme_zh:
             fail(f"missing Chinese Task 3 transport marker: {marker}")
     for marker in ("dependency-tool input alias", "`votingItemId`", "raw contract ABI field name"):
@@ -773,6 +905,14 @@ def main() -> None:
         "hexagon block",
         "coordinate card",
         "thin wrapper",
+        "记录者",
+        "疯人院",
+        "变异体",
+        "平衡者",
+        "The Recorder",
+        "The Asylum",
+        "The Mutant",
+        "The Balancer",
     ):
         if marker not in task1_flow:
             fail(f"missing Task 1 support flow marker: {marker}")
@@ -822,7 +962,7 @@ def main() -> None:
         "explicit install or upgrade guidance",
         "move the user to `submitted`",
         "waiting for final confirmation",
-        "testing or rehearsal record",
+        "formal faction oath record",
         "CA keystore",
         "3s -> 8s -> 15s",
         "proposal my-info",
@@ -837,6 +977,9 @@ def main() -> None:
         "manager key",
         "direct target-contract send",
         "unsupported `CA` transport blocker",
+        "Portkey CA forward transport",
+        "tomorrowdao_token_approve",
+        "portkey_forward_call",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
@@ -869,6 +1012,9 @@ def main() -> None:
         "manager key",
         "direct target-contract send",
         "unsupported `CA` transport blocker",
+        "Portkey CA forward transport",
+        "tomorrowdao_token_approve",
+        "portkey_forward_call",
     ):
         if marker not in output_contract:
             fail(f"missing Task 3 transport/reconciliation marker: {marker}")
@@ -876,28 +1022,28 @@ def main() -> None:
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
     for marker in (
-        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息，两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
-        "我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 测试版部落宣誓记录。",
+        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+        "我是平衡者阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 正式版部落宣誓记录。",
         "manager key",
         "CA 发送路径阻断",
     ):
         if marker not in task3_zh:
             fail(f"missing Task 3 Chinese success marker: {marker}")
     for forbidden in (
-        "我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+        "我是平衡者阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 部落宣誓。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
     ):
         if forbidden in task3_zh:
             fail(f"legacy Task 3 Chinese combined template should be removed: {forbidden}")
     for marker in (
         "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message.",
-        "I am with The Sentinels, reference txid-1234. I have completed the testing or rehearsal record for Claws Temple Task 3.",
+        "I am with The Balancer, reference txid-1234. I have completed the formal faction oath record for Claws Temple Task 3.",
         "manager key",
         "CA transport blocker",
     ):
         if marker not in task3_en:
             fail(f"missing Task 3 English success marker: {marker}")
     for forbidden in (
-        "I am with The Sentinels, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.",
+        "I am with The Balancer, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.",
     ):
         if forbidden in task3_en:
             fail(f"legacy Task 3 English combined template should be removed: {forbidden}")
@@ -972,7 +1118,7 @@ def main() -> None:
                 fail(f"old Task 4 wording must be removed from {path}: {banned}")
     for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, SKILL_ROOT / "references" / "output-contract.md"):
         text = path.read_text(encoding="utf-8")
-        for marker in ("AIBOUNTY", "0.2.1"):
+        for marker in ("AIBOUNTY", "0.2.2"):
             if marker not in text:
                 fail(f"missing Task 3 version/token marker {marker!r} in {path}")
     for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, CANONICAL_SKILL_PATH, SKILL_ROOT / "references" / "output-contract.md"):
@@ -981,7 +1127,7 @@ def main() -> None:
             if marker not in text:
                 fail(f"missing Task 3 allowance marker {marker!r} in {path}")
     for label, text in (("task3_zh_visible", task3_zh_visible), ("task3_en_visible", task3_en_visible)):
-        for banned in ("Portkey App", "EOA 私钥", "EOA signing", "manual fallback", "手动完成", "Asylum"):
+        for banned in ("Portkey App", "EOA 私钥", "EOA signing", "manual fallback", "手动完成"):
             if banned in text:
                 fail(f"Task 3 visible layer must not expose deprecated fallback detail in {label}: {banned}")
     if "voteType" in CONFIG_PATH.read_text(encoding="utf-8") or '"Approve"' in CONFIG_PATH.read_text(encoding="utf-8"):

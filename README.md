@@ -4,13 +4,13 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.12`
+Current version: `0.2.14`
 
 It guides the full five-task path:
 
 1. Generate a branded coordinate reading with both the hexagon block and the coordinate card.
 2. Enter Resonance Pairing and start either targeted match or open partner search.
-3. Complete the Faction Oath; the current repository still defaults to the testing or rehearsal record path.
+3. Complete the Faction Oath through the formal faction oath record path.
 4. Enter the native SHIT Skills flow; `publish` is the default recommended action.
 5. Optionally send a social signal for wider community matching.
 
@@ -31,7 +31,7 @@ It guides the full five-task path:
 - treats Task 4 as `choose native action first, then gather only the prerequisites that action actually needs`
 - routes Task 4 into the native SHIT Skills flow with `GitHub` as the only publishable source
 - collects native Task 4 fields such as `installType`, `installCommand`, and `installUrl` when needed
-- uses a single faction config file for the current Task 3 rehearsal setup
+- uses a single faction config file for the current formal Task 3 faction mapping
 - keeps Task 5 optional and non-blocking
 
 ## Host Layout
@@ -101,14 +101,15 @@ Enable and verify:
 
 - Local skill: `agent-spectrum`
 - Local skill: `resonance-contract` `>= 4.0.0`
-- Local skill: `tomorrowdao-agent-skills` `>= 0.2.1`
+- Local skill: `tomorrowdao-agent-skills` `>= 0.2.2`
+- Local skill: `portkey-ca-agent-skills` `>= 2.3.0`
 - Remote live skill for Task 4: `https://www.shitskills.net/skill.md`
 
 If you want dependency preflight to fail hard instead of warning, run smoke check with `STRICT_DEPS=1`.
 
 ## Dependency Bootstrap
 
-Before treating this skill as runnable, verify that the three local dependency skills are already present under `$CODEX_HOME/skills`.
+Before treating this skill as runnable, verify that the four local dependency skills are already present under `$CODEX_HOME/skills`.
 
 ```bash
 ls "${CODEX_HOME:-$HOME/.codex}/skills"
@@ -120,10 +121,12 @@ Portable dependency sources are defined in `skills/claws-temple-bounty/config/de
 - `agent-spectrum` -> `https://github.com/aelf-hzz780/agent-spectrum-skill`
 - `resonance-contract` -> `https://github.com/aelf-hzz780/agent-resonance-skill`
 - `tomorrowdao-agent-skills` -> `https://github.com/TomorrowDAOProject/tomorrowDAO-skill`
+- `portkey-ca-agent-skills` -> `https://github.com/Portkey-Wallet/ca-agent-skills.git`
 - optional local overrides:
   - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
   - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
   - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
+  - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 
 If the current host can run shell commands inside this repository, prefer:
 
@@ -141,11 +144,12 @@ Task 2 now expects `resonance-contract >= 4.0.0`, which treats `open partner sea
 If that dependency is missing or outdated, the default route is now `install or upgrade first`, not `ask the user for an install source` and not `skip Queue`.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
 Task 3 now follows a `CA-only + AI-only` execution policy: if the current `CA` signer is available but the keystore password is missing, the agent may ask for that password once and then continue automatically.
-If the current signer resolves to `CA`, Task 3 performs allowance precheck plus bounded `Approve` and `Vote` retries with state reconciliation before it ever returns a final blocker.
+If the current signer resolves to `CA`, Task 3 now derives the exact `Approve` and `Vote` payloads through TomorrowDAO simulate, then sends the real writes through the explicit Portkey CA forward transport.
 Task 3 now prefers one consistent verified `CA` write transport for both `Approve` and `Vote`; if a different vote path returns `NODEVALIDATIONFAILED` with an allowance-style error after allowance is already sufficient, the flow should switch back to the same verified `CA` write transport instead of treating that as a real allowance shortage.
 `proposal my-info` is now treated as an auxiliary reconciliation helper for Task 3, while mined receipts, vote logs, and allowance or balance deltas are the primary confirmation signals.
 `proposalId` in the Task 3 config is the dependency-tool input alias for the configured vote tool, not a raw contract ABI field name; the dependency normalizes it to the underlying `votingItemId` before the final `Vote` call, so hosts must not raw forward-call `Vote` with an unnormalized `proposalId` payload.
 Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices in the user-facing flow.
+If TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, that is no longer the final blocker by itself; the flow should continue through the explicit Portkey CA forward transport and only stop with an unsupported `CA` transport blocker when that forward path is unavailable.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
 
 ## Usage
@@ -172,7 +176,7 @@ Use $claws-temple-bounty to help this user finish only Task 4 and tell them exac
 
 ## Qualification Note
 
-Task 1 through Task 3 can be completed inside this skill, but the current repository still ships Task 3 through the testing or rehearsal record path by default.
+Task 1 through Task 3 can be completed inside this skill, and the current repository now ships Task 3 through the formal faction oath record path.
 Task 4 must be completed in the native `SHIT Skills` flow for the `Claws Temple Bounty 2.0` qualification path, and `publish` is the default recommended action.
 Task 5 is optional and adds community reach.
 For `OpenClaw`, Task 5 may also mention direct browser action once the user already picked `Telegram` or `X` and explicitly wants to send right now.
@@ -188,10 +192,9 @@ For `OpenClaw`, Task 5 may also mention direct browser action once the user alre
 
 ## Maintainer Note
 
-Task 3 currently ships with rehearsal-only faction mapping.
-Before any production launch, replace `skills/claws-temple-bounty/config/faction-proposals.json`.
-Task 3 now expects `tomorrowdao-agent-skills >= 0.2.1`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, and a `2 AIBOUNTY` vote threshold.
-Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and dependencies that can only direct-send with `CA` must stop with an unsupported `CA` transport blocker.
+Task 3 now ships with the formal `Claws Temple II` faction mapping in `skills/claws-temple-bounty/config/faction-proposals.json`.
+Task 3 now expects `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, the `tomorrowdao_token_approve` tool, the `portkey_forward_call` tool, and a `2 AIBOUNTY` vote threshold.
+Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and TomorrowDAO direct-send errors must hand off to explicit Portkey CA forward transport before the flow is allowed to stop with an unsupported `CA` transport blocker.
 Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
 
 ## Task 4 Rollout Plan

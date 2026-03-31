@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.12
+version: 0.2.14
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.12`
+- Current skill version: `0.2.14`
 
 ## Scope
 
@@ -52,7 +52,7 @@ Use these dependencies explicitly when the relevant task is requested:
 
 - Task 1 -> `agent-spectrum`
 - Task 2 -> `resonance-contract` version `>= 4.0.0`
-- Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.1`
+- Task 3 -> `tomorrowdao-agent-skills` version `>= 0.2.2` plus `portkey-ca-agent-skills` version `>= 2.3.0`
 - Task 4 -> preferred live skill at `https://www.shitskills.net/skill.md`
 - Task 5 -> `resonance-contract` version `>= 4.0.0` when a direct partner or pairing signal is needed; otherwise this skill may draft copy directly
 
@@ -70,6 +70,7 @@ Dependency rule:
   - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
   - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
   - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
+  - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 - keep dependency names in maintainer-facing details, not in the default visible layer
 - for Task 2, first-time users must be asked whether their `identity entry` is already open and whether they are currently signed in before pairing continues
 - for Task 2, if the current user has not finished the `identity entry` path or is not currently signed in, route them into the smoother identity-entry path first
@@ -86,24 +87,27 @@ Dependency rule:
 - for Task 2, if the user provides `email`, `Address`, nickname, or similar non-`user ID` input for targeted match, correct the input and offer either `provide the other user's user ID` or `switch to open partner search`
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
-- for Task 3, require the dependency contract from `config/faction-proposals.json`, including minimum dependency version, token-balance precheck, token-allowance precheck, vote payload fields, and success Telegram follow-up
+- for Task 3, require the dependency contract from `config/faction-proposals.json`, including the TomorrowDAO minimum dependency version, the Portkey CA write minimum dependency version, token-balance precheck, token-allowance precheck, approve payload fields, vote payload fields, and success Telegram follow-up
 - for Task 3, treat `vote_payload.proposal_id_field = proposalId` as the dependency-tool input alias for `tomorrowdao_dao_vote`, not as a raw contract ABI field name
 - for Task 3, when using `tomorrowdao_dao_vote`, pass the configured `proposalId` field and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call `Vote` with an unnormalized `proposalId` payload
+- for Task 3, use `tomorrowdao_token_approve --mode simulate` to derive the exact token `Approve` payload, and use `tomorrowdao_dao_vote --mode simulate` to derive the exact normalized `Vote` payload before any CA write
 - for Task 3, use `CA-only + AI-only completion` as the execution policy; do not offer a user-facing manual path, app handoff, or non-CA route
 - for Task 3, if the `CA` context is present but the keystore password is not yet available, ask the user for the `CA keystore` password only once and then continue automatically
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
 - for Task 3, resolve a `CA` signer before any write; if the current signer is not `CA` or no usable `CA` context is ready, stop with a branded blocker instead of switching execution routes
 - for Task 3, if the current `CA` context unlocks a manager key, treat that key only as part of the verified `CA` write path; it must not authorize direct target-contract send by itself
 - for Task 3, when the current signer resolves to `CA`, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
-- for Task 3, when the allowance is below the configured vote amount, send `Approve` first through the available `CA` write path and keep that same verified `CA` write transport as the preferred path for the later `Vote`
+- for Task 3, when the allowance is below the configured vote amount, derive the exact `Approve` payload through TomorrowDAO simulate and send it through `portkey_forward_call`, then keep that same verified CA forward transport as the preferred path for the later `Vote`
+- for Task 3, derive the final `Vote` payload through TomorrowDAO simulate and send that normalized payload through `portkey_forward_call`; do not let the CA path fall back to TomorrowDAO direct send
 - for Task 3, prefer one consistent verified `CA` write transport for both `Approve` and `Vote`; do not mix a successful `CA` approval path with a different direct vote path unless the same transport is unavailable
-- for Task 3, once `CA` is selected, direct target-contract send and env or private-key fallback are forbidden; if the current dependency can only direct-send for `CA`, stop with an unsupported `CA` transport blocker instead of rerouting
+- for Task 3, once `CA` is selected, direct target-contract send and env or private-key fallback are forbidden; if TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, continue through the explicit Portkey CA forward transport instead of stopping
+- for Task 3, stop with an unsupported `CA` transport blocker only when the explicit Portkey CA forward transport is unavailable, below minimum version, or cannot continue automatically in the current host
 - for Task 3, use bounded automatic retries with state reconciliation for both `Approve` and `Vote`; do not ask the user whether they want manual completion or another retry
 - for Task 3, if a non-preferred vote send path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`
 - for Task 3, treat `proposal my-info` as an auxiliary reconciliation source only; primary confirmation should come from mined receipts, vote logs, and allowance or balance deltas
 - for Task 3, keep retry timing, receipt polling, and allowance reconciliation in maintainer-facing details; the visible layer should only describe the current automatic stage naturally
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
-- for Task 3, if the current mapping is still rehearsal-only, the visible layer must say clearly that the current oath record is a testing or rehearsal record and that production will use a later formal record
+- for Task 3, when the current config is the production mapping, present the oath as the formal faction oath record and do not mention testing, rehearsal, or a later replacement path
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
 - for Task 4, ask which native action the user wants first; if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl` only when the user chooses `publish` or another action that actually needs them
@@ -184,7 +188,7 @@ Hard requirements:
 
 - do not duplicate proposal IDs or environment flags outside this config file
 - use the config file as the only mapping source for faction display names, internal proposal names, IDs, and end times
-- if `environment = test` or `is_test_only = true`, include a production replacement warning in maintainer-facing details
+- if `environment = production` and `is_test_only = false`, treat the config as the formal Task 3 mapping in both maintainer-facing details and the default visible layer
 
 ## Negative Trigger Rules
 
