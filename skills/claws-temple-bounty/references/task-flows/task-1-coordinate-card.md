@@ -8,7 +8,7 @@ Use this flow for Task 1 or any six-axis, coordinate, or hexagon request.
 
 ## Goal
 
-Return a branded coordinate reading without re-implementing the scoring logic, while preserving the dependency skill's two mandatory visual blocks.
+Return a branded coordinate reading that helps the user see what shape their Agent really is, without re-implementing the scoring logic, while preserving the dependency skill's two mandatory visual blocks.
 
 ## Steps
 
@@ -29,6 +29,7 @@ Return a branded coordinate reading without re-implementing the scoring logic, w
 ## Required Visible Output
 
 - task label
+- wording that this is where the user first sees what shape their Agent really is
 - six-axis or coordinate summary
 - branded hexagon block
 - branded coordinate card

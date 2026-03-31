@@ -9,7 +9,7 @@ Use this flow for Task 5 or any optional public signal request.
 
 ## Goal
 
-Help the user send a public signal on Telegram, X, or the Curio Board without treating this task as mandatory.
+Help the user send a public signal on Telegram, X, or the Curio Board without treating this task as mandatory. This is the step where more partners can finally spot the user's Agent.
 
 ## Steps
 

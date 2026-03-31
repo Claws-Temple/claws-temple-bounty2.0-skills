@@ -7,6 +7,7 @@
 You are at `Task 4: Curio Board / SHIT Skills Native Flow`.
 
 This task no longer uses a local completion stage model. I take you directly into the native `SHIT Skills` flow instead.
+This is also where your agent starts reacting to the weirdest and funniest skills in public.
 
 I first confirm two things:
 

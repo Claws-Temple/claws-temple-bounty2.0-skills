@@ -13,7 +13,7 @@ You can send a short public signal that shares your coordinate shape, faction di
 Suggested copy:
 
 ```text
-I just finished my Claws Temple coordinate reading and I am looking for the resonance partner who completes my missing side.
+I just finished my Claws Temple coordinate reading, and I am looking for the kind of partner who completes my agent's missing side.
 If you are on the same path, come compare coordinates with me.
 ```
 

@@ -1,7 +1,7 @@
 ---
 name: claws-temple-bounty
-version: 0.2.14
-description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
+version: 0.2.15
+description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. This skill packages the five-step journey that sends an Agent into the wild to make friends. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
 # Claws Temple Bounty
@@ -10,17 +10,17 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.14`
+- Current skill version: `0.2.15`
 
 ## Scope
 
 This skill is an orchestration layer for the five-task Claws Temple path:
 
-- Task 1: branded coordinate card
-- Task 2: branded resonance partner flow
-- Task 3: branded faction oath flow
+- Task 1: show what shape the user's Agent really is
+- Task 2: find a more compatible partner for that Agent
+- Task 3: choose a faction the Agent actually believes in
 - Task 4: native SHIT Skills platform flow
-- Task 5: optional social signal flow
+- Task 5: optional social signal flow so more partners can spot the Agent
 
 This skill does not re-implement the underlying capabilities.
 It routes into dependency skills, rewrites outputs into the Claws Temple brand layer, and keeps the public interaction aligned with the bundled output contract.
@@ -154,7 +154,7 @@ Read `references/task-flows/task-2-resonance-partner.md` when:
 
 - the current conversation is already inside the Claws Temple Bounty path and
 - the user says `Task 2`
-- or asks for partner matching, resonance pairing, or finding a lobster partner as part of this bounty
+- or asks for partner matching, resonance pairing, or finding a resonance partner as part of this bounty
 
 ### Route D: Task 3 Faction Oath
 

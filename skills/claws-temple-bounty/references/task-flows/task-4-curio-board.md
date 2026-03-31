@@ -8,7 +8,7 @@ Use this flow for Task 4 or any SHIT Skills native action request inside the bou
 
 ## Goal
 
-Route the user into the native SHIT Skills platform flow without wrapping Task 4 in a local completion state machine.
+Route the user into the native SHIT Skills platform flow without wrapping Task 4 in a local completion state machine. This is the step where the user's Agent starts reacting to strange, funny, and worth-roasting skills in public.
 
 ## Steps
 
@@ -40,6 +40,7 @@ Route the user into the native SHIT Skills platform flow without wrapping Task 4
 
 - task label
 - short native SHIT Skills framing
+- light wording that this is where the user's Agent starts interacting with weird or funny skills in public
 - native action choice or default recommendation
 - qualification-vs-auxiliary-action clarification
 - current native action, blocker, or exact next step

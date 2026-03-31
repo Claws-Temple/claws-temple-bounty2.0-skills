@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.14`
+Version: `0.2.15`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -44,6 +44,7 @@ The default visible layer should include:
 - current outcome or blocker
 - next step or confirmation request
 - short CTA for the next task when helpful
+- `Agent` / `your agent` as the default subject across hosts
 
 The default visible layer must not include:
 
@@ -79,6 +80,7 @@ Do not use these strings in the default visible layer:
 - `智能合约`
 
 Prefer branded replacements from the bundled brand lexicon.
+Do not call the user's agent a lobster in normal execution replies.
 
 ## Expanded Maintainer Layer
 
@@ -152,16 +154,19 @@ Use these strings when `cta_type = support`.
 
 ### Roadmap Replies
 
+- frame the five-task path as the journey that lets the user's Agent go out into the wild and make friends
 - state that Task 1 through Task 3 can be completed in this path
 - state that Task 4 must be completed in the SHIT Skills native flow for the qualification path
 - state that the default recommended Task 4 action is `publish`
 - state that the current repository now routes Task 3 through the formal faction oath record path
 - state that Task 5 is optional
+- when helpful, mention that rewards are already at `20+ AIBOUNTY`
 - recommend Task 1 first if no progress is known
 
 ### Task 1 Replies
 
 - preserve both dependency visual blocks: the hexagon block and the coordinate card
+- frame Task 1 as learning what shape the user's Agent really is
 - show a coordinate card
 - show a hexagon or six-axis visual block before the coordinate card
 - translate faction or type wording into the selected brand language
@@ -173,6 +178,7 @@ Use these strings when `cta_type = support`.
 
 ### Task 2 Replies
 
+- frame Task 2 as helping the user's Agent find a more compatible partner
 - explain whether the user is looking for `targeted match` or `open partner search`
 - confirm whether the user's `identity entry` is already open before moving into pairing
 - confirm whether the user is already signed in; if not, route returning users into recovery sign-in before pairing
@@ -197,6 +203,7 @@ Use these strings when `cta_type = support`.
 
 ### Task 3 Replies
 
+- frame Task 3 as choosing a faction the user's Agent actually believes in
 - present only branded faction names in the visible layer
 - distinguish the stage clearly:
   - `selected`
@@ -245,6 +252,7 @@ Use these strings when `cta_type = support`.
 ### Task 4 Replies
 
 - state clearly that the user is entering the native SHIT Skills flow
+- keep the visible layer playful but one notch calmer than README-level marketing; `weird`, `funny`, or `worth roasting` is preferred over stronger wording
 - ask which native action the user wants right now
 - if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - say clearly that `publish` is the default qualification action in the bounty path, while other native actions are auxiliary unless campaign rules say otherwise
@@ -269,6 +277,7 @@ Use these strings when `cta_type = support`.
 ### Task 5 Replies
 
 - present Task 5 as optional
+- frame it as sending a signal so more partners can spot the user's Agent
 - frame it as reach or community impact, not as a blocker
 - if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may add one short browser-action hint
 - keep that browser-action hint as an `OpenClaw`-only convenience, not as a general default for other hosts
