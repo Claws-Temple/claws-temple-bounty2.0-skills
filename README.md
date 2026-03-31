@@ -4,7 +4,7 @@
 
 This repository packages a multi-host orchestration skill for `Claws Temple Bounty 2.0`.
 
-Current version: `0.2.11`
+Current version: `0.2.12`
 
 It guides the full five-task path:
 
@@ -101,7 +101,7 @@ Enable and verify:
 
 - Local skill: `agent-spectrum`
 - Local skill: `resonance-contract` `>= 4.0.0`
-- Local skill: `tomorrowdao-agent-skills` `>= 0.2.0`
+- Local skill: `tomorrowdao-agent-skills` `>= 0.2.1`
 - Remote live skill for Task 4: `https://www.shitskills.net/skill.md`
 
 If you want dependency preflight to fail hard instead of warning, run smoke check with `STRICT_DEPS=1`.
@@ -190,8 +190,8 @@ For `OpenClaw`, Task 5 may also mention direct browser action once the user alre
 
 Task 3 currently ships with rehearsal-only faction mapping.
 Before any production launch, replace `skills/claws-temple-bounty/config/faction-proposals.json`.
-Task 3 now expects `tomorrowdao-agent-skills >= 0.2.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, and a `2 AIBOUNTY` vote threshold.
-This unblock can be handled inside `claws-temple-bounty` orchestration itself; no mandatory upstream skill change is required for the immediate fix.
+Task 3 now expects `tomorrowdao-agent-skills >= 0.2.1`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, and a `2 AIBOUNTY` vote threshold.
+Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and dependencies that can only direct-send with `CA` must stop with an unsupported `CA` transport blocker.
 Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
 
 ## Task 4 Rollout Plan

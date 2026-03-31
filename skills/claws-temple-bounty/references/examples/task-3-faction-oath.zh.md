@@ -43,6 +43,10 @@
 
 `当前部落宣誓还不能继续，不是因为方向或 Token 不够，而是这一步的 CA 自动执行路径在完成授权、提交和记录确认后仍然没有完全走通。我先把你停在这里，等这个阻断解除后再继续。`
 
+如果当前依赖在 `CA` 身份下只能尝试直发目标合约，而不能继续走已验证的 `CA` 写入路径，也应该明确告诉用户：
+
+`当前部落宣誓还不能继续，不是因为方向选错或 Token 不够，而是当前依赖在这个身份入口下只能走被禁止的直发路径。我会把它视为 CA 发送路径阻断，而不是改成 manager 直签或继续尝试其它私钥回退。`
+
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
 
@@ -85,9 +89,10 @@
 - route: `task-3-faction-oath`
 - config_path: `skills/claws-temple-bounty/config/faction-proposals.json`
 - active_environment: `test`
-- dependency_min_version: `0.2.0`
+- dependency_min_version: `0.2.1`
 - task3_execution_policy: `ca_only_ai_completion`
 - task3_password_policy: `ask_once_for_ca_keystore_password`
 - task3_retry_policy: `bounded_ca_retries_with_state_reconciliation`
 - ca_vote_path: `allowance precheck -> Approve if needed -> keep the same verified CA write transport for Vote -> receipt/log reconciliation (+ proposal my-info when available)`
+- ca_transport_rule: `CA keystore may unlock the manager key, but direct target-contract send is forbidden; env/private-key fallback is forbidden once CA is selected`
 - launch_blocker: `Replace all rehearsal faction-hall and faction proposal records before production launch.`

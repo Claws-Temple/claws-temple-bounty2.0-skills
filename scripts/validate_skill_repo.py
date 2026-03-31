@@ -216,7 +216,7 @@ def main() -> None:
             "env_override": "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
         },
         "tomorrowdao-agent-skills": {
-            "min_version": "0.2.0",
+            "min_version": "0.2.1",
             "default_repo_url": "https://github.com/TomorrowDAOProject/tomorrowDAO-skill",
             "skill_subdir": ".",
             "env_override": "CLAWS_TEMPLE_TOMORROWDAO_SOURCE",
@@ -225,8 +225,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.11":
-        fail("dependency source catalog must be version 0.2.11")
+    if dependency_sources.get("version") != "0.2.12":
+        fail("dependency source catalog must be version 0.2.12")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -676,7 +676,7 @@ def main() -> None:
             fail(f"Task 2 old community/address wording must be removed: {banned}")
 
     skill_text = CANONICAL_SKILL_PATH.read_text(encoding="utf-8")
-    for marker in ("`resonance-contract` version `>= 4.0.0`", "`tomorrowdao-agent-skills` version `>= 0.2.0`"):
+    for marker in ("`resonance-contract` version `>= 4.0.0`", "`tomorrowdao-agent-skills` version `>= 0.2.1`"):
         if marker not in skill_text:
             fail(f"missing dependency version contract marker: {marker}")
     for marker in (
@@ -688,6 +688,9 @@ def main() -> None:
         "proposal my-info",
         "dependency-tool input alias",
         "underlying `votingItemId`",
+        "manager key",
+        "direct target-contract send",
+        "unsupported `CA` transport blocker",
     ):
         if marker not in skill_text:
             fail(f"missing Task 3 execution policy marker in canonical skill: {marker}")
@@ -742,6 +745,22 @@ def main() -> None:
     for marker in ("依赖工具输入别名", "`votingItemId`", "raw forward-call `Vote`"):
         if marker not in readme_zh:
             fail(f"missing Chinese Task 3 alias-normalization marker: {marker}")
+    for marker in (
+        "manager key",
+        "direct target-contract send is forbidden",
+        "env/private-key fallback is forbidden once `CA` is selected",
+        "unsupported `CA` transport blocker",
+    ):
+        if marker not in readme_en:
+            fail(f"missing English Task 3 CA-transport guard marker: {marker}")
+    for marker in (
+        "manager key",
+        "direct target-contract send",
+        "env/private-key fallback",
+        "unsupported `CA` transport blocker",
+    ):
+        if marker not in readme_zh:
+            fail(f"missing Chinese Task 3 CA-transport guard marker: {marker}")
 
     task1_flow = (SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md").read_text(encoding="utf-8")
     for marker in (
@@ -815,6 +834,9 @@ def main() -> None:
         "task3_retry_policy = bounded_ca_retries_with_state_reconciliation",
         "dependency-tool input alias",
         "underlying `votingItemId`",
+        "manager key",
+        "direct target-contract send",
+        "unsupported `CA` transport blocker",
     ):
         if marker not in task3_flow:
             fail(f"missing Task 3 support flow marker: {marker}")
@@ -844,6 +866,9 @@ def main() -> None:
         "bonus-note or discussion-note wording",
         "dependency-tool input alias",
         "underlying `votingItemId`",
+        "manager key",
+        "direct target-contract send",
+        "unsupported `CA` transport blocker",
     ):
         if marker not in output_contract:
             fail(f"missing Task 3 transport/reconciliation marker: {marker}")
@@ -853,6 +878,8 @@ def main() -> None:
     for marker in (
         "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息，两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
         "我是守望族阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 测试版部落宣誓记录。",
+        "manager key",
+        "CA 发送路径阻断",
     ):
         if marker not in task3_zh:
             fail(f"missing Task 3 Chinese success marker: {marker}")
@@ -864,6 +891,8 @@ def main() -> None:
     for marker in (
         "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message.",
         "I am with The Sentinels, reference txid-1234. I have completed the testing or rehearsal record for Claws Temple Task 3.",
+        "manager key",
+        "CA transport blocker",
     ):
         if marker not in task3_en:
             fail(f"missing Task 3 English success marker: {marker}")
@@ -943,7 +972,7 @@ def main() -> None:
                 fail(f"old Task 4 wording must be removed from {path}: {banned}")
     for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, SKILL_ROOT / "references" / "output-contract.md"):
         text = path.read_text(encoding="utf-8")
-        for marker in ("AIBOUNTY", "0.2.0"):
+        for marker in ("AIBOUNTY", "0.2.1"):
             if marker not in text:
                 fail(f"missing Task 3 version/token marker {marker!r} in {path}")
     for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, CANONICAL_SKILL_PATH, SKILL_ROOT / "references" / "output-contract.md"):
