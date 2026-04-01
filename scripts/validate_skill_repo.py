@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -12,12 +13,17 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SKILL_VERSION = "0.2.16"
 SKILL_ROOT = ROOT / "skills" / "claws-temple-bounty"
+BUNDLE_ROOT = ROOT / "dist" / "clawhub" / "claws-temple-bounty"
 CONFIG_PATH = SKILL_ROOT / "config" / "faction-proposals.json"
 CONFIG_SCHEMA_PATH = SKILL_ROOT / "config" / "faction-proposals.schema.json"
 DEPENDENCY_SOURCES_PATH = SKILL_ROOT / "config" / "dependency-sources.json"
 EXAMPLES_DIR = SKILL_ROOT / "references" / "examples"
 OPENAI_METADATA_PATH = SKILL_ROOT / "agents" / "openai.yaml"
+CLAWHUB_BUILD_SCRIPT = ROOT / "scripts" / "build-clawhub.sh"
+CLAWHUB_BUNDLE_VALIDATOR = ROOT / "scripts" / "validate_clawhub_bundle.py"
+CLAWHUB_RUNTIME_NOTES_PATH = SKILL_ROOT / "references" / "clawhub-runtime-notes.md"
 TASK2_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-2-resonance-partner.md"
 TASK3_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-3-faction-oath.md"
 CANONICAL_SKILL_PATH = SKILL_ROOT / "SKILL.md"
@@ -31,11 +37,14 @@ REQUIRED_FILES = [
     ROOT / ".claude" / "skills" / "claws-temple-bounty" / "SKILL.md",
     ROOT / ".opencode" / "skills" / "claws-temple-bounty" / "SKILL.md",
     ROOT / ".cursor" / "rules" / "claws-temple-bounty.mdc",
+    CLAWHUB_BUILD_SCRIPT,
+    CLAWHUB_BUNDLE_VALIDATOR,
     SKILL_ROOT / "SKILL.md",
     OPENAI_METADATA_PATH,
     SKILL_ROOT / "references" / "output-contract.md",
     SKILL_ROOT / "references" / "brand-lexicon.zh.md",
     SKILL_ROOT / "references" / "brand-lexicon.en.md",
+    CLAWHUB_RUNTIME_NOTES_PATH,
     SKILL_ROOT / "references" / "task-flows" / "task-roadmap.md",
     SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md",
     SKILL_ROOT / "references" / "task-flows" / "task-2-resonance-partner.md",
@@ -114,7 +123,7 @@ WRAPPER_EXPECTATIONS = {
 }
 
 EXPECTED_FORMAL_DAO = {
-    "version": "0.2.15",
+    "version": SKILL_VERSION,
     "environment": "production",
     "is_test_only": False,
     "launch_blocker": "",
@@ -260,6 +269,18 @@ def parse_shanghai_timestamp(raw_value: str) -> datetime:
     return parsed.replace(tzinfo=ZoneInfo("Asia/Shanghai"))
 
 
+def run_clawhub_bundle_validator() -> None:
+    result = subprocess.run(
+        [sys.executable, str(CLAWHUB_BUNDLE_VALIDATOR)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = (result.stdout + "\n" + result.stderr).strip()
+        fail(f"ClawHub bundle validation failed: {detail}")
+
+
 def main() -> None:
     for path in REQUIRED_FILES + REQUIRED_EXAMPLES:
         if not path.exists():
@@ -278,6 +299,7 @@ def main() -> None:
         dependency_sources = json.loads(DEPENDENCY_SOURCES_PATH.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         fail(f"invalid JSON in {DEPENDENCY_SOURCES_PATH}: {exc}")
+    run_clawhub_bundle_validator()
 
     expected_dependency_sources = {
         "agent-spectrum": {
@@ -308,8 +330,8 @@ def main() -> None:
     dep_entries = dependency_sources.get("dependencies")
     if not isinstance(dep_entries, dict):
         fail("dependency source catalog must define a dependencies object")
-    if dependency_sources.get("version") != "0.2.15":
-        fail("dependency source catalog must be version 0.2.15")
+    if dependency_sources.get("version") != SKILL_VERSION:
+        fail(f"dependency source catalog must be version {SKILL_VERSION}")
     for dep_name, expected in expected_dependency_sources.items():
         entry = dep_entries.get(dep_name)
         if not isinstance(entry, dict):
@@ -501,11 +523,14 @@ def main() -> None:
             fail(f"missing en display name in faction entry: {faction}")
 
     ids_to_lock.extend([config.get("dao_id"), config.get("dao_create_tx_id")])
-    text_by_path = {
-        path: path.read_text(encoding="utf-8")
-        for path in ROOT.rglob("*")
-        if path.is_file() and ".git" not in path.parts
-    }
+    text_by_path = {}
+    for path in ROOT.rglob("*"):
+        if not path.is_file() or ".git" in path.parts or "dist" in path.parts:
+            continue
+        try:
+            text_by_path[path] = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
 
     local_path_markers = ("/" + "Users/", "/" + "home/", "C:" + "\\Users\\")
     for path, text in text_by_path.items():
@@ -919,6 +944,13 @@ def main() -> None:
         "dependency-sources.json",
         "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
         "CLAWS_TEMPLE_PORTKEY_CA_SOURCE",
+        "build-clawhub.sh",
+        "dist/clawhub/claws-temple-bounty",
+        "clawhub skill publish",
+        "validate_clawhub_bundle.py",
+        "claws-temple-bounty-v2",
+        "Claws Temple Bounty 2.0",
+        "MIT-0",
     ):
         if marker not in readme_en:
             fail(f"missing English dependency self-heal marker: {marker}")
@@ -929,6 +961,13 @@ def main() -> None:
         "dependency-sources.json",
         "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
         "CLAWS_TEMPLE_PORTKEY_CA_SOURCE",
+        "build-clawhub.sh",
+        "dist/clawhub/claws-temple-bounty",
+        "clawhub skill publish",
+        "validate_clawhub_bundle.py",
+        "claws-temple-bounty-v2",
+        "Claws Temple Bounty 2.0",
+        "MIT-0",
     ):
         if marker not in readme_zh:
             fail(f"missing Chinese dependency self-heal marker: {marker}")
@@ -1192,7 +1231,7 @@ def main() -> None:
 
     for path in (ROOT / "README.md", ROOT / "README.zh.md", CANONICAL_SKILL_PATH):
         text = path.read_text(encoding="utf-8")
-        for banned in ("publish-prep mode", "ClawHub", "publish + comment"):
+        for banned in ("publish-prep mode", "publish + comment"):
             if banned in text:
                 fail(f"old Task 4 wording must be removed from {path}: {banned}")
     for path in (ROOT / "README.md", ROOT / "README.zh.md", TASK3_FLOW_PATH, SKILL_ROOT / "references" / "output-contract.md"):

@@ -13,7 +13,7 @@ DEPENDENCY_CATALOG="$SKILL_ROOT/config/dependency-sources.json"
 if [[ -f "$REPO_ROOT/scripts/validate_skill_repo.py" && -d "$REPO_ROOT/skills/claws-temple-bounty" ]]; then
   VALIDATOR_PATH="$REPO_ROOT/scripts/validate_skill_repo.py"
   PROBE_SCRIPT="$SKILL_ROOT/scripts/task4-live-skill-probe.sh"
-  SELF_HEAL_COMMAND="bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh"
+  SELF_HEAL_COMMAND="bash scripts/self-heal-local-dependency.sh"
   VALIDATOR_MODE="repo"
 else
   VALIDATOR_PATH="$SKILL_ROOT/scripts/validate_clawhub_bundle.py"

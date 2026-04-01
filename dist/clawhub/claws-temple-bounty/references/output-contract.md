@@ -128,7 +128,7 @@ Required order:
 
 Portable dependency sources:
 
-- source catalog: `skills/claws-temple-bounty/config/dependency-sources.json`
+- source catalog: `config/dependency-sources.json`
 - default sources use public HTTPS repo URLs
 - optional local overrides:
   - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
