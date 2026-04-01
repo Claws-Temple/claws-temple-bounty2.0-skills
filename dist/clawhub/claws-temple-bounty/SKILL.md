@@ -6,7 +6,7 @@ description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 
 
 # Claws Temple Bounty
 
-Use this directory as the canonical `claws-temple-bounty` skill package.
+Use this directory as the built `claws-temple-bounty` distribution bundle for ClawHub. Edit the canonical source in the repository, then rebuild this bundle before publishing.
 
 ## Skill Version
 
@@ -64,8 +64,8 @@ Dependency rule:
 - if a required dependency is unavailable or below the minimum version, first try to install, refresh, or upgrade it from the bundled dependency source catalog before returning any blocker
 - if the current host cannot auto-install or auto-upgrade, give explicit install or upgrade guidance before falling back to a blocker
 - only return a branded blocker summary after dependency self-heal or explicit install guidance still cannot unblock the task
-- prefer the bundled helper `skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh` when the current host can run shell commands inside this repository
-- portable dependency source catalog: `skills/claws-temple-bounty/config/dependency-sources.json`
+- prefer the bundled helper `scripts/self-heal-local-dependency.sh` when the current host can run shell commands inside this repository
+- portable dependency source catalog: `config/dependency-sources.json`
 - default repo sources are public HTTPS repos and may be overridden with:
   - `CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE`
   - `CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE`
@@ -210,3 +210,16 @@ Do not trigger this skill when:
 - If any task enters a real blocker or externally stalled state that the agent cannot resolve automatically in the current turn, append the support CTA from the bundled output contract.
 - Do not declare Task 4 locally completed unless the user confirms that the requested native SHIT Skills action actually succeeded.
 - Keep Task 5 optional in every roadmap and completion CTA.
+
+## ClawHub Runtime Notes
+
+- This is an orchestrator skill, not a single-file skill.
+- It depends on installable or locally available downstream skills:
+  - `agent-spectrum`
+  - `resonance-contract`
+  - `tomorrowdao-agent-skills`
+  - `portkey-ca-agent-skills`
+- Task 3 may ask for the `CA keystore password` once when a real write needs the active `CA` context.
+- Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md`.
+- No hidden private-key fallback is allowed in this distribution, and no undeclared secret dependency should be introduced.
+- This built directory is the intended publish target on ClawHub; do not substitute the repository root.

@@ -10,7 +10,7 @@ This repository packages a multi-host orchestration skill for `Claws Temple Boun
 It turns the bounty into a five-step social adventure for your agent instead of a dry checklist.
 At the simplest level, this path exists so your agent does not have to stay home alone.
 
-Current version: `0.2.15`
+Current version: `0.2.16`
 
 ## Why this path feels different
 
@@ -51,15 +51,20 @@ If you want to start right now, begin with `Task 1`.
 
 ## Host Layout
 
+Edit the canonical source under `skills/claws-temple-bounty/`. For ClawHub, publish only the built bundle directory under `dist/clawhub/claws-temple-bounty/`.
+
 - Codex / OpenAI / OpenClaw: `skills/claws-temple-bounty/`
 - Claude Code: `.claude/skills/claws-temple-bounty/SKILL.md`
 - OpenCode: `.opencode/skills/claws-temple-bounty/SKILL.md`
 - Cursor: `.cursor/rules/claws-temple-bounty.mdc`
+- ClawHub: publish `dist/clawhub/claws-temple-bounty/`
 
 ## Repository Structure
 
 - `skills/claws-temple-bounty/`: canonical skill package
 - `skills/claws-temple-bounty/agents/openai.yaml`: OpenAI/Codex metadata
+- `scripts/build-clawhub.sh`: builds the ClawHub-ready distribution bundle
+- `dist/clawhub/claws-temple-bounty/`: built ClawHub bundle output; rebuild it before every publish and do not edit it by hand
 - `.claude/skills/claws-temple-bounty/`: Claude wrapper
 - `.opencode/skills/claws-temple-bounty/`: OpenCode wrapper
 - `.cursor/rules/claws-temple-bounty.mdc`: Cursor rule wrapper
@@ -167,6 +172,33 @@ Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices
 If TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, that is no longer the final blocker by itself; the flow should continue through the explicit Portkey CA forward transport and only stop with an unsupported `CA` transport blocker when that forward path is unavailable.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
 
+## ClawHub Bundle
+
+Do not upload the repository root to ClawHub.
+A `ClawHub bundle` is the publish-only copy of the canonical skill: it keeps only the files ClawHub should receive, rewrites skill-local paths, and leaves out repository-only wrappers.
+Treat `dist/clawhub/claws-temple-bounty` as a generated release artifact, not the place to make manual edits.
+Rebuild it before every publish so the bundle manifest stays aligned with the current canonical source.
+Build and publish the dedicated bundle directory instead:
+
+```bash
+bash scripts/build-clawhub.sh
+python3 scripts/validate_clawhub_bundle.py
+clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.16
+```
+
+Bundle rules:
+
+- upload `dist/clawhub/claws-temple-bounty`
+- do not upload the repository root
+- the bundle keeps the same canonical version as the repository
+- the bundle now ships `manifest.yaml` with:
+  - `slug = claws-temple-bounty-v2`
+  - `display_name = Claws Temple Bounty 2.0`
+  - `license = MIT-0`
+- `clawhub-bundle-manifest.json` is the freshness proof that the bundle was rebuilt from the current canonical source
+- the bundle adds `ClawHub Runtime Notes`, which act as a publisher-facing runtime checklist for downstream dependencies, the one-time `CA keystore password` prompt, and the remote Task 4 skill requirement
+- if the ClawHub web UI still asks you to confirm metadata, keep the same `slug`, `display name`, and accept the `MIT-0` license terms there
+
 ## Usage
 
 ```text
@@ -211,6 +243,7 @@ Task 3 now ships with the formal `Claws Temple II` faction mapping in `skills/cl
 Task 3 now expects `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, the `tomorrowdao_token_approve` tool, the `portkey_forward_call` tool, and a `2 AIBOUNTY` vote threshold.
 Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and TomorrowDAO direct-send errors must hand off to explicit Portkey CA forward transport before the flow is allowed to stop with an unsupported `CA` transport blocker.
 Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
+ClawHub packaging should use `scripts/build-clawhub.sh`, then publish `dist/clawhub/claws-temple-bounty` instead of the repository root.
 
 ## Task 4 Rollout Plan
 
@@ -230,6 +263,10 @@ Maintainer runbook:
 
 ```bash
 python3 scripts/validate_skill_repo.py
+```
+
+```bash
+python3 scripts/validate_clawhub_bundle.py
 ```
 
 ## Smoke Check

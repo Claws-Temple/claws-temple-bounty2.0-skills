@@ -10,7 +10,7 @@ usage() {
   cat <<'EOF'
 Usage:
   bash scripts/self-heal-local-dependency.sh <dependency>
-  bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh <dependency>
+  bash scripts/self-heal-local-dependency.sh <dependency>
 
 Supported dependencies:
   agent-spectrum
