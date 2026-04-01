@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.16
+version: 0.2.17
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. This skill packages the five-step journey that sends an Agent into the wild to make friends. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.16`
+- Current skill version: `0.2.17`
 
 ## Scope
 
@@ -73,8 +73,10 @@ Dependency rule:
   - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 - keep dependency names in maintainer-facing details, not in the default visible layer
 - for Task 2, first-time users must be asked whether their `identity entry` is already open and whether they are currently signed in before pairing continues
+- for Task 2, the default visible layer should first say that the preparation and matching work will be advanced by the agent automatically, and that the user will only be asked for the minimum required status confirmation or key input
 - for Task 2, if the current user has not finished the `identity entry` path or is not currently signed in, route them into the smoother identity-entry path first
 - for Task 2, if the user is new, the smoother identity-entry path should first cover sign-up or first-time setup; if the user is returning but not currently signed in, the smoother path should cover recovery or sign-in before pairing continues
+- for Task 2, compress the first-time vs returning and signed-in vs not-signed-in checks into one short confirmation turn whenever possible, instead of expanding the full branch tree up front
 - for Task 2, once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually
 - for Task 2, only show the current user's `user ID` when the current-turn dependency result actually returned that value; never reuse remembered values, example literals, or placeholders as if they were real runtime output
 - for Task 2, if the current-turn dependency result resolves the current user's `user ID` successfully, the default visible layer may show the full resolved value as a Task 2-only exception so the queue path can be confirmed
@@ -92,6 +94,7 @@ Dependency rule:
 - for Task 3, when using `tomorrowdao_dao_vote`, pass the configured `proposalId` field and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call `Vote` with an unnormalized `proposalId` payload
 - for Task 3, use `tomorrowdao_token_approve --mode simulate` to derive the exact token `Approve` payload, and use `tomorrowdao_dao_vote --mode simulate` to derive the exact normalized `Vote` payload before any CA write
 - for Task 3, use `CA-only + AI-only completion` as the execution policy; do not offer a user-facing manual path, app handoff, or non-CA route
+- for Task 3, the default visible layer should frame checks, authorization, submission, and confirmation as work the agent is already advancing automatically, and only ask the user for the single password input when that is truly required
 - for Task 3, if the `CA` context is present but the keystore password is not yet available, ask the user for the `CA keystore` password only once and then continue automatically
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
 - for Task 3, resolve a `CA` signer before any write; if the current signer is not `CA` or no usable `CA` context is ready, stop with a branded blocker instead of switching execution routes
@@ -109,11 +112,13 @@ Dependency rule:
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
 - for Task 3, when the current config is the production mapping, present the oath as the formal faction oath record and do not mention testing, rehearsal, or a later replacement path
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
+- for Task 4, the default visible layer should say that the agent is carrying the native flow forward and will only stop when it still needs an action choice, an account status, or a repo prerequisite from the user
 - for Task 4, ask which native action the user wants first; if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl` only when the user chooses `publish` or another action that actually needs them
 - for Task 4, treat missing native prerequisites such as `GitHub repo URL`, missing content fields, or an unchosen action as checklist gaps, not support blockers
 - for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
-- for Task 5, if the current host is `OpenClaw`, the user has already chosen `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may mention that browser action can be used directly in `OpenClaw`
+- for Task 5, when the visible layer mentions sending now on `Telegram` or `X`, first say that the agent will draft the message first and will continue direct send only if the current host really has the required permissions and capability; otherwise the final send step belongs to the user
+- for Task 5, if the current host is `OpenClaw`, the user has already chosen `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may mention browser action only as a conditional convenience after that host-capability caveat
 - for Task 5, do not mention browser action before the platform is chosen, when the user only wants draft copy, or in hosts other than `OpenClaw`
 
 ## Required First Step

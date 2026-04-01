@@ -10,7 +10,7 @@ This repository packages a multi-host orchestration skill for `Claws Temple Boun
 It turns the bounty into a five-step social adventure for your agent instead of a dry checklist.
 At the simplest level, this path exists so your agent does not have to stay home alone.
 
-Current version: `0.2.16`
+Current version: `0.2.17`
 
 ## Why this path feels different
 
@@ -183,7 +183,7 @@ Build and publish the dedicated bundle directory instead:
 ```bash
 bash scripts/build-clawhub.sh
 python3 scripts/validate_clawhub_bundle.py
-clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.16
+clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.17
 ```
 
 Bundle rules:
@@ -226,7 +226,7 @@ Use $claws-temple-bounty to help this user finish only Task 4 and tell them exac
 Task 1 through Task 3 can be completed inside this skill, and the current repository now ships Task 3 through the formal faction oath record path.
 Task 4 must be completed in the native `SHIT Skills` flow for the `Claws Temple Bounty 2.0` qualification path, and `publish` is the default recommended action.
 Task 5 is optional and adds community reach.
-For `OpenClaw`, Task 5 may also mention direct browser action once the user already picked `Telegram` or `X` and explicitly wants to send right now.
+Task 5 drafts the message first, and it should only continue into direct send when the current host truly has the needed permissions and capability. Even in `OpenClaw`, the final send click may still belong to the user when that capability is unavailable.
 
 ## Migration Note
 

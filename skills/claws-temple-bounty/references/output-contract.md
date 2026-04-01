@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.16`
+Version: `0.2.17`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -179,9 +179,10 @@ Use these strings when `cta_type = support`.
 ### Task 2 Replies
 
 - frame Task 2 as helping the user's Agent find a more compatible partner
+- open with one short execution line that the preparation and matching work is being advanced by the agent automatically, and that the user will only be asked for one status confirmation or one key input when needed
 - explain whether the user is looking for `targeted match` or `open partner search`
-- confirm whether the user's `identity entry` is already open before moving into pairing
-- confirm whether the user is already signed in; if not, route returning users into recovery sign-in before pairing
+- keep the default visible layer in execution-report voice rather than checklist voice; prefer `我先帮你确认 / 我先自动解析 / 接下来我会继续` style wording in Chinese and equivalent action-first wording in English
+- confirm identity-entry readiness and signed-in readiness with the minimum number of visible questions possible before moving into pairing
 - if the user is first-time, explain that the smoother identity-entry path starts with sign-up or first-time setup before the pairing flow and ends with a usable `user ID`
 - if the user is returning but not currently signed in, explain that the smoother identity-entry path starts with recovery sign-in before the pairing flow and ends with a usable `user ID`
 - if identity entry and sign-in are ready, auto-resolve the current user's own `user ID` instead of asking the user to type it manually
@@ -204,6 +205,7 @@ Use these strings when `cta_type = support`.
 ### Task 3 Replies
 
 - frame Task 3 as choosing a faction the user's Agent actually believes in
+- frame the default visible layer as agent-managed execution status; checks, authorization, submission, and confirmation should sound like work already being advanced by the agent
 - present only branded faction names in the visible layer
 - distinguish the stage clearly:
   - `selected`
@@ -221,6 +223,7 @@ Use these strings when `cta_type = support`.
 - use `task3_retry_policy = bounded_ca_retries_with_state_reconciliation`
 - resolve a usable `CA` signer before any oath write; if the current context is not `CA`-ready, stop with a blocker and support CTA instead of switching to another route
 - if the `CA` signer exists but the keystore password is missing, ask the user for that password only once and then continue automatically
+- when the user-facing status is still healthy, make it clear that the user does not need to manually handle the checks, authorization, submission, or confirmation steps
 - if the `CA` keystore unlocks a manager key, treat that manager key only as part of the verified `CA` write path; it must not authorize direct target-contract send by itself
 - once `CA` is selected, direct target-contract send and env or private-key fallback are forbidden for Task 3 writes
 - before vote submission, verify that the user's `AIBOUNTY` balance is at least the configured vote amount
@@ -252,6 +255,7 @@ Use these strings when `cta_type = support`.
 ### Task 4 Replies
 
 - state clearly that the user is entering the native SHIT Skills flow
+- frame the default visible layer as an agent-managed native handoff, and say that the agent will keep the flow moving until it still needs an action choice, account status, or repo prerequisite from the user
 - keep the visible layer playful but one notch calmer than README-level marketing; `weird`, `funny`, or `worth roasting` is preferred over stronger wording
 - ask which native action the user wants right now
 - if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
@@ -279,7 +283,8 @@ Use these strings when `cta_type = support`.
 - present Task 5 as optional
 - frame it as sending a signal so more partners can spot the user's Agent
 - frame it as reach or community impact, not as a blocker
-- if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may add one short browser-action hint
+- when the visible layer mentions sending now on `Telegram` or `X`, first explain that the agent drafts the content first, and that direct send continues only if the current host really has the needed permissions and capability; otherwise the last click belongs to the user
+- if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may add one short browser-action hint after the host-capability caveat
 - keep that browser-action hint as an `OpenClaw`-only convenience, not as a general default for other hosts
 - do not mention browser action before the user chooses a platform or when the user only wants draft copy
 - if the user explicitly wants to send the signal now but the platform or current context blocks that action, append support CTA

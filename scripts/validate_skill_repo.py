@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_VERSION = "0.2.16"
+SKILL_VERSION = "0.2.17"
 SKILL_ROOT = ROOT / "skills" / "claws-temple-bounty"
 BUNDLE_ROOT = ROOT / "dist" / "clawhub" / "claws-temple-bounty"
 CONFIG_PATH = SKILL_ROOT / "config" / "faction-proposals.json"
@@ -661,11 +661,17 @@ def main() -> None:
     for marker in ("自动解析", "不需要你自己手动填写", "已解析到你的用户ID", "本回合真实解析成功后"):
         if marker not in task2_zh:
             fail(f"missing Task 2 Chinese auto-resolve marker: {marker}")
+    for marker in ("这一步里的准备和匹配动作由我来自动推进", "我只会在必要时向你确认一个状态或补一个关键信息", "我先帮你确认一个最小前置"):
+        if marker not in task2_zh:
+            fail(f"missing Task 2 Chinese execution-report marker: {marker}")
     if "不会先让你提供安装源" not in task2_zh:
         fail("missing Task 2 Chinese install-source correction marker")
     for marker in ("auto-resolve", "do not need to type your own", "Resolved your user ID", "current-turn dependency result"):
         if marker not in task2_en:
             fail(f"missing Task 2 English auto-resolve marker: {marker}")
+    for marker in ("I will keep the preparation and matching work moving for you", "I will only stop when I still need one status confirmation or one key input", "I should first confirm one short readiness check"):
+        if marker not in task2_en:
+            fail(f"missing Task 2 English execution-report marker: {marker}")
     if "instead of asking the user to provide an install source" not in task2_en:
         fail("missing Task 2 English install-source correction marker")
     for marker in ("自动排队匹配", "不需要先知道具体是谁"):
@@ -853,10 +859,11 @@ def main() -> None:
         "CA only",
         "counterparty_ca_hash",
         "queue",
+        "preparation and matching work will be advanced by the agent automatically",
     ):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
-    for marker in ("first time here or whether they have already used the identity entry before", "Task 2 can hand off to Task 3 once the pairing path is stable"):
+    for marker in ("ask one short readiness question", "Task 2 path as stable enough for the Task 3 handoff"):
         if marker not in task2_flow:
             fail(f"missing Task 2 stability marker: {marker}")
     for banned in ("confirm whether the user already has their own `user ID`", "whether the user already has their own `user ID`"):
@@ -889,6 +896,12 @@ def main() -> None:
         "Portkey CA forward transport",
         "tomorrowdao_token_approve",
         "portkey_forward_call",
+        "the preparation and matching work will be advanced by the agent automatically",
+        "compress the first-time vs returning and signed-in vs not-signed-in checks",
+        "the default visible layer should frame checks, authorization, submission, and confirmation as work the agent is already advancing automatically",
+        "the agent is carrying the native flow forward",
+        "the agent will draft the message first",
+        "the final send step belongs to the user",
     ):
         if marker not in skill_text:
             fail(f"missing Task 3 execution policy marker in canonical skill: {marker}")
@@ -1133,6 +1146,13 @@ def main() -> None:
         "Portkey CA forward transport",
         "tomorrowdao_token_approve",
         "portkey_forward_call",
+        "the preparation and matching work is being advanced by the agent automatically",
+        "execution-report voice rather than checklist voice",
+        "frame the default visible layer as agent-managed execution status",
+        "the user does not need to manually handle the checks, authorization, submission, or confirmation steps",
+        "agent-managed native handoff",
+        "the agent drafts the content first",
+        "otherwise the last click belongs to the user",
     ):
         if marker not in output_contract:
             fail(f"missing Task 3 transport/reconciliation marker: {marker}")
@@ -1144,6 +1164,7 @@ def main() -> None:
         "我是平衡者阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 正式版部落宣誓记录。",
         "manager key",
         "CA 发送路径阻断",
+        "这一步里的检查、授权、提交和确认都由我自动完成",
     ):
         if marker not in task3_zh:
             fail(f"missing Task 3 Chinese success marker: {marker}")
@@ -1169,6 +1190,10 @@ def main() -> None:
     for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
         if marker not in task4_flow:
             fail(f"missing Task 4 support flow marker: {marker}")
+    task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
+    for marker in ("我会先带你进入原生流程并继续推进", "只有遇到账号、登录态或 repo 前置条件时"):
+        if marker not in task4_zh:
+            fail(f"missing Task 4 Chinese execution-report marker: {marker}")
 
     task5_flow = TASK5_FLOW_PATH.read_text(encoding="utf-8")
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
@@ -1177,7 +1202,7 @@ def main() -> None:
     for marker in ("support CTA", "genuinely stuck on sending", "clickable `Telegram group` link", "clickable `X` link"):
         if marker not in task5_flow:
             fail(f"missing Task 5 support flow marker: {marker}")
-    for marker in ("OpenClaw", "browser action", "Telegram` or `X`"):
+    for marker in ("OpenClaw", "browser action", "Telegram` or `X`", "the final send click belongs to the user"):
         if marker not in task5_flow:
             fail(f"missing Task 5 OpenClaw marker: {marker}")
     task5_zh = (EXAMPLES_DIR / "task-5-social-signal.zh.md").read_text(encoding="utf-8")
@@ -1185,9 +1210,15 @@ def main() -> None:
     for marker in ("TG / X / 奇物志", "如果你已经确定平台", "如果你只是想先看入口", "OpenClaw", "浏览器操作"):
         if marker not in task5_zh:
             fail(f"missing Task 5 Chinese platform-choice marker: {marker}")
+    for marker in ("我会先帮你起草内容", "如果当前宿主具备对应权限和能力", "最后一步会由你手动点发送"):
+        if marker not in task5_zh:
+            fail(f"missing Task 5 Chinese host-capability marker: {marker}")
     for marker in ("TG / X / Curio Board", "If you already know the platform", "If you only want the destination links", "OpenClaw", "browser action"):
         if marker not in task5_en:
             fail(f"missing Task 5 English platform-choice marker: {marker}")
+    for marker in ("I will draft the content first", "required permissions and capability", "the final send click is still yours"):
+        if marker not in task5_en:
+            fail(f"missing Task 5 English host-capability marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
     if "REMOTE_PROBE_MODE=strict" not in release_gate:
