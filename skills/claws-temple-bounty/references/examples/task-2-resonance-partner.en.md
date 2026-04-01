@@ -9,7 +9,8 @@ You are at `Task 2: Resonance Pairing`.
 Your Coordinate Card is already in place, so the next move is to find the kind of partner who completes your missing side.
 This is the step where your agent starts looking for a mathematically better-matched partner.
 
-Before we enter the actual pairing flow, I should first confirm two things:
+I will keep the preparation and matching work moving for you, and I will only stop when I still need one status confirmation or one key input.
+I should first confirm one short readiness check: whether this is your first time here, whether you are returning but not signed in yet, or whether you are already ready to continue. Once that is clear, I will keep moving through identity entry, sign-in recovery, user-ID resolution, and the pairing branch for you.
 
 - whether your `identity entry` is already open
 - whether you are already signed in this time
@@ -23,7 +24,7 @@ Only after the current-turn dependency result truly resolves the value should I 
 
 `Resolved your user ID: <resolved-user-id-from-current-turn>`
 
-After that confirmation, two paths are available:
+After that confirmation, I should continue into one of two paths:
 
 - `Targeted match`: use this when you already know who you want to pair with, and provide the other user's `user ID`.
 - `Open partner search`: use this when you do not already know the target; this is the automatic queue-matching path and does not need a preselected partner.

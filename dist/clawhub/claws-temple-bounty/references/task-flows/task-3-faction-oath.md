@@ -13,7 +13,7 @@ Always read `../../config/faction-proposals.json` before rendering the faction l
 
 ## Goal
 
-Present four branded factions, map the selected faction to the current formal config, keep the whole oath flow inside a `CA-only + AI-only` execution path, verify the user can fund the vote with 2 AIBOUNTY, derive exact `Approve` and normalized `Vote` payloads through TomorrowDAO simulate, execute real writes through Portkey CA forward transport, and close the flow only after a mined-success vote tx plus Telegram follow-up.
+Present four branded factions, map the selected faction to the current formal config, keep the whole oath flow inside a `CA-only + AI-only` execution path, verify the user can fund the vote with 2 AIBOUNTY, derive exact `Approve` and normalized `Vote` payloads through TomorrowDAO simulate, execute real writes through Portkey CA forward transport, and close the flow only after a mined-success vote tx plus Telegram follow-up. The visible layer should sound like agent-managed execution status, not like a manual user runbook.
 
 ## Steps
 
@@ -69,6 +69,7 @@ Present four branded factions, map the selected faction to the current formal co
 - task label
 - the four branded faction names
 - one-line faction thesis per faction
+- one short execution line that checks, authorization, submission, and confirmation are being advanced automatically by the agent
 - current stage or selection prompt
 - token-precheck outcome when relevant
 - allowance or authorization outcome when relevant

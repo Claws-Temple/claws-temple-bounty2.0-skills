@@ -23,6 +23,6 @@ Task 5 是额外社区影响力，不会卡住主线。
 
 ## 维护者详情
 
-- skill: `claws-temple-bounty@0.2.16`
+- skill: `claws-temple-bounty@0.2.17`
 - route: `task-roadmap`
 - next_recommended_task: `task-1-coordinate-card`

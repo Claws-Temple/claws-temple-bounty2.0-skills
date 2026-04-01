@@ -9,7 +9,7 @@ Use this flow for Task 5 or any optional public signal request.
 
 ## Goal
 
-Help the user send a public signal on Telegram, X, or the Curio Board without treating this task as mandatory. This is the step where more partners can finally spot the user's Agent.
+Help the user send a public signal on Telegram, X, or the Curio Board without treating this task as mandatory. This is the step where more partners can finally spot the user's Agent. The visible layer should first frame the agent as the drafter, and only promise direct send when the current host really has the required permissions and capability.
 
 ## Steps
 
@@ -17,10 +17,11 @@ Help the user send a public signal on Telegram, X, or the Curio Board without tr
 2. Ask which platform the user wants if the platform is still unknown.
 3. Draft a short branded signal.
 4. If the user already has a coordinate card or faction result, fold that into the signal.
-5. If the current host is `OpenClaw`, the user already chose `Telegram` or `X`, and the user explicitly wants to send now, add one short visible-layer hint that browser action can be used directly in `OpenClaw`.
-6. Do not mention browser action before the user has chosen a platform, when the user only wants draft copy, or in hosts other than `OpenClaw`.
-7. If the user explicitly wants to send the signal now but the current context blocks that action, return a blocker summary and append support CTA.
-8. End with a community-reach framing instead of a blocker framing when the signal path is otherwise healthy.
+5. Whenever the visible layer mentions sending now on `Telegram` or `X`, first add one short boundary line: the agent drafts first, direct send continues only if the current host really has the required permissions and capability, and otherwise the final send click belongs to the user.
+6. If the current host is `OpenClaw`, the user already chose `Telegram` or `X`, and the user explicitly wants to send now, add one short visible-layer hint that browser action can be used directly in `OpenClaw` after that host-capability caveat.
+7. Do not mention browser action before the user has chosen a platform, when the user only wants draft copy, or in hosts other than `OpenClaw`.
+8. If the user explicitly wants to send the signal now but the current context blocks that action, return a blocker summary and append support CTA.
+9. End with a community-reach framing instead of a blocker framing when the signal path is otherwise healthy.
 
 ## Platform Templates
 
@@ -40,6 +41,7 @@ Each platform draft should include:
 - task label
 - optional-task reminder
 - post copy or signal draft
+- host-capability boundary wording whenever the user wants to send now on `TG` or `X`
 - clickable platform links when the user asks where to post
 - OpenClaw browser-action hint only when the platform is already chosen and the user wants to send now
 - recommended CTA
@@ -50,3 +52,4 @@ Each platform draft should include:
 - keep this task clearly separated from the main qualification path
 - do not imply that Task 5 is required for unlock
 - keep browser-action wording host-aware: `OpenClaw` only, `Telegram` or `X` only, and only when the user explicitly wants to send now
+- never imply guaranteed auto-posting; the safe default is draft first, then direct send only when the host can really do it
