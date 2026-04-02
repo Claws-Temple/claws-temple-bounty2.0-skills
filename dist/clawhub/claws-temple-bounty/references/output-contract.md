@@ -1,6 +1,6 @@
 # Claws Temple Bounty Output Contract
 
-Version: `0.2.17`
+Version: `0.2.19`
 
 Use this file for every visible reply rendered through `claws-temple-bounty`.
 
@@ -215,6 +215,9 @@ Use these strings when `cta_type = support`.
   - `completed`
 - say which stage the user is in and what is still missing
 - before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, and the configured generic token-balance tool are available
+- when shell execution is available, prefer the bundled helper `scripts/task3-oath-executor.sh` before re-expanding the lower-level Task 3 choreography
+- treat helper statuses `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked` as the primary maintainer-facing execution truth for Task 3
+- treat helper statuses `password_required`, `waiting_for_tokens`, `submitted`, and `completed` as normal structured outcomes even when the shell wrapper is used; only hard blockers should surface as non-zero helper exit
 - if `tomorrowdao-agent-skills` is missing or below `0.2.2`, try dependency self-heal first
 - if `portkey-ca-agent-skills` is missing or below `2.3.0`, try dependency self-heal first
 - if the host cannot auto-install or auto-upgrade either dependency, give explicit install or upgrade guidance before any support CTA
@@ -244,6 +247,7 @@ Use these strings when `cta_type = support`.
 - if `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
 - keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
 - use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
+- if reconciliation confirms progress but the final vote `txId` is still missing, stay in `submitted` instead of moving to `completed`
 - in `submitted`, explain that the oath is waiting for final public-record confirmation and keep `cta_type = none` unless monitoring itself is externally blocked
 - only move to `completed` after the vote returns a mined-success `txId`
 - in `completed`, include the `txId`, the Telegram group CTA, one separate reminder sentence for the two-week extra 20 Token note, and then the fixed Telegram post template

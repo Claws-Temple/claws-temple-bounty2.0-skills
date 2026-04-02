@@ -10,7 +10,7 @@ This repository packages a multi-host orchestration skill for `Claws Temple Boun
 It turns the bounty into a five-step social adventure for your agent instead of a dry checklist.
 At the simplest level, this path exists so your agent does not have to stay home alone.
 
-Current version: `0.2.17`
+Current version: `0.2.19`
 
 ## Why this path feels different
 
@@ -47,6 +47,7 @@ If you want to start right now, begin with `Task 1`.
 - routes Task 4 into the native SHIT Skills flow with `GitHub` as the only publishable source
 - collects native Task 4 fields such as `installType`, `installCommand`, and `installUrl` when needed
 - uses a single faction config file for the current formal Task 3 faction mapping
+- ships a bundled Task 3 single-entry executor at `skills/claws-temple-bounty/scripts/task3-oath-executor.sh` so weaker models can call one helper instead of hand-orchestrating every CA vote step
 - keeps Task 5 optional and non-blocking
 
 ## Host Layout
@@ -163,6 +164,13 @@ bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spec
 Task 2 now expects `resonance-contract >= 4.0.0`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
 If that dependency is missing or outdated, the default route is now `install or upgrade first`, not `ask the user for an install source` and not `skip Queue`.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
+When shell execution is available, the preferred Task 3 maintainer path is now the bundled helper:
+
+```bash
+bash skills/claws-temple-bounty/scripts/task3-oath-executor.sh --faction imprints
+```
+
+The helper returns machine statuses such as `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked`, so weaker models can translate one structured result instead of re-deriving the whole flow from multiple documents.
 Task 3 now follows a `CA-only + AI-only` execution policy: if the current `CA` signer is available but the keystore password is missing, the agent may ask for that password once and then continue automatically.
 If the current signer resolves to `CA`, Task 3 now derives the exact `Approve` and `Vote` payloads through TomorrowDAO simulate, then sends the real writes through the explicit Portkey CA forward transport.
 Task 3 now prefers one consistent verified `CA` write transport for both `Approve` and `Vote`; if a different vote path returns `NODEVALIDATIONFAILED` with an allowance-style error after allowance is already sufficient, the flow should switch back to the same verified `CA` write transport instead of treating that as a real allowance shortage.
@@ -183,7 +191,7 @@ Build and publish the dedicated bundle directory instead:
 ```bash
 bash scripts/build-clawhub.sh
 python3 scripts/validate_clawhub_bundle.py
-clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.17
+clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.19
 ```
 
 Bundle rules:

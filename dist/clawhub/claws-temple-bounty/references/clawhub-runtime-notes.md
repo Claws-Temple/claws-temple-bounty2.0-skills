@@ -6,6 +6,7 @@
   - `resonance-contract`
   - `tomorrowdao-agent-skills`
   - `portkey-ca-agent-skills`
+- Task 3 now ships a bundled single-entry helper at `scripts/task3-oath-executor.sh` for hosts that can execute shell commands.
 - Task 3 may ask for the `CA keystore password` once when a real write needs the active `CA` context.
 - Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md`.
 - No hidden private-key fallback is allowed in this distribution, and no undeclared secret dependency should be introduced.

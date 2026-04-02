@@ -1,6 +1,6 @@
 ---
 name: claws-temple-bounty
-version: 0.2.17
+version: 0.2.19
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. This skill packages the five-step journey that sends an Agent into the wild to make friends. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
 ---
 
@@ -10,7 +10,7 @@ Use this directory as the canonical `claws-temple-bounty` skill package.
 
 ## Skill Version
 
-- Current skill version: `0.2.17`
+- Current skill version: `0.2.19`
 
 ## Scope
 
@@ -90,6 +90,10 @@ Dependency rule:
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
 - for Task 3, require the dependency contract from `config/faction-proposals.json`, including the TomorrowDAO minimum dependency version, the Portkey CA write minimum dependency version, token-balance precheck, token-allowance precheck, approve payload fields, vote payload fields, and success Telegram follow-up
+- for Task 3, when the current host can run shell commands inside this repository, prefer the bundled single-entry helper `skills/claws-temple-bounty/scripts/task3-oath-executor.sh` so weaker models do not have to hand-orchestrate the whole CA vote path
+- for Task 3, the bundled helper is the preferred maintainer-facing execution surface and should be treated as the first source of truth for `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked` state
+- for Task 3, treat `password_required`, `waiting_for_tokens`, `submitted`, and `completed` as structured helper outcomes rather than shell failures; only true hard blockers should surface as non-zero helper exit
+- for Task 3, pass the selected faction plus any currently available CA profile hints into the helper, then translate the helper status into the branded visible layer; only fall back to the lower-level dependency contract when the helper truly cannot run in the current host
 - for Task 3, treat `vote_payload.proposal_id_field = proposalId` as the dependency-tool input alias for `tomorrowdao_dao_vote`, not as a raw contract ABI field name
 - for Task 3, when using `tomorrowdao_dao_vote`, pass the configured `proposalId` field and let the dependency normalize it to the underlying `votingItemId`; do not raw forward-call `Vote` with an unnormalized `proposalId` payload
 - for Task 3, use `tomorrowdao_token_approve --mode simulate` to derive the exact token `Approve` payload, and use `tomorrowdao_dao_vote --mode simulate` to derive the exact normalized `Vote` payload before any CA write
@@ -109,7 +113,7 @@ Dependency rule:
 - for Task 3, if a non-preferred vote send path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch and switch back to the same verified `CA` write transport used by `Approve`
 - for Task 3, treat `proposal my-info` as an auxiliary reconciliation source only; primary confirmation should come from mined receipts, vote logs, and allowance or balance deltas
 - for Task 3, keep retry timing, receipt polling, and allowance reconciliation in maintainer-facing details; the visible layer should only describe the current automatic stage naturally
-- for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; the success close must then instruct the user to join the Telegram group and post the fixed template
+- for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; if reconciliation confirms progress without a correlated final `txId`, keep the state in `submitted` instead of declaring completion
 - for Task 3, when the current config is the production mapping, present the oath as the formal faction oath record and do not mention testing, rehearsal, or a later replacement path
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
 - for Task 4, the default visible layer should say that the agent is carrying the native flow forward and will only stop when it still needs an action choice, an account status, or a repo prerequisite from the user

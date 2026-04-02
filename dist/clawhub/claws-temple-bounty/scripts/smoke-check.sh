@@ -57,6 +57,10 @@ else
   python3 "$VALIDATOR_PATH" "$SKILL_ROOT"
 fi
 
+echo "[smoke-check] checking Task 3 executor helper"
+python3 "$SKILL_ROOT/scripts/task3-oath-executor.py" --help >/dev/null
+bash "$SKILL_ROOT/scripts/task3-oath-executor.sh" --help >/dev/null
+
 echo "[smoke-check] checking Task 3 proposal URLs are present"
 python3 - "$SKILL_ROOT" <<'PY'
 import json

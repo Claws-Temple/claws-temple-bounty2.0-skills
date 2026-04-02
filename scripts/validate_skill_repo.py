@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_VERSION = "0.2.17"
+SKILL_VERSION = "0.2.19"
 SKILL_ROOT = ROOT / "skills" / "claws-temple-bounty"
 BUNDLE_ROOT = ROOT / "dist" / "clawhub" / "claws-temple-bounty"
 CONFIG_PATH = SKILL_ROOT / "config" / "faction-proposals.json"
@@ -54,6 +54,8 @@ REQUIRED_FILES = [
     SKILL_ROOT / "references" / "task-4-live-rollout.md",
     SKILL_ROOT / "scripts" / "release-gate.sh",
     SKILL_ROOT / "scripts" / "self-heal-local-dependency.sh",
+    SKILL_ROOT / "scripts" / "task3-oath-executor.py",
+    SKILL_ROOT / "scripts" / "task3-oath-executor.sh",
     SKILL_ROOT / "scripts" / "task4-live-skill-probe.sh",
     SKILL_ROOT / "scripts" / "test-rollout-gate.sh",
     CONFIG_SCHEMA_PATH,
@@ -271,7 +273,7 @@ def parse_shanghai_timestamp(raw_value: str) -> datetime:
 
 def run_clawhub_bundle_validator() -> None:
     result = subprocess.run(
-        [sys.executable, str(CLAWHUB_BUNDLE_VALIDATOR)],
+        [sys.executable, str(CLAWHUB_BUNDLE_VALIDATOR), str(BUNDLE_ROOT)],
         capture_output=True,
         text=True,
         check=False,
