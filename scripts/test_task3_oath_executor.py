@@ -6,6 +6,7 @@ import io
 import json
 import sys
 import tempfile
+import time
 import unittest
 from contextlib import redirect_stdout
 from unittest import mock
@@ -458,6 +459,66 @@ class Task3ExecutorTests(unittest.TestCase):
                 code = MODULE.main(["--faction", "记录者"])
 
         self.assertEqual(code, 1)
+
+    def test_json_runner_returns_after_valid_json_even_if_process_keeps_running(self) -> None:
+        script_path = self.base / "hang_after_json.py"
+        script_path.write_text(
+            (
+                "import json, sys, time\n"
+                "print(json.dumps({'success': True, 'data': {'balance': '1570000000'}}))\n"
+                "sys.stdout.flush()\n"
+                "time.sleep(60)\n"
+            ),
+            encoding="utf-8",
+        )
+
+        runner = MODULE.JsonRunner(overall_timeout_seconds=2.0, post_json_grace_seconds=0.05)
+        started_at = time.monotonic()
+        payload = runner.run_json([sys.executable, str(script_path)])
+        elapsed = time.monotonic() - started_at
+
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["data"]["balance"], "1570000000")
+        self.assertLess(elapsed, 1.0)
+
+    def test_json_runner_times_out_when_stdout_never_becomes_valid_json(self) -> None:
+        script_path = self.base / "invalid_json_hang.py"
+        script_path.write_text(
+            (
+                "import sys, time\n"
+                "sys.stdout.write('{\"success\": true')\n"
+                "sys.stdout.flush()\n"
+                "time.sleep(60)\n"
+            ),
+            encoding="utf-8",
+        )
+
+        runner = MODULE.JsonRunner(overall_timeout_seconds=0.2, post_json_grace_seconds=0.05)
+
+        with self.assertRaises(MODULE.CommandExecutionError) as ctx:
+            runner.run_json([sys.executable, str(script_path)])
+
+        self.assertIn("timed out", str(ctx.exception).lower())
+
+    def test_json_runner_keeps_last_valid_json_when_stdout_has_trailing_noise(self) -> None:
+        script_path = self.base / "json_then_noise.py"
+        script_path.write_text(
+            (
+                "import json, sys, time\n"
+                "print(json.dumps({'success': True, 'status': 'password_required'}))\n"
+                "sys.stdout.flush()\n"
+                "sys.stdout.write('debug tail\\n')\n"
+                "sys.stdout.flush()\n"
+                "time.sleep(60)\n"
+            ),
+            encoding="utf-8",
+        )
+
+        runner = MODULE.JsonRunner(overall_timeout_seconds=2.0, post_json_grace_seconds=0.05)
+        payload = runner.run_json([sys.executable, str(script_path)])
+
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["status"], "password_required")
 
 
 if __name__ == "__main__":

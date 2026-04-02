@@ -74,7 +74,7 @@ If one `CA` write path already completed the approval step successfully, but ano
 
 If the oath transaction already succeeded and returned a `txId`, the reply should say:
 
-`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
+`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now. If the current agent cannot operate Telegram directly, please join the group manually and send the prepared check-in message below. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
 
 If this path included a prior approval step, the reply should also remind the user:
 

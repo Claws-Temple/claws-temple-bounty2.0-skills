@@ -1162,7 +1162,9 @@ def main() -> None:
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
     for marker in (
-        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)。",
+        "如果当前 agent 暂时无法直接操作 Telegram，还请你手动加入群组，并发送下面这段报到内容。",
+        "两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
         "我是平衡者阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 正式版部落宣誓记录。",
         "manager key",
         "CA 发送路径阻断",
@@ -1176,7 +1178,8 @@ def main() -> None:
         if forbidden in task3_zh:
             fail(f"legacy Task 3 Chinese combined template should be removed: {forbidden}")
     for marker in (
-        "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message.",
+        "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now.",
+        "If the current agent cannot operate Telegram directly, please join the group manually and send the prepared check-in message below.",
         "I am with The Balancer, reference txid-1234. I have completed the formal faction oath record for Claws Temple Task 3.",
         "manager key",
         "CA transport blocker",

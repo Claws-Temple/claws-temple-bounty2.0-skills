@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import re
+import selectors
 import subprocess
 import sys
 import time
@@ -23,6 +24,8 @@ from zoneinfo import ZoneInfo
 
 DEFAULT_NETWORK = "mainnet"
 DEFAULT_RETRY_BACKOFFS = (3, 8, 15)
+DEFAULT_RUNNER_TIMEOUT_SECONDS = 30.0
+DEFAULT_JSON_GRACE_SECONDS = 0.2
 STATUS_PASSWORD_REQUIRED = "password_required"
 STATUS_WAITING_FOR_TOKENS = "waiting_for_tokens"
 STATUS_BLOCKED = "blocked"
@@ -81,19 +84,144 @@ class EarlyResult(Exception):
 class JsonRunner:
     """Thin shell runner that expects JSON on stdout."""
 
-    def run_json(self, command: Sequence[str]) -> dict[str, Any]:
-        completed = subprocess.run(
-            list(command),
-            text=True,
-            capture_output=True,
-            check=False,
+    def __init__(
+        self,
+        *,
+        overall_timeout_seconds: float | None = None,
+        post_json_grace_seconds: float = DEFAULT_JSON_GRACE_SECONDS,
+    ) -> None:
+        timeout_override = os.environ.get("CLAWS_TEMPLE_TASK3_RUNNER_TIMEOUT_SECONDS")
+        self.overall_timeout_seconds = (
+            overall_timeout_seconds
+            if overall_timeout_seconds is not None
+            else float(timeout_override or DEFAULT_RUNNER_TIMEOUT_SECONDS)
         )
-        if completed.returncode != 0:
-            raise CommandExecutionError(command, completed.returncode, completed.stdout, completed.stderr)
+        self.post_json_grace_seconds = post_json_grace_seconds
+
+    def run_json(self, command: Sequence[str]) -> dict[str, Any]:
+        process = subprocess.Popen(
+            list(command),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        assert process.stdout is not None and process.stderr is not None
+        stdout_buffer = bytearray()
+        stderr_buffer = bytearray()
+        parsed_stdout: dict[str, Any] | None = None
+        last_valid_stdout: dict[str, Any] | None = None
+        last_stdout_at: float | None = None
+        deadline = time.monotonic() + max(self.overall_timeout_seconds, 0.1)
+
+        with selectors.DefaultSelector() as selector:
+            selector.register(process.stdout, selectors.EVENT_READ, data="stdout")
+            selector.register(process.stderr, selectors.EVENT_READ, data="stderr")
+
+            while True:
+                now = time.monotonic()
+                if (
+                    last_valid_stdout is not None
+                    and process.poll() is None
+                    and last_stdout_at is not None
+                    and now - last_stdout_at >= self.post_json_grace_seconds
+                ):
+                    self._terminate_process(process)
+                    return last_valid_stdout
+
+                if process.poll() is not None and not selector.get_map():
+                    break
+
+                remaining = deadline - now
+                if remaining <= 0:
+                    if last_valid_stdout is not None:
+                        self._terminate_process(process)
+                        return last_valid_stdout
+                    self._terminate_process(process)
+                    stdout_text = self._decode_buffer(stdout_buffer)
+                    stderr_text = self._append_timeout_hint(
+                        self._decode_buffer(stderr_buffer),
+                        self.overall_timeout_seconds,
+                    )
+                    raise CommandExecutionError(command, -1, stdout_text, stderr_text)
+
+                events = selector.select(timeout=min(remaining, self.post_json_grace_seconds))
+                if not events:
+                    if process.poll() is not None:
+                        break
+                    continue
+
+                for key, _ in events:
+                    chunk = os.read(key.fileobj.fileno(), 65536)
+                    if not chunk:
+                        selector.unregister(key.fileobj)
+                        continue
+                    if key.data == "stdout":
+                        stdout_buffer.extend(chunk)
+                        last_stdout_at = time.monotonic()
+                        parsed_stdout = self._try_parse_json(stdout_buffer)
+                        if parsed_stdout is not None:
+                            last_valid_stdout = parsed_stdout
+                    else:
+                        stderr_buffer.extend(chunk)
+
+        self._drain_process_output(process, stdout_buffer, stderr_buffer)
+        stdout_text = self._decode_buffer(stdout_buffer)
+        stderr_text = self._decode_buffer(stderr_buffer)
+        if process.returncode != 0:
+            raise CommandExecutionError(command, process.returncode, stdout_text, stderr_text)
+        if last_valid_stdout is not None:
+            return last_valid_stdout
         try:
-            return json.loads(completed.stdout)
+            return json.loads(stdout_text)
         except json.JSONDecodeError as exc:
-            raise CommandExecutionError(command, completed.returncode, completed.stdout, completed.stderr) from exc
+            raise CommandExecutionError(command, process.returncode or 0, stdout_text, stderr_text) from exc
+
+    @staticmethod
+    def _try_parse_json(buffer: bytearray) -> dict[str, Any] | None:
+        text = JsonRunner._decode_buffer(buffer)
+        stripped = text.lstrip()
+        if not stripped:
+            return None
+        try:
+            payload, _ = json.JSONDecoder().raw_decode(stripped)
+        except json.JSONDecodeError:
+            return None
+        return payload if isinstance(payload, dict) else None
+
+    @staticmethod
+    def _decode_buffer(buffer: bytearray) -> str:
+        return bytes(buffer).decode("utf-8", errors="replace")
+
+    @staticmethod
+    def _append_timeout_hint(stderr_text: str, timeout_seconds: float) -> str:
+        timeout_hint = f"command timed out after {timeout_seconds:.1f}s"
+        return f"{stderr_text}\n{timeout_hint}".strip()
+
+    @staticmethod
+    def _terminate_process(process: subprocess.Popen[bytes]) -> None:
+        if process.poll() is not None:
+            return
+        process.terminate()
+        try:
+            process.communicate(timeout=1)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.communicate()
+
+    @staticmethod
+    def _drain_process_output(
+        process: subprocess.Popen[bytes],
+        stdout_buffer: bytearray,
+        stderr_buffer: bytearray,
+    ) -> None:
+        try:
+            extra_stdout, extra_stderr = process.communicate(timeout=0.1)
+        except subprocess.TimeoutExpired:
+            JsonRunner._terminate_process(process)
+            extra_stdout, extra_stderr = process.communicate()
+        if extra_stdout:
+            stdout_buffer.extend(extra_stdout)
+        if extra_stderr:
+            stderr_buffer.extend(extra_stderr)
 
 
 @dataclass(slots=True)

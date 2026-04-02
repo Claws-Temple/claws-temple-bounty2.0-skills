@@ -250,7 +250,7 @@ Use these strings when `cta_type = support`.
 - if reconciliation confirms progress but the final vote `txId` is still missing, stay in `submitted` instead of moving to `completed`
 - in `submitted`, explain that the oath is waiting for final public-record confirmation and keep `cta_type = none` unless monitoring itself is externally blocked
 - only move to `completed` after the vote returns a mined-success `txId`
-- in `completed`, include the `txId`, the Telegram group CTA, one separate reminder sentence for the two-week extra 20 Token note, and then the fixed Telegram post template
+- in `completed`, include the `txId`, the Telegram group CTA, one short capability boundary line saying that if the current agent cannot directly operate Telegram the user should manually join the group and send the prepared check-in message, one separate reminder sentence for the two-week extra 20 Token note, and then the fixed Telegram post template
 - keep the fixed Telegram post template free of bonus-note or discussion-note wording; those belong in the success prompt sentence, not inside the template body
 - if the current mapping is the production config, say clearly in the visible layer that this is the formal faction oath record
 - never present `Portkey App`, `EOA`, `ManagerForwardCall`, raw spender addresses, or a manual fallback choice in the visible layer

@@ -87,7 +87,7 @@ Routing rule:
 42. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
 43. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
 44. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
-45. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, give the separate bonus or discussion reminder from the config, and then render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
+45. In the success close, show the final vote `txId`, tell the user to join the configured Telegram group, add one short capability boundary line that says the user should manually join the group and send the prepared message if the current agent cannot directly operate Telegram, give the separate bonus or discussion reminder from the config, and then render the fixed Telegram post template with `{faction_name}` and `{txId}` filled in.
 46. If the config is marked as production, present the result as the formal faction oath record and do not mention testing, rehearsal, or a later record replacement.
 
 ## Required Visible Output
@@ -103,7 +103,7 @@ Routing rule:
 - automatic retry wording when authorization or vote confirmation is still being reconciled
 - submitted-state waiting explanation when relevant
 - blocker summary plus support CTA when the oath cannot continue automatically
-- `txId` plus Telegram follow-up prompt and template after success
+- `txId` plus Telegram follow-up prompt, capability boundary line when needed, and template after success
 - next step after the oath
 
 ## Faction Display Mapping
