@@ -15,29 +15,31 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 1. Open with one short execution line that the preparation and matching work will be advanced by the agent automatically, and that the user will only be asked for the minimum required status confirmation or key input.
 2. Identify whether the user already has a specific partner target.
 3. Before any targeted-match or queue action, ask one short readiness question that covers both whether this is the first time here and whether the user is already signed in this time.
-4. If the user is returning but not currently signed in, route them into recovery sign-in first.
-5. If the user is first-time, or the identity entry is not fully ready, route them into identity-entry setup first.
-6. If the user is first-time, explain that the smoother entry path starts with registration or first-time setup and ends with a usable `user ID`.
-7. If the user is returning but not currently signed in, explain that the smoother entry path starts with recovery sign-in and ends with a usable `user ID`.
-8. If `resonance-contract` is missing or below `4.0.0`, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh resonance-contract`.
-9. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL and env override name.
-10. Do not ask the user to provide an install source for `resonance-contract`.
-11. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
-12. Once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually.
-13. Only show the current user's `user ID` when the current-turn dependency result actually returned that value; never reuse remembered values, example literals, or placeholders as if they were real runtime output.
-14. If that current-turn user-ID resolution succeeds, show the full resolved current-user `user ID` in the visible layer so the queue path can be confirmed.
-15. If that user-ID resolution fails, or there is no current-turn dependency result yet, keep the user in the identity-entry or recovery branch, do not ask the user to paste their own `user ID`, and do not claim queue-readiness.
-16. If the user has a specific partner target, route into `targeted match`.
-17. In `targeted match`, ask for the other user's `user ID`.
-18. If the user does not have a specific target, route into `open partner search`.
-19. Explain plainly that `open partner search` is the automatic queue-matching path and does not require a preselected target.
-20. Invoke `resonance-contract` only after identity-entry readiness, sign-in readiness, the auto-resolved current-user `user ID`, and the participation mode are clear.
-21. If dependency queue preflight can proceed, continue into queue send and do not suggest skipping Task 2, replacing queue with Telegram or X posting, or claiming there is no usable direct tool.
-22. Treat the Task 2 path as stable enough for the Task 3 handoff when either the direct pair submission has been sent or the queue join is active. Do not promise that a real partner has already been found unless the dependency flow actually returned that result.
-23. If the user provides `email`, `Address`, nickname, `tDVV` address, or other non-`user ID` input for targeted match, correct the input in plain language and offer two next steps: provide the other user's `user ID`, or switch to `open partner search`.
-24. If registration, recovery sign-in, dependency self-heal, identity-entry setup, or the pairing path is genuinely blocked and the agent cannot continue automatically, return a blocker summary and append support CTA.
-25. Rewrite the visible output into the Claws Temple partner language.
-26. End with a CTA toward Task 3 once the partner path is stable.
+4. As soon as the user answers that readiness question, keep moving in the same turn whenever the host and dependency can still continue; do not stop at the brand layer and repeat the same readiness prompt.
+5. If the user is returning but not currently signed in, route them into recovery sign-in first.
+6. If the user is first-time, or the identity entry is not fully ready, route them into identity-entry setup first.
+7. If the user is first-time, explain that the smoother entry path starts with registration or first-time setup and ends with a usable `user ID`.
+8. If the user is returning but not currently signed in, explain that the smoother entry path starts with recovery sign-in and ends with a usable `user ID`.
+9. If `resonance-contract` is missing or below `4.0.0`, first try the bundled self-heal helper `../../scripts/self-heal-local-dependency.sh resonance-contract`.
+10. If that helper cannot run in the current host, use the portable source catalog in `../../config/dependency-sources.json` and return explicit install or upgrade guidance with the repo URL, any `clawhub_slug`, and the env override name.
+11. Do not ask the user to provide an install source for `resonance-contract`.
+12. If the current host still cannot auto-install or auto-upgrade the dependency, return explicit install or upgrade guidance before any support CTA.
+13. Once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually.
+14. Only show the current user's `user ID` when the current-turn dependency result actually returned that value; never reuse remembered values, example literals, or placeholders as if they were real runtime output.
+15. If that current-turn user-ID resolution succeeds, show the full resolved current-user `user ID` in the visible layer so the queue path can be confirmed.
+16. If that user-ID resolution fails, or there is no current-turn dependency result yet, keep the user in the identity-entry or recovery branch, do not ask the user to paste their own `user ID`, and do not claim queue-readiness.
+17. If the user has a specific partner target, route into `targeted match`.
+18. In `targeted match`, ask for the other user's `user ID`.
+19. If the user does not have a specific target, route into `open partner search`.
+20. Explain plainly that `open partner search` is the automatic queue-matching path and does not require a preselected target.
+21. Invoke `resonance-contract` only after identity-entry readiness, sign-in readiness, the auto-resolved current-user `user ID`, and the participation mode are clear.
+22. If dependency queue preflight can proceed, continue into queue send and do not suggest skipping Task 2, replacing queue with Telegram or X posting, or claiming there is no usable direct tool.
+23. Treat the Task 2 path as stable enough for the Task 3 handoff when either the direct pair submission has been sent or the queue join is active. Do not promise that a real partner has already been found unless the dependency flow actually returned that result.
+24. If the user provides `email`, `Address`, nickname, `tDVV` address, or other non-`user ID` input for targeted match, correct the input in plain language and offer two next steps: provide the other user's `user ID`, or switch to `open partner search`.
+25. If local dependency context is still missing, describe it as a missing local identity-entry or local account-context blocker; do not claim that Task 2 requires the user to complete a generic web flow by themselves.
+26. If registration, recovery sign-in, dependency self-heal, identity-entry setup, or the pairing path is genuinely blocked and the agent cannot continue automatically, return a blocker summary and append support CTA.
+27. Rewrite the visible output into the Claws Temple partner language.
+28. End with a CTA toward Task 3 once the partner path is stable.
 
 ## Required Visible Output
 
@@ -64,6 +66,7 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 - targeted-match wording such as `请提供对方的用户ID`
 - wording such as `如果你没有具体对象，就直接走开放寻配，这条路就是系统自动排队匹配`
 - wording such as `如果依赖版本过低，我会先帮你升级，不会先让你提供安装源`
+- wording that missing local dependency context is still a local identity-entry or account-context problem, not proof that the user must finish a generic web flow alone
 - wording such as `只要开放寻配已经正式入队，或指定匹配请求已经发出，我就会把 Task 2 视为路径已稳定，可以继续 Task 3`
 - wording that Task 2 can hand off to Task 3 once the pairing path is stable, without falsely claiming a partner is already found
 - wording that queue should continue once onboarding is ready, instead of skipping Task 2 or replacing it with social fallback
@@ -88,3 +91,4 @@ Guide the user toward a branded resonance partner flow, including first-time reg
 - do not accept `email`, `Address`, or nickname as a direct-match identifier
 - keep raw method names and execution details out of the visible layer
 - keep the default visible layer in execution-report voice; do not dump the full branch tree before the minimum user decision is actually needed
+- if the user already answered the readiness question, do not ask the same readiness question again unless the dependency state genuinely changed

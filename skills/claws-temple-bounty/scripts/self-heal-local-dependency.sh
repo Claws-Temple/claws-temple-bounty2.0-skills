@@ -3,8 +3,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SKILLS_HOME="${CODEX_HOME:-$HOME/.codex}/skills"
 CATALOG_PATH="$SKILL_ROOT/config/dependency-sources.json"
+RESOLVER_PATH="$SKILL_ROOT/scripts/skill-root-resolver.sh"
+
+# shellcheck source=/dev/null
+source "$RESOLVER_PATH"
+claws_temple_init_skill_roots "$SKILL_ROOT"
 
 usage() {
   cat <<'EOF'
@@ -18,6 +22,9 @@ Supported dependencies:
   tomorrowdao-agent-skills
   portkey-ca-agent-skills
   all
+
+Environment:
+  CLAWS_TEMPLE_SKILLS_HOME   Optional ':'-separated install/search root override.
 EOF
 }
 
@@ -93,11 +100,21 @@ install_or_refresh_one() {
   env_name="$(get_catalog_field "$dep" env_override)"
   skill_subdir="$(get_catalog_field "$dep" skill_subdir)"
   min_version="$(get_catalog_field "$dep" min_version)"
-  local target="$SKILLS_HOME/$dep"
+  local installed_path install_root target target_root
   local source_path=""
   local source_root=""
   local temp_dir
   local env_value="${!env_name:-}"
+
+  installed_path="$(claws_temple_resolve_skill_dir "$dep" 2>/dev/null || true)"
+  install_root="$(claws_temple_runtime_install_root)"
+  if [[ -n "$installed_path" ]]; then
+    target="$installed_path"
+    target_root="$(cd "$(dirname "$installed_path")" && pwd)"
+  else
+    target="$install_root/$dep"
+    target_root="$install_root"
+  fi
 
   temp_dir="$(mktemp -d)"
 
@@ -121,14 +138,17 @@ install_or_refresh_one() {
     }
   fi
 
-  mkdir -p "$SKILLS_HOME"
-  local temp_target="$SKILLS_HOME/.${dep}.tmp.$$"
+  mkdir -p "$target_root"
+  local temp_target="$target_root/.${dep}.tmp.$$"
   rm -rf "$temp_target"
   mkdir -p "$temp_target"
   cp -R "$source_path"/. "$temp_target"/
   rm -rf "$target"
   mv "$temp_target" "$target"
-  echo "[self-heal] installed or upgraded $dep (minimum version: $min_version) from $(render_source_summary "$dep" "$repo_url" "$env_name")"
+  echo "[self-heal] installed or upgraded $dep into $target (minimum version: $min_version) from $(render_source_summary "$dep" "$repo_url" "$env_name")"
+  if [[ "$target_root" != *"/.codex/skills" ]]; then
+    echo "[self-heal] note: if this target is used by OpenClaw, start a new session with /new before retrying"
+  fi
   rm -rf "$temp_dir"
   return 0
 }

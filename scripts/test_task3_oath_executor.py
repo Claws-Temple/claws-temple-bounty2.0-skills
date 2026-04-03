@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import os
 import sys
 import tempfile
 import time
@@ -78,6 +79,10 @@ class Task3ExecutorTests(unittest.TestCase):
             skill_root=ROOT / "skills" / "claws-temple-bounty",
             codex_home=self.codex_home,
             wallet_context_path=self.wallet_context,
+            skill_roots=(self.codex_home / "skills",),
+            bun_path="bun",
+            bash_path="/bin/bash",
+            python3_path=sys.executable,
         )
 
     def tearDown(self) -> None:
@@ -145,6 +150,119 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertFalse(result["success"])
         self.assertEqual(result["status"], "waiting_for_tokens")
         self.assertEqual(result["stage"], "waiting for tokens")
+
+    def test_runtime_paths_discovers_workspace_roots_before_codex_fallback(self) -> None:
+        workspace = self.base / "openclaw-workspace"
+        skill_root = workspace / "skills" / "claws-temple-bounty"
+        (skill_root / "scripts").mkdir(parents=True, exist_ok=True)
+        workspace_tomorrowdao = workspace / "skills" / "tomorrowdao-agent-skills"
+        workspace_portkey = workspace / ".agents" / "skills" / "portkey-ca-agent-skills"
+        for dep_root, version in (
+            (workspace_tomorrowdao, "0.2.2"),
+            (workspace_portkey, "2.3.0"),
+        ):
+            dep_root.mkdir(parents=True, exist_ok=True)
+            (dep_root / "package.json").write_text(json.dumps({"version": version}), encoding="utf-8")
+        fallback_tomorrowdao = self.codex_home / "skills" / "tomorrowdao-agent-skills"
+        fallback_portkey = self.codex_home / "skills" / "portkey-ca-agent-skills"
+        fallback_tomorrowdao.mkdir(parents=True, exist_ok=True)
+        fallback_portkey.mkdir(parents=True, exist_ok=True)
+        (fallback_tomorrowdao / "package.json").write_text(json.dumps({"version": "0.1.0"}), encoding="utf-8")
+        (fallback_portkey / "package.json").write_text(json.dumps({"version": "2.0.0"}), encoding="utf-8")
+
+        with mock.patch.dict(os.environ, {"CODEX_HOME": str(self.codex_home)}, clear=False), mock.patch.object(
+            MODULE.Path, "cwd", return_value=skill_root
+        ):
+            paths = MODULE.RuntimePaths.discover(skill_root=skill_root)
+
+        self.assertEqual(paths.tomorrowdao_root, workspace_tomorrowdao.resolve())
+        self.assertEqual(paths.portkey_root, workspace_portkey.resolve())
+        self.assertEqual(
+            paths.skill_root_search_order[:2],
+            [str((workspace / "skills").resolve()), str((workspace / ".agents" / "skills").resolve())],
+        )
+
+    def test_runtime_paths_uses_shared_openclaw_roots_before_codex_fallback(self) -> None:
+        skill_root = self.base / "detached-skill-root"
+        skill_root.mkdir(parents=True, exist_ok=True)
+        shared_agents_root = self.base / ".agents" / "skills" / "tomorrowdao-agent-skills"
+        shared_openclaw_root = self.base / ".openclaw" / "skills" / "portkey-ca-agent-skills"
+        for dep_root, version in (
+            (shared_agents_root, "0.2.2"),
+            (shared_openclaw_root, "2.3.0"),
+        ):
+            dep_root.mkdir(parents=True, exist_ok=True)
+            (dep_root / "package.json").write_text(json.dumps({"version": version}), encoding="utf-8")
+
+        with mock.patch.dict(
+            os.environ,
+            {"HOME": str(self.base), "CODEX_HOME": str(self.codex_home)},
+            clear=False,
+        ), mock.patch.object(MODULE.Path, "cwd", return_value=skill_root):
+            paths = MODULE.RuntimePaths.discover(skill_root=skill_root)
+
+        self.assertEqual(paths.tomorrowdao_root, shared_agents_root.resolve())
+        self.assertEqual(paths.portkey_root, shared_openclaw_root.resolve())
+        self.assertEqual(
+            paths.skill_root_search_order[:3],
+            [
+                str((self.base / "skills").resolve()),
+                str((self.base / ".agents" / "skills").resolve()),
+                str((self.base / ".openclaw" / "skills").resolve()),
+            ],
+        )
+
+    def test_runtime_paths_prefers_explicit_skill_home_override(self) -> None:
+        skill_root = self.base / "detached-skill-root"
+        skill_root.mkdir(parents=True, exist_ok=True)
+        override_root = self.base / "custom-skill-roots"
+        override_tomorrowdao = override_root / "tomorrowdao-agent-skills"
+        override_portkey = override_root / "portkey-ca-agent-skills"
+        for dep_root, version in (
+            (override_tomorrowdao, "0.2.2"),
+            (override_portkey, "2.3.0"),
+        ):
+            dep_root.mkdir(parents=True, exist_ok=True)
+            (dep_root / "package.json").write_text(json.dumps({"version": version}), encoding="utf-8")
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "HOME": str(self.base),
+                "CODEX_HOME": str(self.codex_home),
+                "CLAWS_TEMPLE_SKILLS_HOME": str(override_root),
+            },
+            clear=False,
+        ), mock.patch.object(MODULE.Path, "cwd", return_value=skill_root):
+            paths = MODULE.RuntimePaths.discover(skill_root=skill_root)
+
+        self.assertEqual(paths.tomorrowdao_root, override_tomorrowdao.resolve())
+        self.assertEqual(paths.portkey_root, override_portkey.resolve())
+        self.assertEqual(paths.skill_root_search_order[0], str(override_root.resolve()))
+
+    def test_returns_helper_prerequisite_blocker_when_bun_is_missing(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        paths = MODULE.RuntimePaths(
+            skill_root=ROOT / "skills" / "claws-temple-bounty",
+            codex_home=self.codex_home,
+            wallet_context_path=self.wallet_context,
+            skill_roots=(self.codex_home / "skills",),
+            bun_path=None,
+            bash_path="/bin/bash",
+            python3_path=sys.executable,
+        )
+        args = Namespace(
+            faction="记录者",
+            login_email=None,
+            keystore_file=None,
+            password="secret",
+        )
+
+        result = MODULE.Task3OathExecutor(args, paths=paths, runner=FakeRunner({}), sleep_fn=lambda _: None).execute()
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["code"], "HELPER_PREREQUISITE_MISSING")
 
     def test_returns_password_required_after_preflight(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")
@@ -240,6 +358,74 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertEqual(result["transactions"]["approve"]["transactionId"], "approve-tx")
         self.assertEqual(result["transactions"]["vote"]["transactionId"], "vote-tx")
         self.assertEqual(result["telegram"]["txId"], "vote-tx")
+
+    def test_retries_approve_after_expired_transaction_without_type_error(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "0"}},
+                    {"success": True, "data": {"allowance": "0"}},
+                ],
+                ("tomorrowdao_skill.ts", "token", "approve"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "token-contract",
+                            "methodName": "Approve",
+                            "args": {"spender": "vote-contract", "symbol": "AIBOUNTY", "amount": 200000000},
+                        },
+                    }
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    MODULE.CommandExecutionError(
+                        ["bun", "run", "forward-call"],
+                        1,
+                        "",
+                        "[ERROR] Transaction expired.Transaction RefBlockNumber is 1,best chain height is 2",
+                    ),
+                    {
+                        "status": "success",
+                        "data": {
+                            "transactionId": "approve-tx",
+                            "data": {"TransactionId": "approve-tx", "Status": "MINED", "Error": None},
+                            "caAddress": "ELF_demo_tDVV",
+                        },
+                    },
+                    {
+                        "status": "success",
+                        "data": {
+                            "transactionId": "vote-tx",
+                            "data": {"TransactionId": "vote-tx", "Status": "MINED", "Error": None},
+                            "caAddress": "ELF_demo_tDVV",
+                        },
+                    },
+                ],
+            }
+        )
+
+        result = self._executor(runner, password="secret").execute()
+
+        self.assertTrue(result["success"])
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["transactions"]["approve"]["transactionId"], "approve-tx")
+        self.assertEqual(result["transactions"]["vote"]["transactionId"], "vote-tx")
 
     def test_returns_submitted_when_vote_confirmation_is_still_pending(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")

@@ -1,13 +1,23 @@
 ## ClawHub Runtime Notes
 
 - This is an orchestrator skill, not a single-file skill.
+- Read `references/host-runtime-contract.md` before any dependency-heavy task.
 - It depends on installable or locally available downstream skills:
   - `agent-spectrum`
   - `resonance-contract`
   - `tomorrowdao-agent-skills`
   - `portkey-ca-agent-skills`
+- Preferred skill-root lookup order:
+  - `CLAWS_TEMPLE_SKILLS_HOME`
+  - `<workspace>/skills`
+  - `<workspace>/.agents/skills`
+  - `~/.agents/skills`
+  - `~/.openclaw/skills`
+  - `${CODEX_HOME:-$HOME/.codex}/skills`
 - Task 3 now ships a bundled single-entry helper at `scripts/task3-oath-executor.sh` for hosts that can execute shell commands.
 - Task 3 may ask for the `CA keystore password` once when a real write needs the active `CA` context.
-- Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md`.
+- In OpenClaw, install or update dependencies and then start a new session with `/new`.
+- Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md` for non-OpenClaw compatibility paths.
+- In OpenClaw, Task 4 is native-dependency-first and should not assume the remote URL can be loaded directly there.
 - No hidden private-key fallback is allowed in this distribution, and no undeclared secret dependency should be introduced.
 - This built directory is the intended publish target on ClawHub; do not substitute the repository root.

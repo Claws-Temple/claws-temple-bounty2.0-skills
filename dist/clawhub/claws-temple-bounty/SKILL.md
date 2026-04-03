@@ -2,6 +2,7 @@
 name: claws-temple-bounty
 version: 0.2.19
 description: Use when the user is explicitly inside the Claws Temple Bounty 2.0 workflow, names Claws Temple / 龙虾圣殿 / Claws Temple Bounty 2.0, or is already continuing this branded five-task path. This skill packages the five-step journey that sends an Agent into the wild to make friends. Do not use for generic numbered tasks, generic bounty requests, or unrelated partner-matching requests outside this brand context.
+homepage: https://github.com/Claws-Temple/claws-temple-bounty2.0-skills
 ---
 
 # Claws Temple Bounty
@@ -30,11 +31,12 @@ Task 4 is handled as a native platform handoff instead of a local completion sta
 
 Before answering, load these files in this order:
 
-1. `references/output-contract.md`
-2. the matching brand lexicon:
+1. `references/host-runtime-contract.md`
+2. `references/output-contract.md`
+3. the matching brand lexicon:
    - `references/brand-lexicon.zh.md` for `zh-CN`
    - `references/brand-lexicon.en.md` for `en`
-3. the matching task flow in `references/task-flows/`
+4. the matching task flow in `references/task-flows/`
 
 ## Language Selection
 
@@ -45,6 +47,18 @@ Resolve `output_language` before rendering:
 3. otherwise -> `en`
 
 Keep all visible fixed strings monolingual after selection.
+
+## Host Runtime Contract
+
+Treat `references/host-runtime-contract.md` as the runtime gate before any dependency-heavy task.
+
+Host rules:
+
+- do not assume the host auto-expands dependency skills; read the dependency package explicitly when needed
+- do not assume a freshly installed or upgraded OpenClaw skill is active until the next new session
+- only use bundled shell helpers when the current host really has repo-shell capability for this package
+- only mention browser or native-action convenience after the current turn confirms that capability
+- when a task requires a current-turn dependency result, fail closed instead of improvising from memory
 
 ## Dependency Skills
 
@@ -60,7 +74,9 @@ Dependency rule:
 
 - prefer the locally available dependency skill when present
 - do not re-derive scoring, pairing, governance, or publishing logic from memory
+- resolve host capability first, then dependency capability, before asking the user for more input in dependency-heavy tasks
 - for Task 1, preserve the dependency skill's two mandatory visual blocks instead of redefining a card-only output; keep both the hexagon block and the coordinate card, then add only a thin Claws Temple brand wrapper around them
+- for Task 1, if there is no current-turn dependency result from `agent-spectrum`, do not generate any hexagon, coordinate card, type result, or faction mapping from memory; return only preflight, install guidance, or blocker state
 - if a required dependency is unavailable or below the minimum version, first try to install, refresh, or upgrade it from the bundled dependency source catalog before returning any blocker
 - if the current host cannot auto-install or auto-upgrade, give explicit install or upgrade guidance before falling back to a blocker
 - only return a branded blocker summary after dependency self-heal or explicit install guidance still cannot unblock the task
@@ -78,10 +94,12 @@ Dependency rule:
 - for Task 2, if the user is new, the smoother identity-entry path should first cover sign-up or first-time setup; if the user is returning but not currently signed in, the smoother path should cover recovery or sign-in before pairing continues
 - for Task 2, compress the first-time vs returning and signed-in vs not-signed-in checks into one short confirmation turn whenever possible, instead of expanding the full branch tree up front
 - for Task 2, once identity entry and sign-in are ready, auto-resolve the current user's own `user ID` from the dependency context instead of asking the user to type it manually
+- for Task 2, once the user answers the readiness question, keep moving in the same turn whenever the host and dependency can still continue; do not stop at the brand layer and repeat the same readiness prompt
 - for Task 2, only show the current user's `user ID` when the current-turn dependency result actually returned that value; never reuse remembered values, example literals, or placeholders as if they were real runtime output
 - for Task 2, if the current-turn dependency result resolves the current user's `user ID` successfully, the default visible layer may show the full resolved value as a Task 2-only exception so the queue path can be confirmed
 - for Task 2, if the current user's `user ID` still cannot be auto-resolved after onboarding, keep the user in the identity-entry or recovery path; do not ask the user to paste their own `user ID`
 - for Task 2, if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`
+- for Task 2, do not mislabel missing local dependency context as a requirement that the user must manually finish a web page flow; describe it as missing local identity-entry or local account context instead
 - for Task 2, `targeted match` maps to the dependency's direct-pair path and requires the other user's `user ID`
 - for Task 2, `open partner search` maps to the dependency's automatic queue path and can continue only after the current user's `user ID` is auto-resolved
 - for Task 2, once identity-entry onboarding finishes and dependency queue preflight can proceed, continue into the formal queue path; do not suggest skipping Task 2 or replacing queue with social posting
@@ -90,7 +108,8 @@ Dependency rule:
 - for Task 2, never tell the user to find a partner through legacy community-brand wording, legacy address-routing wording, or extra platform names outside Telegram and X; keep the visible layer focused on `user ID`, `targeted match`, `open partner search`, Telegram, and X
 - for Task 2, keep `CA only`, `counterparty_ca_hash`, and `queue` in maintainer-facing details; the default visible layer should call the identifier `user ID`
 - for Task 3, require the dependency contract from `config/faction-proposals.json`, including the TomorrowDAO minimum dependency version, the Portkey CA write minimum dependency version, token-balance precheck, token-allowance precheck, approve payload fields, vote payload fields, and success Telegram follow-up
-- for Task 3, when the current host can run shell commands inside this repository, prefer the bundled single-entry helper `scripts/task3-oath-executor.sh` so weaker models do not have to hand-orchestrate the whole CA vote path
+- for Task 3, use helper mode only when the current host can run shell commands inside this repository and the helper preflight confirms `bash`, `python3`, dependency skill roots, and local CA context are ready; otherwise fall back to lower-level dependency choreography or a host-capability blocker
+- for Task 3, when helper mode is available, prefer the bundled single-entry helper `scripts/task3-oath-executor.sh` so weaker models do not have to hand-orchestrate the whole CA vote path
 - for Task 3, the bundled helper is the preferred maintainer-facing execution surface and should be treated as the first source of truth for `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked` state
 - for Task 3, treat `password_required`, `waiting_for_tokens`, `submitted`, and `completed` as structured helper outcomes rather than shell failures; only true hard blockers should surface as non-zero helper exit
 - for Task 3, pass the selected faction plus any currently available CA profile hints into the helper, then translate the helper status into the branded visible layer; only fall back to the lower-level dependency contract when the helper truly cannot run in the current host
@@ -102,6 +121,7 @@ Dependency rule:
 - for Task 3, if the `CA` context is present but the keystore password is not yet available, ask the user for the `CA keystore` password only once and then continue automatically
 - for Task 3, do not continue into vote submission until the user's `AIBOUNTY` balance is confirmed to be at least the configured vote amount
 - for Task 3, resolve a `CA` signer before any write; if the current signer is not `CA` or no usable `CA` context is ready, stop with a branded blocker instead of switching execution routes
+- for Task 3, if helper mode is unavailable because the host cannot guarantee the required local shell or dependency context, surface that as a host-capability blocker instead of pretending the same automatic write path is still running
 - for Task 3, if the current `CA` context unlocks a manager key, treat that key only as part of the verified `CA` write path; it must not authorize direct target-contract send by itself
 - for Task 3, when the current signer resolves to `CA`, check the current `AIBOUNTY` allowance against the current vote contract before sending the vote
 - for Task 3, when the allowance is below the configured vote amount, derive the exact `Approve` payload through TomorrowDAO simulate and send it through `portkey_forward_call`, then keep that same verified CA forward transport as the preferred path for the later `Vote`
@@ -116,13 +136,15 @@ Dependency rule:
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; if reconciliation confirms progress without a correlated final `txId`, keep the state in `submitted` instead of declaring completion
 - for Task 3, when the current config is the production mapping, present the oath as the formal faction oath record and do not mention testing, rehearsal, or a later replacement path
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
+- for Task 4, treat OpenClaw as native-dependency-first: prefer an installed local or ClawHub native dependency over the remote `skill.md` URL, and do not assume OpenClaw can load the remote URL directly
 - for Task 4, the default visible layer should say that the agent is carrying the native flow forward and will only stop when it still needs an action choice, an account status, or a repo prerequisite from the user
 - for Task 4, ask which native action the user wants first; if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl` only when the user chooses `publish` or another action that actually needs them
 - for Task 4, treat missing native prerequisites such as `GitHub repo URL`, missing content fields, or an unchosen action as checklist gaps, not support blockers
-- for Task 4, if the host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
+- for Task 4, if the current host is OpenClaw and the native dependency is not locally available yet, stop with a checklist or blocker that tells the user exactly which native dependency or account prerequisite is still missing
+- for Task 4, if the current host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
 - for Task 5, when the visible layer mentions sending now on `Telegram` or `X`, first say that the agent will draft the message first and will continue direct send only if the current host really has the required permissions and capability; otherwise the final send step belongs to the user
-- for Task 5, if the current host is `OpenClaw`, the user has already chosen `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may mention browser action only as a conditional convenience after that host-capability caveat
+- for Task 5, if the current host is `OpenClaw`, the user has already chosen `Telegram` or `X`, the user explicitly wants to send now, and the current turn has already confirmed browser capability, the visible layer may mention browser action only as a conditional convenience after that host-capability caveat
 - for Task 5, do not mention browser action before the platform is chosen, when the user only wants draft copy, or in hosts other than `OpenClaw`
 
 ## Required First Step
@@ -223,13 +245,23 @@ Do not trigger this skill when:
 ## ClawHub Runtime Notes
 
 - This is an orchestrator skill, not a single-file skill.
+- Read `references/host-runtime-contract.md` before any dependency-heavy task.
 - It depends on installable or locally available downstream skills:
   - `agent-spectrum`
   - `resonance-contract`
   - `tomorrowdao-agent-skills`
   - `portkey-ca-agent-skills`
+- Preferred skill-root lookup order:
+  - `CLAWS_TEMPLE_SKILLS_HOME`
+  - `<workspace>/skills`
+  - `<workspace>/.agents/skills`
+  - `~/.agents/skills`
+  - `~/.openclaw/skills`
+  - `${CODEX_HOME:-$HOME/.codex}/skills`
 - Task 3 now ships a bundled single-entry helper at `scripts/task3-oath-executor.sh` for hosts that can execute shell commands.
 - Task 3 may ask for the `CA keystore password` once when a real write needs the active `CA` context.
-- Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md`.
+- In OpenClaw, install or update dependencies and then start a new session with `/new`.
+- Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md` for non-OpenClaw compatibility paths.
+- In OpenClaw, Task 4 is native-dependency-first and should not assume the remote URL can be loaded directly there.
 - No hidden private-key fallback is allowed in this distribution, and no undeclared secret dependency should be introduced.
 - This built directory is the intended publish target on ClawHub; do not substitute the repository root.

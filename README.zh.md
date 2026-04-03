@@ -55,7 +55,8 @@
 
 日常编辑永远改 `skills/claws-temple-bounty/` 这份 canonical 源。要发 ClawHub 时，只发布 `dist/clawhub/claws-temple-bounty/` 这个 bundle 目录。
 
-- Codex / OpenAI / OpenClaw: `skills/claws-temple-bounty/`
+- Codex / OpenAI: `skills/claws-temple-bounty/`
+- OpenClaw: canonical package 仍然是 `skills/claws-temple-bounty/`，但安装根目录和 session 刷新规则不同
 - Claude Code: `.claude/skills/claws-temple-bounty/SKILL.md`
 - OpenCode: `.opencode/skills/claws-temple-bounty/SKILL.md`
 - Cursor: `.cursor/rules/claws-temple-bounty.mdc`
@@ -74,7 +75,7 @@
 
 ## 快速安装
 
-### Codex / OpenAI / OpenClaw
+### Codex / OpenAI
 
 ```bash
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
@@ -84,6 +85,38 @@ cp -R skills/claws-temple-bounty "${CODEX_HOME:-$HOME/.codex}/skills/claws-templ
 最小验证：
 
 - 让宿主执行：`使用 $claws-temple-bounty 展示这条让 Agent 去原野上交朋友的路线图。`
+
+### OpenClaw
+
+推荐安装根目录：
+
+- `<workspace>/skills/claws-temple-bounty`
+- `<workspace>/.agents/skills/claws-temple-bounty`
+- `~/.agents/skills/claws-temple-bounty`
+- `~/.openclaw/skills/claws-temple-bounty`
+
+方案一：把本地 package 安装到当前 workspace：
+
+```bash
+mkdir -p "<workspace>/skills"
+cp -R skills/claws-temple-bounty "<workspace>/skills/claws-temple-bounty"
+```
+
+方案二：安装已发布的 ClawHub package：
+
+```bash
+openclaw skills install claws-temple-bounty-v2
+```
+
+OpenClaw 注意事项：
+
+- 安装或升级后，都要先 `/new` 开一个新 session 再重试
+- OpenClaw 只会注入可用 skills 列表，不会自动把 Task 1 到 Task 5 依赖的 skill 一层层展开
+- 如果想手动覆盖依赖搜索根目录，可以设置 `CLAWS_TEMPLE_SKILLS_HOME=/absolute/path/to/skills`
+
+最小验证：
+
+- 让 OpenClaw 执行：`使用 $claws-temple-bounty 展示这条让 Agent 去原野上交朋友的路线图。`
 
 ### Claude Code
 
@@ -125,16 +158,26 @@ cp -R skills/claws-temple-bounty "${CODEX_HOME:-$HOME/.codex}/skills/claws-templ
 - 本地 skill：`resonance-contract` `>= 4.0.0`
 - 本地 skill：`tomorrowdao-agent-skills` `>= 0.2.2`
 - 本地 skill：`portkey-ca-agent-skills` `>= 2.3.0`
-- Task 4 远端 live skill：`https://www.shitskills.net/skill.md`
+- Task 4 的非 OpenClaw 兼容路径仍依赖远端 live skill：`https://www.shitskills.net/skill.md`
+- OpenClaw 上的 Task 4 运行面改成 `native dependency / native action first`，不要默认远端 `skill.md` 能直接加载
 
 如果希望依赖预检在缺失时直接失败，而不是只给 warning，可以用 `STRICT_DEPS=1` 运行 smoke check。
 
 ## 依赖前置
 
-在把这个 skill 当成可运行版本之前，先确认 4 个本地 dependency skills 已经放在 `$CODEX_HOME/skills` 下。
+在把这个 skill 当成可运行版本之前，先确认 4 个本地 dependency skills 能通过下面这条统一搜索顺序被发现。
+
+搜索顺序：
+
+1. `CLAWS_TEMPLE_SKILLS_HOME`
+2. `<workspace>/skills`
+3. `<workspace>/.agents/skills`
+4. `~/.agents/skills`
+5. `~/.openclaw/skills`
+6. `${CODEX_HOME:-$HOME/.codex}/skills`
 
 ```bash
-ls "${CODEX_HOME:-$HOME/.codex}/skills"
+bash skills/claws-temple-bounty/scripts/skill-root-resolver.sh list-roots
 ```
 
 如果依赖缺失或版本过低，默认主路径不应该是直接 blocker，而应该先尝试自动安装或升级；当前宿主如果做不到，再给明确安装或升级指引。
@@ -150,6 +193,12 @@ ls "${CODEX_HOME:-$HOME/.codex}/skills"
   - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
   - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 
+如果想一次性覆盖整个依赖安装 / 搜索根目录，可以设置：
+
+```bash
+export CLAWS_TEMPLE_SKILLS_HOME=/absolute/path/to/skills
+```
+
 如果当前宿主支持在仓库里执行 shell，可以优先用：
 
 ```bash
@@ -161,6 +210,9 @@ bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh <dependenc
 ```bash
 bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spectrum
 ```
+
+如果当前宿主是 OpenClaw，dependency install 也遵循上面的根目录顺序。只要发生安装或升级，都要先 `/new` 再回到当前任务。
+如果后续某个 dependency 有 OpenClaw 原生可安装包，优先使用 `openclaw skills install <slug>`；否则就把 skill 复制到上面的 OpenClaw 根目录之一。
 
 Task 2 现在要求 `resonance-contract >= 4.0.0`，这样 `开放寻配` 才会在 onboarding 和依赖预检通过后被视为正式 queue 主路径。
 如果这个依赖缺失或版本过低，默认顺序现在是先安装或升级，不再先让用户提供安装源，也不再建议跳过 Queue。
@@ -180,6 +232,8 @@ Task 3 配置里的 `proposalId` 是配置内依赖投票工具使用的 `依赖
 Task 3 不再给用户 `手动完成`、`Portkey App` 或 `EOA` 这类回退分支。
 如果 TomorrowDAO direct send 返回 `SIGNER_CA_DIRECT_SEND_FORBIDDEN`，它本身不再视为最终 blocker；流程应该继续切到显式 Portkey CA forward transport，只有这条 forward 路径不可用时，才允许停在 unsupported `CA` transport blocker。
 对 Task 2 来说，如果只是本地还没登录，不应直接视为 blocker；新用户注册和老用户恢复登录都属于正常 onboarding 路径。
+Task 4 现在按宿主分层：非 OpenClaw 仍可把远端 live skill 当兼容路径，OpenClaw 则应坚持 native dependency first；如果原生运行面没装好，就明确返回 checklist 或 blocker。
+Task 5 现在也改成 capability-first：即使在 OpenClaw 里，也只有在本回合已经确认浏览器能力时，才允许出现浏览器直发提示。
 
 ## ClawHub Bundle
 

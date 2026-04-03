@@ -171,6 +171,8 @@ Use these strings when `cta_type = support`.
 - show a hexagon or six-axis visual block before the coordinate card
 - translate faction or type wording into the selected brand language
 - keep the Task 1 brand wrapper thin; do not replace the dependency output with a card-only local template
+- before rendering any Task 1 business result, require a real current-turn `agent-spectrum` dependency result
+- if the current turn has not produced the dependency result yet, do not synthesize the hexagon block, coordinate card, type judgment, or faction mapping from memory; return only dependency preflight, self-heal progress, or a blocker summary
 - if the dependency skill is missing or below the required runnable state, try dependency self-heal first
 - if the host cannot auto-install or auto-upgrade, give explicit install guidance before any support CTA
 - if dependency self-heal or the scoring run still cannot continue, explain the blocker and append support CTA
@@ -186,6 +188,7 @@ Use these strings when `cta_type = support`.
 - if the user is first-time, explain that the smoother identity-entry path starts with sign-up or first-time setup before the pairing flow and ends with a usable `user ID`
 - if the user is returning but not currently signed in, explain that the smoother identity-entry path starts with recovery sign-in before the pairing flow and ends with a usable `user ID`
 - if identity entry and sign-in are ready, auto-resolve the current user's own `user ID` instead of asking the user to type it manually
+- once the user answers the Task 2 readiness question and the current host can continue, keep descending into dependency or local identity context in the same turn instead of stopping at the readiness prompt
 - only show the current user's `user ID` when the current-turn dependency result actually returned that value; do not reuse remembered values, example literals, or placeholders as if they were real runtime output
 - once the current-turn dependency result resolves the current user's `user ID`, show the full value in the visible layer as the Task 2 queue-readiness confirmation
 - if there is no current-turn dependency result yet, do not claim queue-readiness and do not show any concrete `user ID`
@@ -198,6 +201,7 @@ Use these strings when `cta_type = support`.
 - treat the Task 2 path as stable enough for Task 3 once the queue join is active or the direct pair submission has been sent
 - if the user provides `email`, `Address`, nickname, `tDVV` address, or another non-`user ID` input for targeted match, correct the input naturally and offer `provide the other user's user ID` or `switch to open partner search`
 - keep `CA only`, `counterparty_ca_hash`, and `queue` inside maintainer-facing details; the default visible layer should say `user ID`
+- if local dependency context is still missing, describe that state as `identity entry / user ID is not ready in the current host` rather than telling the user that they must finish a manual web flow alone
 - do not tell the user to look in legacy community-brand wording, extra platform names outside Telegram and X, or any address-based source; if the user is stuck, point them to the clickable Telegram / X links instead
 - if registration, recovery sign-in, user-ID auto-resolution, dependency self-heal, identity-entry setup, or the pairing path is externally blocked and the user cannot continue automatically, translate the blocker into `身份入口 / 用户ID 未准备好` style wording and append support CTA
 - end with a CTA toward Task 3 when the path is stable
@@ -215,7 +219,8 @@ Use these strings when `cta_type = support`.
   - `completed`
 - say which stage the user is in and what is still missing
 - before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, and the configured generic token-balance tool are available
-- when shell execution is available, prefer the bundled helper `skills/claws-temple-bounty/scripts/task3-oath-executor.sh` before re-expanding the lower-level Task 3 choreography
+- prefer the bundled helper `skills/claws-temple-bounty/scripts/task3-oath-executor.sh` only when helper mode is truly available: repo shell, `bash`, `python3`, `bun`, resolved dependency skill roots, and usable local `CA` context
+- if helper mode is not available in the current host, either fall back to tool choreography or stop with a host-capability blocker; do not pretend the helper continued automatically
 - treat helper statuses `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked` as the primary maintainer-facing execution truth for Task 3
 - treat helper statuses `password_required`, `waiting_for_tokens`, `submitted`, and `completed` as normal structured outcomes even when the shell wrapper is used; only hard blockers should surface as non-zero helper exit
 - if `tomorrowdao-agent-skills` is missing or below `0.2.2`, try dependency self-heal first
@@ -265,6 +270,10 @@ Use these strings when `cta_type = support`.
 - if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - say clearly that `publish` is the default qualification action in the bounty path, while other native actions are auxiliary unless campaign rules say otherwise
 - ask whether the user already has a SHIT Skills account; if not, route them into registration or sign-in first
+- if the current host is `OpenClaw`, treat Task 4 as native-dependency-first instead of remote-URL-first
+- in `OpenClaw`, do not assume `https://www.shitskills.net/skill.md` is directly loadable as a runtime surface
+- if `OpenClaw` is missing the required native dependency or native action capability, return a precise checklist or blocker instead of claiming the remote live skill will run there automatically
+- for non-OpenClaw hosts, the remote live skill may remain the compatibility path when that host really supports it
 - require a publishable `GitHub repo URL` only when the chosen native action actually needs it
 - gather the native publish fields only when the chosen native action actually needs them:
   - `title`
@@ -280,7 +289,7 @@ Use these strings when `cta_type = support`.
 - do not claim that the local bounty skill itself has completed Task 4; only say which SHIT Skills native action is ready, blocked, or confirmed
 - if the user chose a repo-dependent action but does not have a publishable `GitHub repo URL`, explain that the action is still missing a prerequisite and keep `cta_type = none`
 - if registration or sign-in is the next normal step, keep `cta_type = none`
-- if registration, sign-in, authenticated publishing, or live remote loading is truly blocked, explain the blocker plainly and append support CTA
+- if registration, sign-in, authenticated publishing, native dependency readiness, or live remote loading is truly blocked, explain the blocker plainly and append support CTA
 
 ### Task 5 Replies
 
@@ -288,7 +297,7 @@ Use these strings when `cta_type = support`.
 - frame it as sending a signal so more partners can spot the user's Agent
 - frame it as reach or community impact, not as a blocker
 - when the visible layer mentions sending now on `Telegram` or `X`, first explain that the agent drafts the content first, and that direct send continues only if the current host really has the needed permissions and capability; otherwise the last click belongs to the user
-- if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, and the user explicitly wants to send now, the visible layer may add one short browser-action hint after the host-capability caveat
+- if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, the user explicitly wants to send now, and browser capability was already confirmed in the current turn, the visible layer may add one short browser-action hint after the host-capability caveat
 - keep that browser-action hint as an `OpenClaw`-only convenience, not as a general default for other hosts
 - do not mention browser action before the user chooses a platform or when the user only wants draft copy
 - if the user explicitly wants to send the signal now but the platform or current context blocks that action, append support CTA

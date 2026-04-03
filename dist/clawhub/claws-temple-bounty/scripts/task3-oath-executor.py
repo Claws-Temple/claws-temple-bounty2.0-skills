@@ -12,6 +12,7 @@ import json
 import os
 import re
 import selectors
+import shutil
 import subprocess
 import sys
 import time
@@ -229,18 +230,148 @@ class RuntimePaths:
     skill_root: Path
     codex_home: Path
     wallet_context_path: Path
+    resolver_path: Path | None = None
+    skill_roots: tuple[Path, ...] = ()
+    bun_path: str | None = None
+    bash_path: str | None = None
+    python3_path: str | None = None
+    _resolved_skill_dirs: dict[str, Path] = field(default_factory=dict)
 
     @classmethod
     def discover(cls, skill_root: Path | None = None) -> "RuntimePaths":
-        resolved_skill_root = skill_root or Path(__file__).resolve().parents[1]
+        resolved_skill_root = (skill_root or Path(__file__).resolve().parents[1]).resolve()
         codex_home = Path(os.environ.get("CODEX_HOME") or (Path.home() / ".codex"))
         wallet_context_override = os.environ.get("PORTKEY_SKILL_WALLET_CONTEXT_PATH")
         wallet_context_path = Path(wallet_context_override) if wallet_context_override else Path.home() / ".portkey" / "skill-wallet" / "context.v1.json"
+        resolver_path = resolved_skill_root / "scripts" / "skill-root-resolver.sh"
+        skill_roots = cls._discover_skill_roots(
+            skill_root=resolved_skill_root,
+            codex_home=codex_home,
+            resolver_path=resolver_path if resolver_path.exists() else None,
+        )
         return cls(
             skill_root=resolved_skill_root,
             codex_home=codex_home,
             wallet_context_path=wallet_context_path,
+            resolver_path=resolver_path if resolver_path.exists() else None,
+            skill_roots=skill_roots,
+            bun_path=shutil.which("bun"),
+            bash_path=shutil.which("bash"),
+            python3_path=shutil.which("python3") or sys.executable,
         )
+
+    @classmethod
+    def _discover_skill_roots(
+        cls,
+        *,
+        skill_root: Path,
+        codex_home: Path,
+        resolver_path: Path | None,
+    ) -> tuple[Path, ...]:
+        if resolver_path is not None and shutil.which("bash"):
+            result = subprocess.run(
+                ["bash", str(resolver_path), "list-roots", str(skill_root)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if result.returncode == 0:
+                roots = [
+                    Path(line.strip()).expanduser().resolve(strict=False)
+                    for line in result.stdout.splitlines()
+                    if line.strip()
+                ]
+                if roots:
+                    return tuple(roots)
+        return cls._fallback_skill_roots(skill_root=skill_root, codex_home=codex_home)
+
+    @classmethod
+    def _fallback_skill_roots(cls, *, skill_root: Path, codex_home: Path) -> tuple[Path, ...]:
+        roots: list[Path] = []
+
+        def append_root(path: Path) -> None:
+            resolved = path.expanduser().resolve(strict=False)
+            if resolved not in roots:
+                roots.append(resolved)
+
+        raw_override = os.environ.get("CLAWS_TEMPLE_SKILLS_HOME", "")
+        for raw_path in [item.strip() for item in raw_override.split(":") if item.strip()]:
+            append_root(Path(raw_path))
+
+        explicit_workspace_root = os.environ.get("CLAWS_TEMPLE_WORKSPACE_ROOT")
+        if explicit_workspace_root:
+            workspace_root = Path(explicit_workspace_root).expanduser().resolve(strict=False)
+            append_root(workspace_root / "skills")
+            append_root(workspace_root / ".agents" / "skills")
+
+        cwd_workspace_root = cls._discover_workspace_root_from_path(Path.cwd())
+        if cwd_workspace_root is not None:
+            append_root(cwd_workspace_root / "skills")
+            append_root(cwd_workspace_root / ".agents" / "skills")
+
+        workspace_root = cls._infer_workspace_root(skill_root)
+        if workspace_root is not None:
+            append_root(workspace_root / "skills")
+            append_root(workspace_root / ".agents" / "skills")
+
+        append_root(Path.home() / ".agents" / "skills")
+        append_root(Path.home() / ".openclaw" / "skills")
+        append_root(codex_home / "skills")
+        return tuple(roots)
+
+    @staticmethod
+    def _infer_workspace_root(skill_root: Path) -> Path | None:
+        normalized = skill_root.expanduser().resolve(strict=False)
+        skills_root = normalized.parent
+        if skills_root.name != "skills":
+            return None
+        parent_root = skills_root.parent
+        if parent_root.name == ".agents":
+            return parent_root.parent
+        if parent_root.name in {".openclaw", ".codex"}:
+            return None
+        return parent_root
+
+    @staticmethod
+    def _discover_workspace_root_from_path(start: Path) -> Path | None:
+        normalized = start.expanduser().resolve(strict=False)
+        for candidate in (normalized, *normalized.parents):
+            if (candidate / "skills").is_dir() or (candidate / ".agents" / "skills").is_dir() or (candidate / ".git").exists():
+                return candidate
+        return None
+
+    @property
+    def skill_root_search_order(self) -> list[str]:
+        return [str(path) for path in self.skill_roots]
+
+    @property
+    def helper_capabilities(self) -> dict[str, Any]:
+        return {
+            "skillRoots": self.skill_root_search_order,
+            "resolverPath": str(self.resolver_path) if self.resolver_path else None,
+            "preferredInstallRoot": str(self.skill_roots[0]) if self.skill_roots else None,
+            "bun": {"available": bool(self.bun_path), "path": self.bun_path},
+            "bash": {"available": bool(self.bash_path), "path": self.bash_path},
+            "python3": {"available": bool(self.python3_path), "path": self.python3_path},
+            "walletContextPath": str(self.wallet_context_path),
+            "walletContextExists": self.wallet_context_path.exists(),
+            "resolvedDependencyRoots": {
+                skill_name: str(path)
+                for skill_name, path in self._resolved_skill_dirs.items()
+            },
+        }
+
+    def resolve_skill_dir(self, skill_name: str) -> Path | None:
+        cached = self._resolved_skill_dirs.get(skill_name)
+        if cached is not None:
+            return cached
+        for root in self.skill_roots:
+            candidate = root / skill_name
+            if candidate.is_dir() and ((candidate / "SKILL.md").exists() or (candidate / "package.json").exists()):
+                resolved = candidate.resolve(strict=False)
+                self._resolved_skill_dirs[skill_name] = resolved
+                return resolved
+        return None
 
     @property
     def config_path(self) -> Path:
@@ -248,11 +379,11 @@ class RuntimePaths:
 
     @property
     def tomorrowdao_root(self) -> Path:
-        return self.codex_home / "skills" / "tomorrowdao-agent-skills"
+        return self.resolve_skill_dir("tomorrowdao-agent-skills") or (self.codex_home / "skills" / "tomorrowdao-agent-skills")
 
     @property
     def portkey_root(self) -> Path:
-        return self.codex_home / "skills" / "portkey-ca-agent-skills"
+        return self.resolve_skill_dir("portkey-ca-agent-skills") or (self.codex_home / "skills" / "portkey-ca-agent-skills")
 
     @property
     def portkey_keystore_root(self) -> Path:
@@ -440,7 +571,7 @@ class Task3OathExecutor:
                     payload=approve_payload,
                     reconcile=lambda: self._read_allowance(wallet.ca_address, spender_address),
                     success_predicate=lambda current: current >= self._vote_amount,
-                    auxiliary=lambda tx_id: self._poll_transaction(tx_id),
+                    auxiliary=None,
                 )
                 self.state.transactions["approve"] = approve_result
                 self._record("approve_send", "success", approve_result)
@@ -511,6 +642,31 @@ class Task3OathExecutor:
         return json.loads(path.read_text(encoding="utf-8"))
 
     def _verify_dependencies(self) -> dict[str, Any]:
+        helper_capabilities = self.paths.helper_capabilities
+        self.state.preflight["helperCapabilities"] = helper_capabilities
+        missing_prerequisites = [
+            tool_name
+            for tool_name, tool_path in (
+                ("bash", self.paths.bash_path),
+                ("python3", self.paths.python3_path),
+                ("bun", self.paths.bun_path),
+            )
+            if not tool_path
+        ]
+        if isinstance(self.runner, JsonRunner) and missing_prerequisites:
+            self._record("dependency_check", "failure", helper_capabilities)
+            self._raise_result(
+                status=STATUS_BLOCKED,
+                stage="dependency",
+                code="HELPER_PREREQUISITE_MISSING",
+                summary=(
+                    "Task 3 helper mode requires repo-shell helper prerequisites in the current host: "
+                    + ", ".join(missing_prerequisites)
+                    + "."
+                ),
+                next_action="use_tool_choreography_or_fix_host_capability",
+            )
+
         tomorrowdao_root = self.paths.tomorrowdao_root
         portkey_root = self.paths.portkey_root
         checks = {
@@ -529,15 +685,29 @@ class Task3OathExecutor:
         for name, meta in checks.items():
             package_path = Path(meta["package"])
             if not package_path.exists():
+                self._record("dependency_check", "failure", {
+                    "dependency": name,
+                    "searchRoots": self.paths.skill_root_search_order,
+                    "expectedPackage": str(package_path),
+                })
                 self._raise_result(
                     status=STATUS_BLOCKED,
                     stage="dependency",
                     code="DEPENDENCY_MISSING",
-                    summary=f"{name} is missing from {package_path.parent}.",
+                    summary=(
+                        f"{name} is missing from the current skill-root search order. "
+                        f"Checked: {', '.join(self.paths.skill_root_search_order)}."
+                    ),
                     next_action="run_dependency_self_heal",
                 )
             version = self._load_json(package_path).get("version")
             if not version or not self._version_gte(str(version), str(meta["minVersion"])):
+                self._record("dependency_check", "failure", {
+                    "dependency": name,
+                    "root": meta["root"],
+                    "version": version,
+                    "minVersion": meta["minVersion"],
+                })
                 self._raise_result(
                     status=STATUS_BLOCKED,
                     stage="dependency",
@@ -829,7 +999,7 @@ class Task3OathExecutor:
         label: str,
     ) -> dict[str, Any]:
         cli = [
-            "bun",
+            self.paths.bun_path or "bun",
             "run",
             str(self.paths.tomorrowdao_root / "tomorrowdao_skill.ts"),
             domain,
@@ -855,7 +1025,7 @@ class Task3OathExecutor:
 
     def _portkey_cli(self, script_name: str, command: str, options: dict[str, Any], *, label: str) -> dict[str, Any]:
         cli = [
-            "bun",
+            self.paths.bun_path or "bun",
             "run",
             str(self.paths.portkey_root / script_name),
             command,

@@ -18,6 +18,8 @@
 如果你还没有指定动作，我会先推荐 `发布` 作为当前 bounty 路线下最自然的默认动作。  
 如果你还没有账号，我会先带你走原生注册或登录。
 
+如果当前宿主是 `OpenClaw`，我会先按 `native dependency / native action` 来检查可用性，不会默认把远端 `skill.md` 当成当前回合一定可直接加载的运行面。
+
 只有当你先选了 `发布` 或其他确实依赖 repo 的原生动作，而且账号也已经准备好时，我才会继续确认 `GitHub repo URL`，再收后面的发布字段：
 
 - `title`
@@ -52,6 +54,10 @@
 
 `当前不是缺材料，而是 SHIT Skills 的原生动作在这个宿主里还没法继续。我先把你停在这里，等登录态或原生动作恢复后再继续。`
 
+如果当前宿主是 `OpenClaw`，但还没装好对应的 native dependency 或 native action 还没确认可用，就应该明确告诉你：
+
+`你现在是在 OpenClaw 里，但当前回合还没有确认可用的 SHIT Skills 原生依赖 / 原生动作。我先把缺失项列出来，等依赖装好并且 /new 进入新会话后，再继续 Task 4。`
+
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
 
@@ -59,5 +65,6 @@
 
 - route: `task-4-curio-board`
 - live_dependency: `https://www.shitskills.net/skill.md`
+- openclaw_runtime: `native-dependency-first`
 - default_bounty_action: `publish`
 - native_publish_required_fields: `title`, `summary`, `githubUrl`, `tags`, `installType`, `installCommand|installUrl`

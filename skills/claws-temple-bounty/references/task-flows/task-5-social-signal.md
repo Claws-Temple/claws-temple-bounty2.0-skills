@@ -18,7 +18,7 @@ Help the user send a public signal on Telegram, X, or the Curio Board without tr
 3. Draft a short branded signal.
 4. If the user already has a coordinate card or faction result, fold that into the signal.
 5. Whenever the visible layer mentions sending now on `Telegram` or `X`, first add one short boundary line: the agent drafts first, direct send continues only if the current host really has the required permissions and capability, and otherwise the final send click belongs to the user.
-6. If the current host is `OpenClaw`, the user already chose `Telegram` or `X`, and the user explicitly wants to send now, add one short visible-layer hint that browser action can be used directly in `OpenClaw` after that host-capability caveat.
+6. If the current host is `OpenClaw`, the user already chose `Telegram` or `X`, the user explicitly wants to send now, and the current turn already confirmed browser capability, add one short visible-layer hint that browser action can be used directly in `OpenClaw` after that host-capability caveat.
 7. Do not mention browser action before the user has chosen a platform, when the user only wants draft copy, or in hosts other than `OpenClaw`.
 8. If the user explicitly wants to send the signal now but the current context blocks that action, return a blocker summary and append support CTA.
 9. End with a community-reach framing instead of a blocker framing when the signal path is otherwise healthy.
@@ -28,7 +28,7 @@ Help the user send a public signal on Telegram, X, or the Curio Board without tr
 - `TG`: slightly longer, conversational, may use 2 short paragraphs and a clear reply CTA; when practical, point the user to the clickable `Telegram group` link
 - `X`: one compact post, keep it within a short single-post format; when practical, point the user to the clickable `X` link
 - `Curio Board`: slightly more descriptive, may mention what kind of resonance partner the user wants
-- `OpenClaw host hint`: when the user already chose `TG` or `X` and wants to send now, the visible layer may say that browser action can be used directly in `OpenClaw`
+- `OpenClaw host hint`: when the user already chose `TG` or `X`, wants to send now, and browser capability is confirmed in the current turn, the visible layer may say that browser action can be used directly in `OpenClaw`
 
 Each platform draft should include:
 
@@ -51,5 +51,5 @@ Each platform draft should include:
 
 - keep this task clearly separated from the main qualification path
 - do not imply that Task 5 is required for unlock
-- keep browser-action wording host-aware: `OpenClaw` only, `Telegram` or `X` only, and only when the user explicitly wants to send now
+- keep browser-action wording host-aware: `OpenClaw` only, `Telegram` or `X` only, only when the user explicitly wants to send now, and only when browser capability is already confirmed
 - never imply guaranteed auto-posting; the safe default is draft first, then direct send only when the host can really do it

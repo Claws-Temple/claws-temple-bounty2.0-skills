@@ -54,7 +54,8 @@ If you want to start right now, begin with `Task 1`.
 
 Edit the canonical source under `skills/claws-temple-bounty/`. For ClawHub, publish only the built bundle directory under `dist/clawhub/claws-temple-bounty/`.
 
-- Codex / OpenAI / OpenClaw: `skills/claws-temple-bounty/`
+- Codex / OpenAI: `skills/claws-temple-bounty/`
+- OpenClaw: canonical package stays `skills/claws-temple-bounty/`, but install roots and session refresh rules are different
 - Claude Code: `.claude/skills/claws-temple-bounty/SKILL.md`
 - OpenCode: `.opencode/skills/claws-temple-bounty/SKILL.md`
 - Cursor: `.cursor/rules/claws-temple-bounty.mdc`
@@ -73,7 +74,7 @@ Edit the canonical source under `skills/claws-temple-bounty/`. For ClawHub, publ
 
 ## Quick Install
 
-### Codex / OpenAI / OpenClaw
+### Codex / OpenAI
 
 ```bash
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
@@ -83,6 +84,38 @@ cp -R skills/claws-temple-bounty "${CODEX_HOME:-$HOME/.codex}/skills/claws-templ
 Verify:
 
 - Ask the host to run: `Use $claws-temple-bounty to show the roadmap that takes my agent out into the wild.`
+
+### OpenClaw
+
+Preferred install roots:
+
+- `<workspace>/skills/claws-temple-bounty`
+- `<workspace>/.agents/skills/claws-temple-bounty`
+- `~/.agents/skills/claws-temple-bounty`
+- `~/.openclaw/skills/claws-temple-bounty`
+
+Option 1, install the local package into the current workspace:
+
+```bash
+mkdir -p "<workspace>/skills"
+cp -R skills/claws-temple-bounty "<workspace>/skills/claws-temple-bounty"
+```
+
+Option 2, install the published ClawHub package:
+
+```bash
+openclaw skills install claws-temple-bounty-v2
+```
+
+OpenClaw notes:
+
+- after install or upgrade, start a fresh OpenClaw session with `/new`
+- OpenClaw injects the available-skill list, but it does not auto-expand dependency skills for Task 1 to Task 5
+- if you want to override the dependency search root manually, set `CLAWS_TEMPLE_SKILLS_HOME=/absolute/path/to/skills`
+
+Verify:
+
+- Ask OpenClaw to run: `Use $claws-temple-bounty to show the roadmap that takes my agent out into the wild.`
 
 ### Claude Code
 
@@ -124,16 +157,26 @@ Enable and verify:
 - Local skill: `resonance-contract` `>= 4.0.0`
 - Local skill: `tomorrowdao-agent-skills` `>= 0.2.2`
 - Local skill: `portkey-ca-agent-skills` `>= 2.3.0`
-- Remote live skill for Task 4: `https://www.shitskills.net/skill.md`
+- Remote live skill for Task 4 compatibility on non-OpenClaw hosts: `https://www.shitskills.net/skill.md`
+- OpenClaw Task 4 runtime: native dependency / native action first; do not assume the remote `skill.md` is directly loadable there
 
 If you want dependency preflight to fail hard instead of warning, run smoke check with `STRICT_DEPS=1`.
 
 ## Dependency Bootstrap
 
-Before treating this skill as runnable, verify that the four local dependency skills are already present under `$CODEX_HOME/skills`.
+Before treating this skill as runnable, verify that the four local dependency skills are discoverable through the shared search order below.
+
+Search order:
+
+1. `CLAWS_TEMPLE_SKILLS_HOME`
+2. `<workspace>/skills`
+3. `<workspace>/.agents/skills`
+4. `~/.agents/skills`
+5. `~/.openclaw/skills`
+6. `${CODEX_HOME:-$HOME/.codex}/skills`
 
 ```bash
-ls "${CODEX_HOME:-$HOME/.codex}/skills"
+bash skills/claws-temple-bounty/scripts/skill-root-resolver.sh list-roots
 ```
 
 If any dependency is missing or below the required version, the default path should self-heal first instead of blocking immediately.
@@ -149,6 +192,12 @@ Portable dependency sources are defined in `skills/claws-temple-bounty/config/de
   - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
   - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 
+If you want to override the whole dependency install/search root, use:
+
+```bash
+export CLAWS_TEMPLE_SKILLS_HOME=/absolute/path/to/skills
+```
+
 If the current host can run shell commands inside this repository, prefer:
 
 ```bash
@@ -160,6 +209,9 @@ For example:
 ```bash
 bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spectrum
 ```
+
+If the current host is OpenClaw, use the same root order as above for dependency installs. After any install or upgrade, run `/new` before retrying.
+If a dependency has a published OpenClaw-native package later, prefer `openclaw skills install <slug>`; otherwise copy it into one of the OpenClaw roots above.
 
 Task 2 now expects `resonance-contract >= 4.0.0`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
 If that dependency is missing or outdated, the default route is now `install or upgrade first`, not `ask the user for an install source` and not `skip Queue`.
@@ -179,6 +231,8 @@ Task 3 now prefers one consistent verified `CA` write transport for both `Approv
 Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices in the user-facing flow.
 If TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, that is no longer the final blocker by itself; the flow should continue through the explicit Portkey CA forward transport and only stop with an unsupported `CA` transport blocker when that forward path is unavailable.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
+Task 4 is now host-aware: non-OpenClaw hosts may still use the remote live skill as a compatibility path, while OpenClaw should stay native-dependency-first and return a checklist or blocker when that native runtime is not installed.
+Task 5 is now capability-first: even in OpenClaw, browser-action hints should appear only after the current turn already confirmed browser capability.
 
 ## ClawHub Bundle
 
