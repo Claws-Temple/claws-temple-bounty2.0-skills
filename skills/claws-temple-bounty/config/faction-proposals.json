@@ -1,5 +1,5 @@
 {
-  "version": "0.2.17",
+  "version": "0.2.19",
   "environment": "production",
   "is_test_only": false,
   "launch_blocker": "",
@@ -20,6 +20,15 @@
     "zh-CN": "两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
     "en": "There is an extra 20 Token claim in two weeks, and any questions are welcome in the Telegram group."
   },
+  "tx_recovery": {
+    "provider": "aelfscan",
+    "address_transactions_url": "https://aelfscan.io/api/app/blockchain/transactions",
+    "max_result_count": 25,
+    "confirmed_status": 0,
+    "phase_lookback_seconds": 180,
+    "vote_method_name": "Vote",
+    "approve_method_name": "Approve"
+  },
   "dependency_invocation": {
     "dependency_skill": "tomorrowdao-agent-skills",
     "tool_name": "tomorrowdao_dao_vote",
@@ -34,8 +43,7 @@
     "validation_failure_switch_rule": "if_vote_returns_NODEVALIDATIONFAILED_with_insufficient_allowance_after_allowance_is_sufficient_switch_back_to_the_verified_ca_write_path",
     "state_reconciliation_priority": [
       "tx_receipt",
-      "vote_logs",
-      "allowance_or_balance_delta",
+      "aelfscan_recent_transactions",
       "proposal_my_info"
     ],
     "approve_payload": {

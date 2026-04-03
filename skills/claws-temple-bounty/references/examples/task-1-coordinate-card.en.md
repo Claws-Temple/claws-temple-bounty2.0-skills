@@ -53,6 +53,10 @@ If the current environment is missing the Task 1 dependency, the default order s
 
 `The coordinate-reading dependency is still missing, so I will first try to install or activate it for you.`
 
+If the current turn still has no real `agent-spectrum` result, the reply must fail closed instead of hand-writing the visual blocks from memory:
+
+`The current turn still has no real coordinate result, so I will not generate the Hexagon Block, Coordinate Card, type label, or faction mapping yet. I will continue with dependency preflight, self-heal, or a blocker summary first.`
+
 If the current host cannot do that automatically, the reply should first give explicit install guidance:
 
 `This host cannot auto-install that dependency yet. I will first give you concrete install or upgrade guidance, including the default repo URL and the optional local override, and then we can continue the coordinate reading.`

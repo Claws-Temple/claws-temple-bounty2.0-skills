@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_VERSION = "0.2.17"
+SKILL_VERSION = "0.2.19"
 SKILL_ROOT = ROOT / "skills" / "claws-temple-bounty"
 BUNDLE_ROOT = ROOT / "dist" / "clawhub" / "claws-temple-bounty"
 CONFIG_PATH = SKILL_ROOT / "config" / "faction-proposals.json"
@@ -24,6 +24,7 @@ OPENAI_METADATA_PATH = SKILL_ROOT / "agents" / "openai.yaml"
 CLAWHUB_BUILD_SCRIPT = ROOT / "scripts" / "build-clawhub.sh"
 CLAWHUB_BUNDLE_VALIDATOR = ROOT / "scripts" / "validate_clawhub_bundle.py"
 CLAWHUB_RUNTIME_NOTES_PATH = SKILL_ROOT / "references" / "clawhub-runtime-notes.md"
+HOST_RUNTIME_CONTRACT_PATH = SKILL_ROOT / "references" / "host-runtime-contract.md"
 TASK2_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-2-resonance-partner.md"
 TASK3_FLOW_PATH = SKILL_ROOT / "references" / "task-flows" / "task-3-faction-oath.md"
 CANONICAL_SKILL_PATH = SKILL_ROOT / "SKILL.md"
@@ -45,6 +46,7 @@ REQUIRED_FILES = [
     SKILL_ROOT / "references" / "brand-lexicon.zh.md",
     SKILL_ROOT / "references" / "brand-lexicon.en.md",
     CLAWHUB_RUNTIME_NOTES_PATH,
+    HOST_RUNTIME_CONTRACT_PATH,
     SKILL_ROOT / "references" / "task-flows" / "task-roadmap.md",
     SKILL_ROOT / "references" / "task-flows" / "task-1-coordinate-card.md",
     SKILL_ROOT / "references" / "task-flows" / "task-2-resonance-partner.md",
@@ -53,7 +55,11 @@ REQUIRED_FILES = [
     SKILL_ROOT / "references" / "task-flows" / "task-5-social-signal.md",
     SKILL_ROOT / "references" / "task-4-live-rollout.md",
     SKILL_ROOT / "scripts" / "release-gate.sh",
+    SKILL_ROOT / "scripts" / "skill-root-resolver.sh",
     SKILL_ROOT / "scripts" / "self-heal-local-dependency.sh",
+    SKILL_ROOT / "scripts" / "smoke-check.sh",
+    SKILL_ROOT / "scripts" / "task3-oath-executor.py",
+    SKILL_ROOT / "scripts" / "task3-oath-executor.sh",
     SKILL_ROOT / "scripts" / "task4-live-skill-probe.sh",
     SKILL_ROOT / "scripts" / "test-rollout-gate.sh",
     CONFIG_SCHEMA_PATH,
@@ -271,7 +277,7 @@ def parse_shanghai_timestamp(raw_value: str) -> datetime:
 
 def run_clawhub_bundle_validator() -> None:
     result = subprocess.run(
-        [sys.executable, str(CLAWHUB_BUNDLE_VALIDATOR)],
+        [sys.executable, str(CLAWHUB_BUNDLE_VALIDATOR), str(BUNDLE_ROOT)],
         capture_output=True,
         text=True,
         check=False,
@@ -307,24 +313,28 @@ def main() -> None:
             "default_repo_url": "https://github.com/aelf-hzz780/agent-spectrum-skill",
             "skill_subdir": "skills/agent-spectrum",
             "env_override": "CLAWS_TEMPLE_AGENT_SPECTRUM_SOURCE",
+            "openclaw_install_hint": "Install into <workspace>/skills/agent-spectrum, <workspace>/.agents/skills/agent-spectrum, ~/.agents/skills/agent-spectrum, or ~/.openclaw/skills/agent-spectrum, then start a new OpenClaw session with /new.",
         },
         "resonance-contract": {
             "min_version": "4.0.0",
             "default_repo_url": "https://github.com/aelf-hzz780/agent-resonance-skill",
             "skill_subdir": "skills/resonance-contract",
             "env_override": "CLAWS_TEMPLE_RESONANCE_CONTRACT_SOURCE",
+            "openclaw_install_hint": "Install into <workspace>/skills/resonance-contract, <workspace>/.agents/skills/resonance-contract, ~/.agents/skills/resonance-contract, or ~/.openclaw/skills/resonance-contract, then start a new OpenClaw session with /new.",
         },
         "tomorrowdao-agent-skills": {
             "min_version": "0.2.2",
             "default_repo_url": "https://github.com/TomorrowDAOProject/tomorrowDAO-skill",
             "skill_subdir": ".",
             "env_override": "CLAWS_TEMPLE_TOMORROWDAO_SOURCE",
+            "openclaw_install_hint": "Install into <workspace>/skills/tomorrowdao-agent-skills, <workspace>/.agents/skills/tomorrowdao-agent-skills, ~/.agents/skills/tomorrowdao-agent-skills, or ~/.openclaw/skills/tomorrowdao-agent-skills, then start a new OpenClaw session with /new.",
         },
         "portkey-ca-agent-skills": {
             "min_version": "2.3.0",
             "default_repo_url": "https://github.com/Portkey-Wallet/ca-agent-skills.git",
             "skill_subdir": ".",
             "env_override": "CLAWS_TEMPLE_PORTKEY_CA_SOURCE",
+            "openclaw_install_hint": "Install into <workspace>/skills/portkey-ca-agent-skills, <workspace>/.agents/skills/portkey-ca-agent-skills, ~/.agents/skills/portkey-ca-agent-skills, or ~/.openclaw/skills/portkey-ca-agent-skills, then start a new OpenClaw session with /new.",
         },
     }
     dep_entries = dependency_sources.get("dependencies")
@@ -344,6 +354,9 @@ def main() -> None:
                     f"unexpected dependency source {dep_name}.{key}: "
                     f"expected {value!r}, got {entry.get(key)!r}"
                 )
+        clawhub_slug = entry.get("clawhub_slug")
+        if clawhub_slug is not None and not isinstance(clawhub_slug, str):
+            fail(f"dependency source {dep_name}.clawhub_slug must be a string when present")
 
     openai_yaml = OPENAI_METADATA_PATH.read_text(encoding="utf-8")
     if "allow_implicit_invocation: false" not in openai_yaml:
@@ -362,6 +375,33 @@ def main() -> None:
         fail("expected canonical skill to define negative trigger rules")
     if "Do not trigger this skill when:" not in canonical_text:
         fail("expected canonical skill to define negative trigger guidance")
+    for marker in (
+        "homepage: https://github.com/Claws-Temple/claws-temple-bounty2.0-skills",
+        "references/host-runtime-contract.md",
+        "## Host Runtime Contract",
+        "do not assume the host auto-expands dependency skills",
+        "OpenClaw",
+        "fail closed",
+    ):
+        if marker not in canonical_text:
+            fail(f"missing canonical host-runtime marker: {marker}")
+
+    host_runtime_contract = HOST_RUNTIME_CONTRACT_PATH.read_text(encoding="utf-8")
+    for marker in (
+        "## Shared Skill Root Search Order",
+        "`CLAWS_TEMPLE_SKILLS_HOME`",
+        "`<workspace>/skills`",
+        "`<workspace>/.agents/skills`",
+        "`~/.agents/skills`",
+        "`~/.openclaw/skills`",
+        "`${CODEX_HOME:-$HOME/.codex}/skills`",
+        "`/new`",
+        "repo shell capability",
+        "browser/native-action capability",
+        "fail-closed",
+    ):
+        if marker not in host_runtime_contract:
+            fail(f"missing host runtime contract marker: {marker}")
 
     for key, value in EXPECTED_FORMAL_DAO.items():
         if config.get(key) != value:
@@ -587,6 +627,11 @@ def main() -> None:
         "dependency-sources.json",
         "如果这里卡住了",
         "If you're stuck here",
+        "require a real current-turn `agent-spectrum` dependency result",
+        "keep descending into dependency or local identity context in the same turn",
+        "identity entry / user ID is not ready in the current host",
+        "native-dependency-first",
+        "browser capability was already confirmed in the current turn",
     ):
         if marker not in output_contract:
             fail(f"missing support CTA contract marker: {marker}")
@@ -834,6 +879,9 @@ def main() -> None:
         "`installCommand`",
         "`installUrl`",
         "hard failure",
+        "OpenClaw",
+        "native dependency",
+        "do not assume the remote `skill.md` URL can be loaded directly",
     ):
         if marker not in task4_flow:
             fail(f"missing Task 4 native-flow marker: {marker}")
@@ -860,6 +908,8 @@ def main() -> None:
         "counterparty_ca_hash",
         "queue",
         "preparation and matching work will be advanced by the agent automatically",
+        "same turn",
+        "missing local identity-entry or local account-context blocker",
     ):
         if marker not in task2_flow:
             fail(f"missing Task 2 onboarding flow marker: {marker}")
@@ -916,6 +966,13 @@ def main() -> None:
         "20+ AIBOUNTY",
         "25 AIBOUNTY",
         "默认主体统一使用 `Agent` 视角",
+        "openclaw skills install claws-temple-bounty-v2",
+        "/new",
+        "<workspace>/skills/claws-temple-bounty",
+        "<workspace>/.agents/skills/claws-temple-bounty",
+        "~/.openclaw/skills/claws-temple-bounty",
+        "CLAWS_TEMPLE_SKILLS_HOME",
+        "不会自动把 Task 1 到 Task 5 依赖的 skill 一层层展开",
     ):
         if marker not in readme_zh:
             fail(f"missing Chinese narrative marker: {marker}")
@@ -924,9 +981,18 @@ def main() -> None:
         "20+ AIBOUNTY",
         "25 AIBOUNTY",
         "uses `your agent` as the default subject across hosts",
+        "openclaw skills install claws-temple-bounty-v2",
+        "/new",
+        "<workspace>/skills/claws-temple-bounty",
+        "<workspace>/.agents/skills/claws-temple-bounty",
+        "~/.openclaw/skills/claws-temple-bounty",
+        "CLAWS_TEMPLE_SKILLS_HOME",
+        "does not auto-expand dependency skills",
     ):
         if marker not in readme_en:
             fail(f"missing English narrative marker: {marker}")
+    if "### Codex / OpenAI / OpenClaw" in readme_en or "### Codex / OpenAI / OpenClaw" in readme_zh:
+        fail("README install sections must split Codex/OpenAI from OpenClaw")
     for marker in (
         "主 Slogan -> `你的Agent，终于可以去原野上交朋友了。`",
         "默认主体 -> `你的Agent`",
@@ -1044,6 +1110,8 @@ def main() -> None:
         "The Asylum",
         "The Mutant",
         "The Balancer",
+        "host runtime contract",
+        "do not generate any Task 1 business result yet",
     ):
         if marker not in task1_flow:
             fail(f"missing Task 1 support flow marker: {marker}")
@@ -1061,6 +1129,9 @@ def main() -> None:
     for marker in ("阻断示例", "补齐依赖", "明确安装或升级步骤", "默认仓库地址"):
         if marker not in task1_zh:
             fail(f"missing Task 1 Chinese dependency self-heal marker: {marker}")
+    for marker in ("fail-closed", "不会先生成六边形图", "本回合还没有拿到真实坐标结果"):
+        if marker not in task1_zh:
+            fail(f"missing Task 1 Chinese fail-closed marker: {marker}")
     for marker in (
         "Blocker Example",
         "install or upgrade",
@@ -1069,6 +1140,9 @@ def main() -> None:
     ):
         if marker not in task1_en:
             fail(f"missing Task 1 English dependency self-heal marker: {marker}")
+    for marker in ("fail closed", "will not generate the Hexagon Block", "no real coordinate result"):
+        if marker not in task1_en:
+            fail(f"missing Task 1 English fail-closed marker: {marker}")
     for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
         if marker not in task1_zh:
             fail(f"missing Task 1 Chinese support marker: {marker}")
@@ -1160,7 +1234,9 @@ def main() -> None:
     task3_zh = (EXAMPLES_DIR / "task-3-faction-oath.zh.md").read_text(encoding="utf-8")
     task3_en = (EXAMPLES_DIR / "task-3-faction-oath.en.md").read_text(encoding="utf-8")
     for marker in (
-        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)，并发送这条消息。两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
+        "请现在加入 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)。",
+        "如果当前 agent 暂时无法直接操作 Telegram，还请你手动加入群组，并发送下面这段报到内容。",
+        "两周后可额外领取 20 Token，有问题也欢迎在群里讨论。",
         "我是平衡者阵营，编号 txid-1234。我已完成龙虾圣殿 Task 3 正式版部落宣誓记录。",
         "manager key",
         "CA 发送路径阻断",
@@ -1174,13 +1250,20 @@ def main() -> None:
         if forbidden in task3_zh:
             fail(f"legacy Task 3 Chinese combined template should be removed: {forbidden}")
     for marker in (
-        "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message.",
+        "Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now.",
+        "If the current agent cannot operate Telegram directly, please join the group manually and send the prepared check-in message below.",
         "I am with The Balancer, reference txid-1234. I have completed the formal faction oath record for Claws Temple Task 3.",
         "manager key",
         "CA transport blocker",
     ):
         if marker not in task3_en:
             fail(f"missing Task 3 English success marker: {marker}")
+    for marker in ("### Helper 模式不可用示例", "repo shell / bun / 本地 CA 上下文", "切到能跑这个仓库 helper 的宿主"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese helper-blocker marker: {marker}")
+    for marker in ("### Helper-Mode Blocker Example", "repo shell access, bun, or readable local CA context", "switch to a host that can run this repository helper"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English helper-blocker marker: {marker}")
     for forbidden in (
         "I am with The Balancer, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.",
     ):
@@ -1190,10 +1273,19 @@ def main() -> None:
     for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
         if marker not in task4_flow:
             fail(f"missing Task 4 support flow marker: {marker}")
+    for marker in ("## OpenClaw Recovery Checklist", "native runtime package", "install that package into the usable OpenClaw runtime surface and then start `/new`"):
+        if marker not in task4_flow:
+            fail(f"missing Task 4 OpenClaw checklist marker: {marker}")
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     for marker in ("我会先带你进入原生流程并继续推进", "只有遇到账号、登录态或 repo 前置条件时"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese execution-report marker: {marker}")
+    for marker in ("openclaw_native_wrapper_bundled", "这个仓库版本本身还没有内置可直接拿来跑 Task 4 的 SHIT Skills 原生 wrapper", "改到能加载远端 live skill 的非 OpenClaw 宿主继续 Task 4"):
+        if marker not in task4_zh:
+            fail(f"missing Task 4 Chinese OpenClaw recovery marker: {marker}")
+    for marker in ("openclaw_native_wrapper_bundled", "does not bundle a ready-to-run SHIT Skills native wrapper for Task 4", "continue Task 4 in a non-OpenClaw host that can load the remote live skill"):
+        if marker not in task4_en:
+            fail(f"missing Task 4 English OpenClaw recovery marker: {marker}")
 
     task5_flow = TASK5_FLOW_PATH.read_text(encoding="utf-8")
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
@@ -1202,9 +1294,12 @@ def main() -> None:
     for marker in ("support CTA", "genuinely stuck on sending", "clickable `Telegram group` link", "clickable `X` link"):
         if marker not in task5_flow:
             fail(f"missing Task 5 support flow marker: {marker}")
-    for marker in ("OpenClaw", "browser action", "Telegram` or `X`", "the final send click belongs to the user"):
+    for marker in ("OpenClaw", "browser action", "Telegram` or `X`", "the final send click belongs to the user", "browser capability"):
         if marker not in task5_flow:
             fail(f"missing Task 5 OpenClaw marker: {marker}")
+    for marker in ("successful browser or native action", "exposed host capability marker or tool manifest", "draft-plus-link mode", "Can this exact session open browser actions right now?"):
+        if marker not in task5_flow:
+            fail(f"missing Task 5 capability-confirmation marker: {marker}")
     task5_zh = (EXAMPLES_DIR / "task-5-social-signal.zh.md").read_text(encoding="utf-8")
     task5_en = (EXAMPLES_DIR / "task-5-social-signal.en.md").read_text(encoding="utf-8")
     for marker in ("TG / X / 奇物志", "如果你已经确定平台", "如果你只是想先看入口", "OpenClaw", "浏览器操作"):
@@ -1213,22 +1308,28 @@ def main() -> None:
     for marker in ("我会先帮你起草内容", "如果当前宿主具备对应权限和能力", "最后一步会由你手动点发送"):
         if marker not in task5_zh:
             fail(f"missing Task 5 Chinese host-capability marker: {marker}")
+    for marker in ("### 能力确认示例", "这个会话现在是否真的能直接打开浏览器动作", "最终文案和入口链接", "如果这个会话现在还不能确认浏览器能力"):
+        if marker not in task5_zh:
+            fail(f"missing Task 5 Chinese capability-confirmation marker: {marker}")
     for marker in ("TG / X / Curio Board", "If you already know the platform", "If you only want the destination links", "OpenClaw", "browser action"):
         if marker not in task5_en:
             fail(f"missing Task 5 English platform-choice marker: {marker}")
     for marker in ("I will draft the content first", "required permissions and capability", "the final send click is still yours"):
         if marker not in task5_en:
             fail(f"missing Task 5 English host-capability marker: {marker}")
+    for marker in ("### Capability-Confirmation Example", "whether this session can actually open browser actions right now", "draft-plus-link mode", "If this session still cannot confirm browser capability"):
+        if marker not in task5_en:
+            fail(f"missing Task 5 English capability-confirmation marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
-    if "REMOTE_PROBE_MODE=strict" not in release_gate:
-        fail("release gate must run Task 4 probe in strict mode")
+    for marker in ("TASK4_TARGET_HOST", "OPENCLAW_TASK4_NATIVE_READY", "OPENCLAW_TASK4_SESSION_REFRESHED", "CHECK_REMOTE_SKILL=1", "REMOTE_PROBE_MODE=strict"):
+        if marker not in release_gate:
+            fail(f"release gate is missing Task 4 host-aware marker: {marker}")
 
     test_rollout_gate = (SKILL_ROOT / "scripts" / "test-rollout-gate.sh").read_text(encoding="utf-8")
-    if "task4-live-skill-probe.sh" not in test_rollout_gate:
-        fail("test rollout gate must call Task 4 probe")
-    if "PROBE_MODE=strict" not in test_rollout_gate:
-        fail("test rollout gate must keep Task 4 probe in strict mode")
+    for marker in ("TASK4_TARGET_HOST", "OPENCLAW_TASK4_NATIVE_READY", "OPENCLAW_TASK4_SESSION_REFRESHED", "task4-live-skill-probe.sh", "PROBE_MODE=strict"):
+        if marker not in test_rollout_gate:
+            fail(f"test rollout gate is missing Task 4 host-aware marker: {marker}")
 
     task4_probe = (SKILL_ROOT / "scripts" / "task4-live-skill-probe.sh").read_text(encoding="utf-8")
     if "publish-prep mode" in task4_probe:
@@ -1238,6 +1339,9 @@ def main() -> None:
     for marker in ("native SHIT Skills flow", "Task 4 is unavailable", "do not simulate a prep-only success path"):
         if marker not in task4_rollout:
             fail(f"missing Task 4 rollout marker: {marker}")
+    for marker in ("does not bundle an OpenClaw-native SHIT Skills wrapper", "run `/new`", "install the compatible package, run `/new`, or switch host"):
+        if marker not in task4_rollout:
+            fail(f"missing Task 4 OpenClaw rollout marker: {marker}")
     for banned in ("publish-prep mode", "prep-only mode"):
         if banned in task4_rollout:
             fail(f"old Task 4 rollout marker must be removed: {banned}")

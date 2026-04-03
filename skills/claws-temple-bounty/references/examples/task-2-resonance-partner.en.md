@@ -33,9 +33,11 @@ If your identity entry is already open and you are signed in, I should auto-reso
 Only when the dependency really returns that value in the current turn should I show a concrete user ID; I must not treat example values, placeholders, or remembered IDs as if they were real runtime output.
 If this is your first time here, I will take you through sign-up or first-time setup before the pairing flow continues.
 If you are returning but not currently signed in, I will take you through recovery sign-in before the pairing flow continues.
+Once you answer that minimum readiness question, and the current host can still continue, I should keep descending into local identity context or the dependency in the same turn instead of stopping there.
 If you do not already have a concrete partner, go straight into `Open partner search`; that is the automatic queue path.
 Once identity entry, sign-in, and current-user ID resolution are ready, I should continue into the formal queue flow instead of suggesting a skip or social-posting substitute.
 If `resonance-contract` is missing or outdated, I should install or upgrade it first instead of asking the user to provide an install source.
+If local dependency context is still missing, I should describe that as `identity entry / user ID is not ready in the current host`, not as `go finish a separate web flow on your own`.
 Once the `Open partner search` queue join is active, or the `Targeted match` submission has already been sent, I should treat `Task 2` as stable enough to hand off into `Task 3`.
 
 ### Correction Example

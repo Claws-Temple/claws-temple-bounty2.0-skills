@@ -69,6 +69,8 @@ def main(argv: list[str]) -> None:
         bundle_root / "config" / "faction-proposals.json",
         bundle_root / "references" / "brand-lexicon.zh.md",
         bundle_root / "references" / "brand-lexicon.en.md",
+        bundle_root / "references" / "clawhub-runtime-notes.md",
+        bundle_root / "references" / "host-runtime-contract.md",
         bundle_root / "references" / "output-contract.md",
         bundle_root / "references" / "task-flows" / "task-roadmap.md",
         bundle_root / "references" / "task-flows" / "task-1-coordinate-card.md",
@@ -78,7 +80,10 @@ def main(argv: list[str]) -> None:
         bundle_root / "references" / "task-flows" / "task-5-social-signal.md",
         bundle_root / "scripts" / "smoke-check.sh",
         bundle_root / "scripts" / "release-gate.sh",
+        bundle_root / "scripts" / "skill-root-resolver.sh",
         bundle_root / "scripts" / "self-heal-local-dependency.sh",
+        bundle_root / "scripts" / "task3-oath-executor.py",
+        bundle_root / "scripts" / "task3-oath-executor.sh",
         bundle_root / "scripts" / "task4-live-skill-probe.sh",
         bundle_root / "scripts" / "test-rollout-gate.sh",
         bundle_root / "scripts" / "validate_clawhub_bundle.py",
@@ -113,6 +118,9 @@ def main(argv: list[str]) -> None:
         "resonance-contract",
         "tomorrowdao-agent-skills",
         "portkey-ca-agent-skills",
+        "references/host-runtime-contract.md",
+        "native-dependency-first",
+        "browser capability",
         "CA keystore password",
         "https://www.shitskills.net/skill.md",
         "No hidden private-key fallback",
@@ -120,6 +128,11 @@ def main(argv: list[str]) -> None:
     ):
         if marker not in bundle_skill_text:
             fail(f"missing ClawHub runtime-note marker {marker!r} in bundle SKILL.md")
+
+    bundle_dependency_catalog = json.loads((bundle_root / "config" / "dependency-sources.json").read_text(encoding="utf-8"))
+    for dep_name, entry in bundle_dependency_catalog.get("dependencies", {}).items():
+        if not entry.get("openclaw_install_hint"):
+            fail(f"bundle dependency source is missing openclaw_install_hint for {dep_name}")
 
     bundle_version = parse_version_from_skill(bundle_skill_path)
     dependency_version = json.loads((bundle_root / "config" / "dependency-sources.json").read_text(encoding="utf-8")).get("version")

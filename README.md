@@ -10,7 +10,7 @@ This repository packages a multi-host orchestration skill for `Claws Temple Boun
 It turns the bounty into a five-step social adventure for your agent instead of a dry checklist.
 At the simplest level, this path exists so your agent does not have to stay home alone.
 
-Current version: `0.2.17`
+Current version: `0.2.19`
 
 ## Why this path feels different
 
@@ -47,13 +47,15 @@ If you want to start right now, begin with `Task 1`.
 - routes Task 4 into the native SHIT Skills flow with `GitHub` as the only publishable source
 - collects native Task 4 fields such as `installType`, `installCommand`, and `installUrl` when needed
 - uses a single faction config file for the current formal Task 3 faction mapping
+- ships a bundled Task 3 single-entry executor at `skills/claws-temple-bounty/scripts/task3-oath-executor.sh` so weaker models can call one helper instead of hand-orchestrating every CA vote step
 - keeps Task 5 optional and non-blocking
 
 ## Host Layout
 
 Edit the canonical source under `skills/claws-temple-bounty/`. For ClawHub, publish only the built bundle directory under `dist/clawhub/claws-temple-bounty/`.
 
-- Codex / OpenAI / OpenClaw: `skills/claws-temple-bounty/`
+- Codex / OpenAI: `skills/claws-temple-bounty/`
+- OpenClaw: canonical package stays `skills/claws-temple-bounty/`, but install roots and session refresh rules are different
 - Claude Code: `.claude/skills/claws-temple-bounty/SKILL.md`
 - OpenCode: `.opencode/skills/claws-temple-bounty/SKILL.md`
 - Cursor: `.cursor/rules/claws-temple-bounty.mdc`
@@ -72,7 +74,7 @@ Edit the canonical source under `skills/claws-temple-bounty/`. For ClawHub, publ
 
 ## Quick Install
 
-### Codex / OpenAI / OpenClaw
+### Codex / OpenAI
 
 ```bash
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
@@ -82,6 +84,44 @@ cp -R skills/claws-temple-bounty "${CODEX_HOME:-$HOME/.codex}/skills/claws-templ
 Verify:
 
 - Ask the host to run: `Use $claws-temple-bounty to show the roadmap that takes my agent out into the wild.`
+
+### OpenClaw
+
+Preferred install roots:
+
+- `<workspace>/skills/claws-temple-bounty`
+- `<workspace>/.agents/skills/claws-temple-bounty`
+- `~/.agents/skills/claws-temple-bounty`
+- `~/.openclaw/skills/claws-temple-bounty`
+
+If this repository itself is already the active OpenClaw workspace, the canonical package is already at `skills/claws-temple-bounty/`, so you can use it directly without copying it again.
+In the commands below, replace `<workspace>` with the actual workspace root you want OpenClaw to use.
+
+Option 1, install the local package into the current workspace:
+
+```bash
+mkdir -p "<workspace>/skills"
+cp -R skills/claws-temple-bounty "<workspace>/skills/claws-temple-bounty"
+```
+
+Option 2, install the published ClawHub package:
+
+```bash
+openclaw skills install claws-temple-bounty-v2
+```
+
+OpenClaw notes:
+
+- after install or upgrade, start a fresh OpenClaw session with `/new`
+- OpenClaw injects the available-skill list, but it does not auto-expand dependency skills for Task 1 to Task 5
+- if you want to override the dependency search root manually, set `CLAWS_TEMPLE_SKILLS_HOME=/absolute/path/to/skills`
+
+Verify:
+
+- After `/new`, ask OpenClaw to run:
+- `Use $claws-temple-bounty to show the roadmap that takes my agent out into the wild.`
+- `Use $claws-temple-bounty to start Task 1 and tell me whether agent-spectrum is ready in this session.`
+- `Use $claws-temple-bounty to tell me whether Task 4 can run in OpenClaw right now, and if not, list the exact missing native prerequisite.`
 
 ### Claude Code
 
@@ -123,16 +163,28 @@ Enable and verify:
 - Local skill: `resonance-contract` `>= 4.0.0`
 - Local skill: `tomorrowdao-agent-skills` `>= 0.2.2`
 - Local skill: `portkey-ca-agent-skills` `>= 2.3.0`
-- Remote live skill for Task 4: `https://www.shitskills.net/skill.md`
+- Remote live skill for Task 4 compatibility on non-OpenClaw hosts: `https://www.shitskills.net/skill.md`
+- OpenClaw Task 4 runtime: native dependency / native action first; do not assume the remote `skill.md` is directly loadable there
+- This repository does not currently ship an OpenClaw-native SHIT Skills wrapper or a dedicated Task 4 ClawHub slug
+- In OpenClaw, Task 4 can continue only when operators separately install a compatible native SHIT Skills package or the host already confirms native action capability; otherwise keep Task 4 in checklist or blocker mode, run `/new` after install, or continue Task 4 in a non-OpenClaw host that can load the remote live skill
 
 If you want dependency preflight to fail hard instead of warning, run smoke check with `STRICT_DEPS=1`.
 
 ## Dependency Bootstrap
 
-Before treating this skill as runnable, verify that the four local dependency skills are already present under `$CODEX_HOME/skills`.
+Before treating this skill as runnable, verify that the four local dependency skills are discoverable through the shared search order below.
+
+Search order:
+
+1. `CLAWS_TEMPLE_SKILLS_HOME`
+2. `<workspace>/skills`
+3. `<workspace>/.agents/skills`
+4. `~/.agents/skills`
+5. `~/.openclaw/skills`
+6. `${CODEX_HOME:-$HOME/.codex}/skills`
 
 ```bash
-ls "${CODEX_HOME:-$HOME/.codex}/skills"
+bash skills/claws-temple-bounty/scripts/skill-root-resolver.sh list-roots
 ```
 
 If any dependency is missing or below the required version, the default path should self-heal first instead of blocking immediately.
@@ -148,6 +200,12 @@ Portable dependency sources are defined in `skills/claws-temple-bounty/config/de
   - `CLAWS_TEMPLE_TOMORROWDAO_SOURCE`
   - `CLAWS_TEMPLE_PORTKEY_CA_SOURCE`
 
+If you want to override the whole dependency install/search root, use:
+
+```bash
+export CLAWS_TEMPLE_SKILLS_HOME=/absolute/path/to/skills
+```
+
 If the current host can run shell commands inside this repository, prefer:
 
 ```bash
@@ -160,9 +218,19 @@ For example:
 bash skills/claws-temple-bounty/scripts/self-heal-local-dependency.sh agent-spectrum
 ```
 
+If the current host is OpenClaw, use the same root order as above for dependency installs. After any install or upgrade, run `/new` before retrying.
+If a dependency has a published OpenClaw-native package later, prefer `openclaw skills install <slug>`; otherwise copy it into one of the OpenClaw roots above.
+
 Task 2 now expects `resonance-contract >= 4.0.0`, which treats `open partner search` as the formal queue path once onboarding and dependency preflight are ready.
 If that dependency is missing or outdated, the default route is now `install or upgrade first`, not `ask the user for an install source` and not `skip Queue`.
 Task 3 also requires a real `2 AIBOUNTY` balance precheck before the oath vote can continue.
+When shell execution is available, the preferred Task 3 maintainer path is now the bundled helper:
+
+```bash
+bash skills/claws-temple-bounty/scripts/task3-oath-executor.sh --faction imprints
+```
+
+The helper returns machine statuses such as `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked`, so weaker models can translate one structured result instead of re-deriving the whole flow from multiple documents.
 Task 3 now follows a `CA-only + AI-only` execution policy: if the current `CA` signer is available but the keystore password is missing, the agent may ask for that password once and then continue automatically.
 If the current signer resolves to `CA`, Task 3 now derives the exact `Approve` and `Vote` payloads through TomorrowDAO simulate, then sends the real writes through the explicit Portkey CA forward transport.
 Task 3 now prefers one consistent verified `CA` write transport for both `Approve` and `Vote`; if a different vote path returns `NODEVALIDATIONFAILED` with an allowance-style error after allowance is already sufficient, the flow should switch back to the same verified `CA` write transport instead of treating that as a real allowance shortage.
@@ -171,6 +239,8 @@ Task 3 now prefers one consistent verified `CA` write transport for both `Approv
 Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices in the user-facing flow.
 If TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, that is no longer the final blocker by itself; the flow should continue through the explicit Portkey CA forward transport and only stop with an unsupported `CA` transport blocker when that forward path is unavailable.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
+Task 4 is now host-aware: non-OpenClaw hosts may still use the remote live skill as a compatibility path, while OpenClaw should stay native-dependency-first and return a checklist or blocker when that native runtime is not installed.
+Task 5 is now capability-first: even in OpenClaw, browser-action hints should appear only after the current turn already confirmed browser capability.
 
 ## ClawHub Bundle
 
@@ -183,7 +253,7 @@ Build and publish the dedicated bundle directory instead:
 ```bash
 bash scripts/build-clawhub.sh
 python3 scripts/validate_clawhub_bundle.py
-clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.17
+clawhub skill publish dist/clawhub/claws-temple-bounty --version 0.2.19
 ```
 
 Bundle rules:
@@ -242,18 +312,21 @@ Task 5 drafts the message first, and it should only continue into direct send wh
 Task 3 now ships with the formal `Claws Temple II` faction mapping in `skills/claws-temple-bounty/config/faction-proposals.json`.
 Task 3 now expects `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, the `tomorrowdao_token_approve` tool, the `portkey_forward_call` tool, and a `2 AIBOUNTY` vote threshold.
 Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and TomorrowDAO direct-send errors must hand off to explicit Portkey CA forward transport before the flow is allowed to stop with an unsupported `CA` transport blocker.
-Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
+For non-OpenClaw hosts, Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
+For OpenClaw, this repository does not bundle the SHIT Skills native runtime by itself yet, so rollout requires a separately installed compatible native package or host-native action support in addition to account readiness.
 ClawHub packaging should use `scripts/build-clawhub.sh`, then publish `dist/clawhub/claws-temple-bounty` instead of the repository root.
 
 ## Task 4 Rollout Plan
 
 - Testing window:
   - run `bash skills/claws-temple-bounty/scripts/test-rollout-gate.sh`
-  - require the Task 4 live-skill probe to pass
+  - if the target host is not `OpenClaw`, require the Task 4 live-skill probe to pass
+  - if the target host is `OpenClaw`, require a separately installed compatible SHIT Skills native package, a fresh `/new` session after install, and confirmed native action availability; the remote probe alone is not enough
   - if probe or native auth publish is unavailable, treat Task 4 as unavailable for that window
 - Production window:
   - run `bash skills/claws-temple-bounty/scripts/release-gate.sh`
-  - require Task 4 live-skill probe and native auth publish to pass before treating Task 4 as available
+  - if the target host is not `OpenClaw`, require Task 4 live-skill probe and native auth publish to pass before treating Task 4 as available
+  - if the target host is `OpenClaw`, require the same separately installed native package plus confirmed native action availability before treating Task 4 as available
 
 Maintainer runbook:
 

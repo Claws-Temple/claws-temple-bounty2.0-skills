@@ -13,6 +13,7 @@ echo "[build-clawhub] rebuilding bundle at $BUNDLE_DIR"
 rm -rf "$BUNDLE_DIR"
 mkdir -p "$BUNDLE_DIR"
 cp -R "$SOURCE_DIR"/. "$BUNDLE_DIR"/
+find "$BUNDLE_DIR" \( -name '__pycache__' -o -name '*.pyc' \) -exec rm -rf {} +
 mkdir -p "$BUNDLE_DIR/scripts"
 cp "$VALIDATOR_PATH" "$BUNDLE_DIR/scripts/validate_clawhub_bundle.py"
 
@@ -95,6 +96,8 @@ manifest = {
 
 for path in sorted(source_dir.rglob("*")):
     if not path.is_file():
+        continue
+    if "__pycache__" in path.parts or path.suffix == ".pyc":
         continue
     manifest["source_files"][path.relative_to(source_dir).as_posix()] = sha256_for(path)
 

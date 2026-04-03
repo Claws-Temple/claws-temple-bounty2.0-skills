@@ -47,6 +47,16 @@ If TomorrowDAO direct send already reports that `CA` direct send is forbidden, b
 
 `The faction oath still cannot continue, and this is not because your faction choice or tokens are wrong. This step is missing a usable CA forward transport, so I am treating it as a CA transport blocker instead of switching to manager direct signing or another private-key fallback.`
 
+### Helper-Mode Blocker Example
+
+If the current host still does not satisfy the helper-mode prerequisites, the reply should also say:
+
+`I have confirmed that you want to continue Task 3, but the current host still does not satisfy the helper-mode prerequisites. This turn is missing at least one of repo shell access, bun, or readable local CA context, so I will not pretend the oath write path already advanced automatically. The healthy next move is either to switch to a host that can run this repository helper, or to repair the missing dependency or local CA context first and then let me continue.`
+
+If the recovery path needs to be more explicit, the reply may also say:
+
+`If the missing piece is repo shell access or bash / python3 / bun, switch to a host that can run this repository helper. If the missing piece is dependency roots or version state, install or upgrade those first. If the missing piece is local CA context, recover that local identity path first. I only skip the helper and use lower-level choreography when the current host already exposes those dependency tools directly.`
+
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
 
@@ -74,7 +84,7 @@ If one `CA` write path already completed the approval step successfully, but ano
 
 If the oath transaction already succeeded and returned a `txId`, the reply should say:
 
-`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now and send this message. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
+`Your faction oath has succeeded and your current reference is txid-1234. Join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) now. If the current agent cannot operate Telegram directly, please join the group manually and send the prepared check-in message below. There is also an extra 20 Token claim in two weeks, and any questions are welcome in the group.`
 
 If this path included a prior approval step, the reply should also remind the user:
 
