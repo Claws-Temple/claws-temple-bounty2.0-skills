@@ -50,6 +50,16 @@
 
 `当前部落宣誓还不能继续，不是因为方向选错或 Token 不够，而是当前这一步缺少可用的 CA forward 写入路径。我会把它视为 CA 发送路径阻断，而不是改成 manager 直签或继续尝试其它私钥回退。`
 
+### Helper 模式不可用示例
+
+如果当前宿主还不满足 Task 3 helper mode 的前置条件，也应该明确告诉用户：
+
+`我已经确认你想继续 Task 3，但当前宿主还不满足 helper mode 的前置条件。这次缺的是 repo shell / bun / 本地 CA 上下文 里的至少一项，所以我不会假装已经自动推进宣誓写入。下一步要么切到能跑这个仓库 helper 的宿主，要么先补齐缺失依赖或本地 CA 上下文，然后我再继续。`
+
+如果要把恢复路径说得更清楚，也可以直接写成：
+
+`如果现在缺的是 repo shell 或 bash / python3 / bun，我建议直接切到能跑这个仓库 helper 的宿主；如果缺的是 dependency roots 或版本，我先走安装 / 升级；如果缺的是本地 CA 上下文，我先等你把本地身份入口恢复好。只有当当前宿主本来就暴露了底层 dependency 工具时，我才会跳过 helper，改走 lower-level choreography。`
+
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
 - `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
 

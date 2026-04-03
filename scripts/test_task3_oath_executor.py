@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import time
@@ -22,6 +23,7 @@ MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
+RESOLVER_PATH = ROOT / "skills" / "claws-temple-bounty" / "scripts" / "skill-root-resolver.sh"
 
 
 class FakeRunner(MODULE.JsonRunner):
@@ -122,6 +124,18 @@ class Task3ExecutorTests(unittest.TestCase):
         )
         return MODULE.Task3OathExecutor(args, paths=self.paths, runner=runner, sleep_fn=lambda _: None)
 
+    def _run_resolver(self, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+        merged_env = os.environ.copy()
+        if env:
+            merged_env.update(env)
+        return subprocess.run(
+            ["bash", str(RESOLVER_PATH), *args],
+            capture_output=True,
+            text=True,
+            check=False,
+            env=merged_env,
+        )
+
     def test_returns_waiting_for_tokens_before_password(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")
         runner = FakeRunner(
@@ -206,9 +220,9 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertEqual(
             paths.skill_root_search_order[:3],
             [
-                str((self.base / "skills").resolve()),
                 str((self.base / ".agents" / "skills").resolve()),
                 str((self.base / ".openclaw" / "skills").resolve()),
+                str((self.codex_home / "skills").resolve()),
             ],
         )
 
@@ -240,6 +254,49 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertEqual(paths.portkey_root, override_portkey.resolve())
         self.assertEqual(paths.skill_root_search_order[0], str(override_root.resolve()))
 
+    def test_skill_root_resolver_prefers_workspace_roots_before_shared_and_codex(self) -> None:
+        workspace = self.base / "openclaw-workspace"
+        canonical_skill_root = workspace / "skills" / "claws-temple-bounty"
+        canonical_skill_root.mkdir(parents=True, exist_ok=True)
+        (canonical_skill_root / "SKILL.md").write_text("version: 0.2.19\n", encoding="utf-8")
+
+        result = self._run_resolver(
+            "list-roots",
+            str(canonical_skill_root),
+            env={"HOME": str(self.base), "CODEX_HOME": str(self.codex_home)},
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        roots = [str(Path(line.strip()).resolve(strict=False)) for line in result.stdout.splitlines() if line.strip()]
+        self.assertEqual(
+            roots[:5],
+            [
+                str((workspace / "skills").resolve()),
+                str((workspace / ".agents" / "skills").resolve()),
+                str((self.base / ".agents" / "skills").resolve()),
+                str((self.base / ".openclaw" / "skills").resolve()),
+                str((self.codex_home / "skills").resolve()),
+            ],
+        )
+
+    def test_skill_root_resolver_requires_skill_entry_file(self) -> None:
+        workspace = self.base / "openclaw-workspace"
+        canonical_skill_root = workspace / "skills" / "claws-temple-bounty"
+        fake_dep = workspace / "skills" / "agent-spectrum"
+        canonical_skill_root.mkdir(parents=True, exist_ok=True)
+        fake_dep.mkdir(parents=True, exist_ok=True)
+        (canonical_skill_root / "SKILL.md").write_text("version: 0.2.19\n", encoding="utf-8")
+
+        result = self._run_resolver(
+            "resolve-skill",
+            "agent-spectrum",
+            str(canonical_skill_root),
+            env={"HOME": str(self.base), "CODEX_HOME": str(self.codex_home)},
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout.strip(), "")
+
     def test_returns_helper_prerequisite_blocker_when_bun_is_missing(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")
         paths = MODULE.RuntimePaths(
@@ -263,6 +320,10 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertFalse(result["success"])
         self.assertEqual(result["status"], "blocked")
         self.assertEqual(result["code"], "HELPER_PREREQUISITE_MISSING")
+        helper_mode = result["preflight"]["helperMode"]
+        self.assertFalse(helper_mode["available"])
+        self.assertEqual(helper_mode["missingPrerequisites"], ["bun"])
+        self.assertEqual(helper_mode["recovery"]["directToolChoreography"], "host_managed_only")
 
     def test_returns_password_required_after_preflight(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")

@@ -304,11 +304,6 @@ class RuntimePaths:
             append_root(workspace_root / "skills")
             append_root(workspace_root / ".agents" / "skills")
 
-        cwd_workspace_root = cls._discover_workspace_root_from_path(Path.cwd())
-        if cwd_workspace_root is not None:
-            append_root(cwd_workspace_root / "skills")
-            append_root(cwd_workspace_root / ".agents" / "skills")
-
         workspace_root = cls._infer_workspace_root(skill_root)
         if workspace_root is not None:
             append_root(workspace_root / "skills")
@@ -331,14 +326,6 @@ class RuntimePaths:
         if parent_root.name in {".openclaw", ".codex"}:
             return None
         return parent_root
-
-    @staticmethod
-    def _discover_workspace_root_from_path(start: Path) -> Path | None:
-        normalized = start.expanduser().resolve(strict=False)
-        for candidate in (normalized, *normalized.parents):
-            if (candidate / "skills").is_dir() or (candidate / ".agents" / "skills").is_dir() or (candidate / ".git").exists():
-                return candidate
-        return None
 
     @property
     def skill_root_search_order(self) -> list[str]:
@@ -653,18 +640,33 @@ class Task3OathExecutor:
             )
             if not tool_path
         ]
+        helper_recovery = {
+            "switchHost": bool(missing_prerequisites),
+            "repairLocalToolchain": missing_prerequisites,
+            "directToolChoreography": "host_managed_only",
+        }
+        self.state.preflight["helperMode"] = {
+            "available": not missing_prerequisites,
+            "missingPrerequisites": missing_prerequisites,
+            "recovery": helper_recovery,
+        }
         if isinstance(self.runner, JsonRunner) and missing_prerequisites:
-            self._record("dependency_check", "failure", helper_capabilities)
+            failure_details = {
+                **helper_capabilities,
+                "missingPrerequisites": missing_prerequisites,
+                "recovery": helper_recovery,
+            }
+            self._record("dependency_check", "failure", failure_details)
             self._raise_result(
                 status=STATUS_BLOCKED,
                 stage="dependency",
                 code="HELPER_PREREQUISITE_MISSING",
                 summary=(
-                    "Task 3 helper mode requires repo-shell helper prerequisites in the current host: "
+                    "Task 3 bundled helper cannot run in the current host because helper prerequisites are missing: "
                     + ", ".join(missing_prerequisites)
-                    + "."
+                    + ". The helper itself does not auto-fall back to lower-level choreography; either switch to a shell-rich host, repair the missing prerequisite, or let the host call the dependency tools directly."
                 ),
-                next_action="use_tool_choreography_or_fix_host_capability",
+                next_action="switch_host_fix_helper_prerequisite_or_use_direct_tool_choreography",
             )
 
         tomorrowdao_root = self.paths.tomorrowdao_root

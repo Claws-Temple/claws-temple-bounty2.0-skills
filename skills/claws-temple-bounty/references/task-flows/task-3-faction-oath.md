@@ -24,6 +24,7 @@ Helper prerequisites:
 - repo shell access to this package
 - `bash`
 - `python3`
+- `bun`
 - dependency skill roots for `tomorrowdao-agent-skills` and `portkey-ca-agent-skills`
 - local CA context that the helper can read
 
@@ -44,6 +45,7 @@ Routing rule:
 - call the helper first only when helper mode is available
 - translate the helper status into the branded visible layer
 - if helper mode is unavailable because the host cannot satisfy helper prerequisites, surface that as a host-capability blocker or fall back to the lower-level dependency-tool choreography below when that lower-level path is actually available
+- the bundled helper itself does not auto-run lower-level choreography; it returns a structured blocker so the host can choose between `switch host`, `repair dependency or toolchain`, `wait for local CA readiness`, or direct dependency-tool choreography
 - only fall back to the lower-level dependency-tool choreography below when the helper truly cannot run in the current host
 
 ## Steps
@@ -59,7 +61,13 @@ Routing rule:
 9. If the helper returns `completed`, require its final vote `txId` and success payload for the branded close.
 10. If helper mode is unavailable because the host cannot satisfy helper prerequisites, stop with a host-capability blocker or fall back to the lower-level contract below only when that path is actually available.
 11. Only if the helper cannot run in the current host, fall back to the lower-level contract below.
-12. Run a formal preflight:
+12. When helper mode is unavailable, name the exact missing prerequisite in visible language, such as missing repo shell, missing `bash` / `python3` / `bun`, unresolved dependency roots, or missing local `CA` context.
+13. Turn that helper blocker into one explicit recovery branch:
+   - missing repo shell or missing `bash` / `python3` / `bun` -> `switch host` or repair the local toolchain
+   - unresolved dependency roots or dependency version mismatch -> run dependency self-heal or install or upgrade guidance first
+   - missing local `CA` context or keystore metadata -> recover local identity context first
+   - direct dependency-tool choreography is host-managed and may continue only when the host already exposes that lower-level path; the bundled helper itself does not perform this fallback
+14. Run a formal preflight:
    - confirm the selected faction entry exists
    - confirm the dependency invocation contract exists in the config file
    - confirm the TomorrowDAO dependency minimum version exists and is `0.2.2` or above
@@ -110,6 +118,7 @@ Routing rule:
 - one short execution line that checks, authorization, submission, and confirmation are being advanced automatically by the agent
 - current stage or selection prompt
 - host-capability blocker wording when helper mode is unavailable in the current host
+- explicit missing helper prerequisite plus the next recovery action when helper mode is unavailable
 - token-precheck outcome when relevant
 - allowance or authorization outcome when relevant
 - password request wording when the `CA` keystore password is missing

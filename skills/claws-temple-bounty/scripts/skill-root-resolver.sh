@@ -117,7 +117,7 @@ claws_temple_resolve_skill_dir() {
   fi
 
   while IFS= read -r root; do
-    if [[ -d "$root/$skill_name" ]]; then
+    if [[ -d "$root/$skill_name" && ( -f "$root/$skill_name/SKILL.md" || -f "$root/$skill_name/package.json" ) ]]; then
       printf '%s\n' "$root/$skill_name"
       return 0
     fi

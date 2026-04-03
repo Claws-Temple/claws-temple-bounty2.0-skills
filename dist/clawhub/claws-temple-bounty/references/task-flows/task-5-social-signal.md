@@ -18,10 +18,13 @@ Help the user send a public signal on Telegram, X, or the Curio Board without tr
 3. Draft a short branded signal.
 4. If the user already has a coordinate card or faction result, fold that into the signal.
 5. Whenever the visible layer mentions sending now on `Telegram` or `X`, first add one short boundary line: the agent drafts first, direct send continues only if the current host really has the required permissions and capability, and otherwise the final send click belongs to the user.
-6. If the current host is `OpenClaw`, the user already chose `Telegram` or `X`, the user explicitly wants to send now, and the current turn already confirmed browser capability, add one short visible-layer hint that browser action can be used directly in `OpenClaw` after that host-capability caveat.
-7. Do not mention browser action before the user has chosen a platform, when the user only wants draft copy, or in hosts other than `OpenClaw`.
-8. If the user explicitly wants to send the signal now but the current context blocks that action, return a blocker summary and append support CTA.
-9. End with a community-reach framing instead of a blocker framing when the signal path is otherwise healthy.
+6. Treat browser capability as confirmed only when the current turn already has one of these signals: a successful browser or native action in this session, an exposed host capability marker or tool manifest, or an explicit user confirmation that this exact session can open browser actions.
+7. If the user wants to send now on `Telegram` or `X` but browser capability is not confirmed yet, ask for that confirmation in one short step or keep the reply in draft-plus-link mode; do not hint browser action yet.
+8. The confirmation question should stay concrete: `Can this exact session open browser actions right now?` If the answer is unknown or negative, stay in draft-plus-link mode and keep the final send click with the user.
+9. If the current host is `OpenClaw`, the user already chose `Telegram` or `X`, the user explicitly wants to send now, and the current turn already confirmed browser capability, add one short visible-layer hint that browser action can be used directly in `OpenClaw` after that host-capability caveat.
+10. Do not mention browser action before the user has chosen a platform, when the user only wants draft copy, or in hosts other than `OpenClaw`.
+11. If the user explicitly wants to send the signal now but the current context blocks that action, return a blocker summary and append support CTA.
+12. End with a community-reach framing instead of a blocker framing when the signal path is otherwise healthy.
 
 ## Platform Templates
 
@@ -42,6 +45,7 @@ Each platform draft should include:
 - optional-task reminder
 - post copy or signal draft
 - host-capability boundary wording whenever the user wants to send now on `TG` or `X`
+- one short capability-confirmation step or draft-first fallback when browser capability is not yet confirmed
 - clickable platform links when the user asks where to post
 - OpenClaw browser-action hint only when the platform is already chosen and the user wants to send now
 - recommended CTA
@@ -52,4 +56,6 @@ Each platform draft should include:
 - keep this task clearly separated from the main qualification path
 - do not imply that Task 5 is required for unlock
 - keep browser-action wording host-aware: `OpenClaw` only, `Telegram` or `X` only, only when the user explicitly wants to send now, and only when browser capability is already confirmed
+- treat browser capability confirmation as same-turn evidence only: successful browser or native action, exposed capability marker or tool manifest, or explicit user confirmation for the current session
+- when browser capability is not confirmed, use one explicit confirmation question or stay in draft-plus-link mode; avoid vague wording like `maybe the host can do it`
 - never imply guaranteed auto-posting; the safe default is draft first, then direct send only when the host can really do it

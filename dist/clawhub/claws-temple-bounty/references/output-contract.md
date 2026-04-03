@@ -221,6 +221,7 @@ Use these strings when `cta_type = support`.
 - before vote submission, verify that `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, and the configured generic token-balance tool are available
 - prefer the bundled helper `scripts/task3-oath-executor.sh` only when helper mode is truly available: repo shell, `bash`, `python3`, `bun`, resolved dependency skill roots, and usable local `CA` context
 - if helper mode is not available in the current host, either fall back to tool choreography or stop with a host-capability blocker; do not pretend the helper continued automatically
+- the bundled helper itself never auto-runs lower-level choreography; when helper prerequisites are missing, translate that into a recovery branch such as `switch host`, `repair toolchain or dependency roots`, or `wait for local CA readiness`
 - treat helper statuses `password_required`, `waiting_for_tokens`, `submitted`, `completed`, and `blocked` as the primary maintainer-facing execution truth for Task 3
 - treat helper statuses `password_required`, `waiting_for_tokens`, `submitted`, and `completed` as normal structured outcomes even when the shell wrapper is used; only hard blockers should surface as non-zero helper exit
 - if `tomorrowdao-agent-skills` is missing or below `0.2.2`, try dependency self-heal first
@@ -273,6 +274,7 @@ Use these strings when `cta_type = support`.
 - if the current host is `OpenClaw`, treat Task 4 as native-dependency-first instead of remote-URL-first
 - in `OpenClaw`, do not assume `https://www.shitskills.net/skill.md` is directly loadable as a runtime surface
 - if `OpenClaw` is missing the required native dependency or native action capability, return a precise checklist or blocker instead of claiming the remote live skill will run there automatically
+- if the current repository version does not bundle a usable OpenClaw-native SHIT Skills package, say that plainly and keep the next recovery action concrete: install the compatible native package, run `/new`, or switch Task 4 to a non-OpenClaw host that can load the remote live skill
 - for non-OpenClaw hosts, the remote live skill may remain the compatibility path when that host really supports it
 - require a publishable `GitHub repo URL` only when the chosen native action actually needs it
 - gather the native publish fields only when the chosen native action actually needs them:
@@ -297,7 +299,9 @@ Use these strings when `cta_type = support`.
 - frame it as sending a signal so more partners can spot the user's Agent
 - frame it as reach or community impact, not as a blocker
 - when the visible layer mentions sending now on `Telegram` or `X`, first explain that the agent drafts the content first, and that direct send continues only if the current host really has the needed permissions and capability; otherwise the last click belongs to the user
+- treat browser capability as confirmed only when the current turn already has a successful browser or native action, an exposed host capability marker or tool manifest, or an explicit user confirmation that this exact session can open browser actions
 - if the current host is `OpenClaw`, the platform is already `Telegram` or `X`, the user explicitly wants to send now, and browser capability was already confirmed in the current turn, the visible layer may add one short browser-action hint after the host-capability caveat
+- if the user wants to send now on `Telegram` or `X` but browser capability is not confirmed yet, ask for that confirmation in one short step or keep the reply in draft-plus-link mode; do not hint browser action before confirmation exists
 - keep that browser-action hint as an `OpenClaw`-only convenience, not as a general default for other hosts
 - do not mention browser action before the user chooses a platform or when the user only wants draft copy
 - if the user explicitly wants to send the signal now but the platform or current context blocks that action, append support CTA

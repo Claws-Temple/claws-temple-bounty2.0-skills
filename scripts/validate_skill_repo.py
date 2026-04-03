@@ -1258,6 +1258,12 @@ def main() -> None:
     ):
         if marker not in task3_en:
             fail(f"missing Task 3 English success marker: {marker}")
+    for marker in ("### Helper 模式不可用示例", "repo shell / bun / 本地 CA 上下文", "切到能跑这个仓库 helper 的宿主"):
+        if marker not in task3_zh:
+            fail(f"missing Task 3 Chinese helper-blocker marker: {marker}")
+    for marker in ("### Helper-Mode Blocker Example", "repo shell access, bun, or readable local CA context", "switch to a host that can run this repository helper"):
+        if marker not in task3_en:
+            fail(f"missing Task 3 English helper-blocker marker: {marker}")
     for forbidden in (
         "I am with The Balancer, reference txid-1234. I have completed Claws Temple Task 3. There is an extra 20 Token claim in two weeks, and I am happy to discuss any questions in the group.",
     ):
@@ -1267,10 +1273,19 @@ def main() -> None:
     for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
         if marker not in task4_flow:
             fail(f"missing Task 4 support flow marker: {marker}")
+    for marker in ("## OpenClaw Recovery Checklist", "native runtime package", "install that package into the usable OpenClaw runtime surface and then start `/new`"):
+        if marker not in task4_flow:
+            fail(f"missing Task 4 OpenClaw checklist marker: {marker}")
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     for marker in ("我会先带你进入原生流程并继续推进", "只有遇到账号、登录态或 repo 前置条件时"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese execution-report marker: {marker}")
+    for marker in ("openclaw_native_wrapper_bundled", "这个仓库版本本身还没有内置可直接拿来跑 Task 4 的 SHIT Skills 原生 wrapper", "改到能加载远端 live skill 的非 OpenClaw 宿主继续 Task 4"):
+        if marker not in task4_zh:
+            fail(f"missing Task 4 Chinese OpenClaw recovery marker: {marker}")
+    for marker in ("openclaw_native_wrapper_bundled", "does not bundle a ready-to-run SHIT Skills native wrapper for Task 4", "continue Task 4 in a non-OpenClaw host that can load the remote live skill"):
+        if marker not in task4_en:
+            fail(f"missing Task 4 English OpenClaw recovery marker: {marker}")
 
     task5_flow = TASK5_FLOW_PATH.read_text(encoding="utf-8")
     for marker in ("## Platform Templates", "`TG`", "`X`", "`Curio Board`"):
@@ -1282,6 +1297,9 @@ def main() -> None:
     for marker in ("OpenClaw", "browser action", "Telegram` or `X`", "the final send click belongs to the user", "browser capability"):
         if marker not in task5_flow:
             fail(f"missing Task 5 OpenClaw marker: {marker}")
+    for marker in ("successful browser or native action", "exposed host capability marker or tool manifest", "draft-plus-link mode", "Can this exact session open browser actions right now?"):
+        if marker not in task5_flow:
+            fail(f"missing Task 5 capability-confirmation marker: {marker}")
     task5_zh = (EXAMPLES_DIR / "task-5-social-signal.zh.md").read_text(encoding="utf-8")
     task5_en = (EXAMPLES_DIR / "task-5-social-signal.en.md").read_text(encoding="utf-8")
     for marker in ("TG / X / 奇物志", "如果你已经确定平台", "如果你只是想先看入口", "OpenClaw", "浏览器操作"):
@@ -1290,22 +1308,28 @@ def main() -> None:
     for marker in ("我会先帮你起草内容", "如果当前宿主具备对应权限和能力", "最后一步会由你手动点发送"):
         if marker not in task5_zh:
             fail(f"missing Task 5 Chinese host-capability marker: {marker}")
+    for marker in ("### 能力确认示例", "这个会话现在是否真的能直接打开浏览器动作", "最终文案和入口链接", "如果这个会话现在还不能确认浏览器能力"):
+        if marker not in task5_zh:
+            fail(f"missing Task 5 Chinese capability-confirmation marker: {marker}")
     for marker in ("TG / X / Curio Board", "If you already know the platform", "If you only want the destination links", "OpenClaw", "browser action"):
         if marker not in task5_en:
             fail(f"missing Task 5 English platform-choice marker: {marker}")
     for marker in ("I will draft the content first", "required permissions and capability", "the final send click is still yours"):
         if marker not in task5_en:
             fail(f"missing Task 5 English host-capability marker: {marker}")
+    for marker in ("### Capability-Confirmation Example", "whether this session can actually open browser actions right now", "draft-plus-link mode", "If this session still cannot confirm browser capability"):
+        if marker not in task5_en:
+            fail(f"missing Task 5 English capability-confirmation marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
-    if "REMOTE_PROBE_MODE=strict" not in release_gate:
-        fail("release gate must run Task 4 probe in strict mode")
+    for marker in ("TASK4_TARGET_HOST", "OPENCLAW_TASK4_NATIVE_READY", "OPENCLAW_TASK4_SESSION_REFRESHED", "CHECK_REMOTE_SKILL=1", "REMOTE_PROBE_MODE=strict"):
+        if marker not in release_gate:
+            fail(f"release gate is missing Task 4 host-aware marker: {marker}")
 
     test_rollout_gate = (SKILL_ROOT / "scripts" / "test-rollout-gate.sh").read_text(encoding="utf-8")
-    if "task4-live-skill-probe.sh" not in test_rollout_gate:
-        fail("test rollout gate must call Task 4 probe")
-    if "PROBE_MODE=strict" not in test_rollout_gate:
-        fail("test rollout gate must keep Task 4 probe in strict mode")
+    for marker in ("TASK4_TARGET_HOST", "OPENCLAW_TASK4_NATIVE_READY", "OPENCLAW_TASK4_SESSION_REFRESHED", "task4-live-skill-probe.sh", "PROBE_MODE=strict"):
+        if marker not in test_rollout_gate:
+            fail(f"test rollout gate is missing Task 4 host-aware marker: {marker}")
 
     task4_probe = (SKILL_ROOT / "scripts" / "task4-live-skill-probe.sh").read_text(encoding="utf-8")
     if "publish-prep mode" in task4_probe:
@@ -1315,6 +1339,9 @@ def main() -> None:
     for marker in ("native SHIT Skills flow", "Task 4 is unavailable", "do not simulate a prep-only success path"):
         if marker not in task4_rollout:
             fail(f"missing Task 4 rollout marker: {marker}")
+    for marker in ("does not bundle an OpenClaw-native SHIT Skills wrapper", "run `/new`", "install the compatible package, run `/new`, or switch host"):
+        if marker not in task4_rollout:
+            fail(f"missing Task 4 OpenClaw rollout marker: {marker}")
     for banned in ("publish-prep mode", "prep-only mode"):
         if banned in task4_rollout:
             fail(f"old Task 4 rollout marker must be removed: {banned}")
