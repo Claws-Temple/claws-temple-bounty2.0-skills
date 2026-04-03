@@ -247,10 +247,11 @@ Use these strings when `cta_type = support`.
 - derive the final `Vote` payload through `tomorrowdao_dao_vote --mode simulate`, then send that exact normalized payload through `portkey_forward_call`
 - after a successful `Approve`, prefer the same verified Portkey CA forward transport for the final `Vote` instead of switching to a different write path
 - for `Approve`, retry at most 3 times with state reconciliation before each attempt; if allowance is already sufficient after a timeout, continue directly to `Vote`
-- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and primary state signals from `tx receipt`, `logs`, and allowance or balance deltas
-- treat `proposal my-info` as an auxiliary source; if it is unavailable or returns no user record, continue with receipt and log based reconciliation instead of failing the flow immediately
+- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, mined `tx receipt`, the configured recent-transaction recovery source, and then `proposal my-info`
+- treat the configured recent-transaction recovery source as the first fallback when a mined `Vote txId` is missing after send uncertainty
+- treat `proposal my-info` as the last auxiliary source; if it is unavailable or returns no user record, continue with receipt and recent-transaction based reconciliation instead of failing the flow immediately
 - if a non-preferred vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, switch back to the same verified `CA` write transport that already succeeded for `Approve`
-- if `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
+- if recent-transaction recovery is ambiguous or `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
 - keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
 - use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
 - if reconciliation confirms progress but the final vote `txId` is still missing, stay in `submitted` instead of moving to `completed`

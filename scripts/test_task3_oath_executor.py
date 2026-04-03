@@ -86,8 +86,15 @@ class Task3ExecutorTests(unittest.TestCase):
             bash_path="/bin/bash",
             python3_path=sys.executable,
         )
+        self.fetch_recent_transactions_patcher = mock.patch.object(
+            MODULE.Task3OathExecutor,
+            "_fetch_recent_address_transactions",
+            return_value=("https://aelfscan.invalid/api", []),
+        )
+        self.mock_fetch_recent_address_transactions = self.fetch_recent_transactions_patcher.start()
 
     def tearDown(self) -> None:
+        self.fetch_recent_transactions_patcher.stop()
         self.temp_dir.cleanup()
 
     def _write_active_wallet(self, *, manager_address: str | None = "ELF_manager_tDVV") -> None:
@@ -135,6 +142,44 @@ class Task3ExecutorTests(unittest.TestCase):
             check=False,
             env=merged_env,
         )
+
+    def _aelfscan_transaction(
+        self,
+        *,
+        tx_id: str,
+        method: str = "Vote",
+        to_address: str = "vote-contract",
+        status: int = 0,
+        timestamp: int | None = None,
+        chain_ids: list[str] | None = None,
+    ) -> dict[str, object]:
+        return {
+            "transactionId": tx_id,
+            "blockHeight": 310696679,
+            "method": method,
+            "status": status,
+            "from": {
+                "address": "ELF_manager_tDVV",
+                "addressType": 0,
+                "isManager": True,
+                "isProducer": False,
+                "chainId": None,
+                "name": None,
+            },
+            "to": {
+                "address": to_address,
+                "addressType": 0,
+                "isManager": True,
+                "isProducer": False,
+                "chainId": None,
+                "name": None,
+            },
+            "timestamp": timestamp if timestamp is not None else int(time.time()),
+            "transactionValue": "0",
+            "transactionFee": "0",
+            "blockTime": "0001-01-01T00:00:00",
+            "chainIds": chain_ids or ["tDVV"],
+        }
 
     def test_returns_waiting_for_tokens_before_password(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")
@@ -418,6 +463,7 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertEqual(result["status"], "completed")
         self.assertEqual(result["transactions"]["approve"]["transactionId"], "approve-tx")
         self.assertEqual(result["transactions"]["vote"]["transactionId"], "vote-tx")
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "none")
         self.assertEqual(result["telegram"]["txId"], "vote-tx")
 
     def test_retries_approve_after_expired_transaction_without_type_error(self) -> None:
@@ -539,6 +585,7 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertFalse(result["success"])
         self.assertEqual(result["status"], "submitted")
         self.assertEqual(result["transactions"]["vote"]["transactionId"], "vote-tx")
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "none")
 
     def test_blocks_when_vote_write_returns_terminal_failure(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")
@@ -591,6 +638,7 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertEqual(result["status"], "blocked")
         self.assertEqual(result["stage"], "vote")
         self.assertEqual(result["code"], "VOTE_FAILED")
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "none")
 
     def test_returns_password_required_when_forward_call_rejects_password(self) -> None:
         self._write_active_wallet(manager_address="ELF_manager_tDVV")
@@ -678,6 +726,351 @@ class Task3ExecutorTests(unittest.TestCase):
         self.assertEqual(result["status"], "submitted")
         self.assertEqual(result["code"], "VOTE_CONFIRMED_WITHOUT_TXID")
         self.assertIsNone(result["transactions"]["vote"]["transactionId"])
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "proposal_my_info")
+
+    def test_returns_submitted_when_pending_tx_is_only_confirmed_by_proposal_my_info(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "200000000"}}
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    {
+                        "status": "success",
+                        "data": {
+                            "transactionId": "pending-vote-tx",
+                            "data": {"TransactionId": "pending-vote-tx", "Status": "PENDING", "Error": None},
+                            "caAddress": "ELF_demo_tDVV",
+                        },
+                    }
+                ],
+                ("portkey_query_skill.ts", "tx-result"): [
+                    {"status": "success", "data": {"TransactionId": "pending-vote-tx", "Status": "PENDING", "Error": None}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "proposal-my-info"): [
+                    {"success": True, "data": {"voteAmount": "200000000"}}
+                ],
+            }
+        )
+
+        executor = self._executor(runner, password="secret")
+        executor.retry_backoffs = (0,)
+        result = executor.execute()
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["status"], "submitted")
+        self.assertEqual(result["code"], "VOTE_CONFIRMED_WITHOUT_TXID")
+        self.assertIsNone(result["transactions"]["vote"]["transactionId"])
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "proposal_my_info")
+
+    def test_completes_vote_after_transport_error_when_aelfscan_recovers_txid(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        self.mock_fetch_recent_address_transactions.return_value = (
+            "https://aelfscan.invalid/api",
+            [self._aelfscan_transaction(tx_id="recovered-vote-tx")],
+        )
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "200000000"}}
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    MODULE.CommandExecutionError(
+                        ["bun", "run", "portkey_tx_skill.ts", "forward-call"],
+                        1,
+                        "",
+                        "tls certificate verification failed",
+                    )
+                ],
+            }
+        )
+
+        executor = self._executor(runner, password="secret")
+        executor.retry_backoffs = (0,)
+        result = executor.execute()
+
+        self.assertTrue(result["success"])
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["transactions"]["vote"]["transactionId"], "recovered-vote-tx")
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "aelfscan")
+        self.assertEqual(result["telegram"]["txId"], "recovered-vote-tx")
+
+    def test_completes_vote_after_already_voted_when_aelfscan_recovers_txid(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        self.mock_fetch_recent_address_transactions.return_value = (
+            "https://aelfscan.invalid/api",
+            [self._aelfscan_transaction(tx_id="recovered-vote-tx")],
+        )
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "200000000"}}
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    {
+                        "status": "success",
+                        "data": {
+                            "transactionId": "duplicate-vote-tx",
+                            "data": {
+                                "TransactionId": "duplicate-vote-tx",
+                                "Status": "NODEVALIDATIONFAILED",
+                                "Error": "Voter already voted",
+                            },
+                            "caAddress": "ELF_demo_tDVV",
+                        },
+                    }
+                ],
+                ("portkey_query_skill.ts", "tx-result"): [
+                    {
+                        "status": "success",
+                        "data": {
+                            "TransactionId": "duplicate-vote-tx",
+                            "Status": "NODEVALIDATIONFAILED",
+                            "Error": "Voter already voted",
+                        },
+                    }
+                ],
+            }
+        )
+
+        executor = self._executor(runner, password="secret")
+        executor.retry_backoffs = (0,)
+        result = executor.execute()
+
+        self.assertTrue(result["success"])
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["transactions"]["vote"]["transactionId"], "recovered-vote-tx")
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "aelfscan")
+
+    def test_returns_submitted_when_aelfscan_finds_multiple_vote_candidates(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        self.mock_fetch_recent_address_transactions.return_value = (
+            "https://aelfscan.invalid/api",
+            [
+                self._aelfscan_transaction(tx_id="vote-candidate-1"),
+                self._aelfscan_transaction(tx_id="vote-candidate-2"),
+            ],
+        )
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "200000000"}}
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    MODULE.CommandExecutionError(
+                        ["bun", "run", "portkey_tx_skill.ts", "forward-call"],
+                        1,
+                        "",
+                        "transport timeout",
+                    )
+                ],
+            }
+        )
+
+        executor = self._executor(runner, password="secret")
+        executor.retry_backoffs = (0,)
+        result = executor.execute()
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["status"], "submitted")
+        self.assertEqual(result["code"], "VOTE_CONFIRMED_WITHOUT_TXID")
+        self.assertIsNone(result["transactions"]["vote"]["transactionId"])
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "aelfscan")
+        recovery_traces = [item for item in result["trace"] if item["step"] == "vote_tx_recovery"]
+        self.assertTrue(recovery_traces)
+        self.assertEqual(recovery_traces[-1]["status"], "ambiguous")
+        self.assertEqual(
+            recovery_traces[-1]["details"]["candidateTransactionIds"],
+            ["vote-candidate-1", "vote-candidate-2"],
+        )
+
+    def test_returns_submitted_when_pending_vote_has_ambiguous_aelfscan_candidates(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        self.mock_fetch_recent_address_transactions.return_value = (
+            "https://aelfscan.invalid/api",
+            [
+                self._aelfscan_transaction(tx_id="vote-candidate-1"),
+                self._aelfscan_transaction(tx_id="vote-candidate-2"),
+            ],
+        )
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "200000000"}}
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    {
+                        "status": "success",
+                        "data": {
+                            "transactionId": "pending-vote-tx",
+                            "data": {
+                                "TransactionId": "pending-vote-tx",
+                                "Status": "PENDING",
+                                "Error": None,
+                            },
+                            "caAddress": "ELF_demo_tDVV",
+                        },
+                    }
+                ],
+                ("portkey_query_skill.ts", "tx-result"): [
+                    {
+                        "status": "success",
+                        "data": {
+                            "TransactionId": "pending-vote-tx",
+                            "Status": "PENDING",
+                            "Error": None,
+                        },
+                    }
+                ],
+            }
+        )
+
+        executor = self._executor(runner, password="secret")
+        executor.retry_backoffs = (0,)
+        result = executor.execute()
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["status"], "submitted")
+        self.assertEqual(result["code"], "VOTE_CONFIRMED_WITHOUT_TXID")
+        self.assertIsNone(result["transactions"]["vote"]["transactionId"])
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "aelfscan")
+
+    def test_returns_submitted_when_pending_tx_has_ambiguous_aelfscan_candidates(self) -> None:
+        self._write_active_wallet(manager_address="ELF_manager_tDVV")
+        self.mock_fetch_recent_address_transactions.return_value = (
+            "https://aelfscan.invalid/api",
+            [
+                self._aelfscan_transaction(tx_id="vote-candidate-1"),
+                self._aelfscan_transaction(tx_id="vote-candidate-2"),
+            ],
+        )
+        runner = FakeRunner(
+            {
+                ("portkey_query_skill.ts", "manager-sync-status"): [
+                    {"status": "success", "data": {"isManagerSynced": True, "caAddress": "ELF_demo_tDVV"}}
+                ],
+                ("tomorrowdao_skill.ts", "dao", "vote"): [
+                    {
+                        "success": True,
+                        "data": {
+                            "contractAddress": "vote-contract",
+                            "methodName": "Vote",
+                            "args": {"votingItemId": "proposal-1", "voteOption": 0, "voteAmount": 200000000},
+                        },
+                    }
+                ],
+                ("tomorrowdao_skill.ts", "token", "balance-view"): [
+                    {"success": True, "data": {"balance": "200000000"}}
+                ],
+                ("tomorrowdao_skill.ts", "token", "allowance-view"): [
+                    {"success": True, "data": {"allowance": "200000000"}}
+                ],
+                ("portkey_tx_skill.ts", "forward-call"): [
+                    {
+                        "status": "success",
+                        "data": {
+                            "transactionId": "pending-vote-tx",
+                            "data": {"TransactionId": "pending-vote-tx", "Status": "PENDING", "Error": None},
+                            "caAddress": "ELF_demo_tDVV",
+                        },
+                    }
+                ],
+                ("portkey_query_skill.ts", "tx-result"): [
+                    {"status": "success", "data": {"TransactionId": "pending-vote-tx", "Status": "PENDING", "Error": None}}
+                ],
+            }
+        )
+
+        executor = self._executor(runner, password="secret")
+        executor.retry_backoffs = (0,)
+        result = executor.execute()
+
+        self.assertFalse(result["success"])
+        self.assertEqual(result["status"], "submitted")
+        self.assertEqual(result["code"], "VOTE_CONFIRMED_WITHOUT_TXID")
+        self.assertIsNone(result["transactions"]["vote"]["transactionId"])
+        self.assertEqual(result["transactions"]["vote"]["recoverySource"], "aelfscan")
 
     def test_main_returns_zero_for_recoverable_statuses(self) -> None:
         class StubExecutor:

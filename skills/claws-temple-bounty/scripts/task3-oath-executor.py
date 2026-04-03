@@ -17,10 +17,12 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Sequence
-from urllib.parse import quote
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote, urlencode
+from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 DEFAULT_NETWORK = "mainnet"
@@ -50,6 +52,11 @@ TERMINAL_TX_FAILURE_STATUSES = {
     "CANCELED",
     "CANCELLED",
 }
+RECOVERY_SOURCE_NONE = "none"
+RECOVERY_SOURCE_DIRECT_RECEIPT = "direct_receipt"
+RECOVERY_SOURCE_AELFSCAN = "aelfscan"
+RECOVERY_SOURCE_PROPOSAL_MY_INFO = "proposal_my_info"
+AELFSCAN_USER_AGENT = "Mozilla/5.0 (Claws Temple Task3 Recovery)"
 
 
 class CommandExecutionError(RuntimeError):
@@ -567,9 +574,13 @@ class Task3OathExecutor:
                 wallet,
                 phase="vote",
                 payload=vote_payload,
-                reconcile=lambda: self._vote_reconciliation(wallet, tx_id=None),
+                reconcile=lambda: {"confirmed": False, "recoverySource": RECOVERY_SOURCE_NONE},
                 success_predicate=lambda current: current.get("confirmed") is True,
-                auxiliary=self._vote_auxiliary_reconciliation(wallet),
+                auxiliary=self._vote_auxiliary_reconciliation(
+                    wallet,
+                    vote_payload=vote_payload,
+                    attempt_started_at=time.time(),
+                ),
             )
             self.state.transactions["vote"] = vote_result
             self._record("vote_send", "success", vote_result)
@@ -620,6 +631,10 @@ class Task3OathExecutor:
     @property
     def _vote_amount(self) -> int:
         return int(self.config["vote_amount_minimal_unit"])
+
+    @property
+    def _tx_recovery(self) -> dict[str, Any]:
+        return dict(self.config.get("tx_recovery") or {})
 
     @property
     def _password_value(self) -> str | None:
@@ -839,18 +854,14 @@ class Task3OathExecutor:
                 except (CommandExecutionError, ToolResponseError):
                     reconciled = None
                 if reconciled is not None and success_predicate(reconciled):
-                    tx_result["reconciled"] = reconciled
-                    tx_result["status"] = "MINED"
-                    return tx_result
+                    return self._merge_reconciled_tx_result(tx_result, reconciled)
                 if auxiliary:
                     try:
                         extra = auxiliary(tx_result.get("transactionId"))
                     except (CommandExecutionError, ToolResponseError):
                         extra = None
                     if extra is not None and success_predicate(extra):
-                        tx_result["reconciled"] = extra
-                        tx_result["status"] = "MINED"
-                        return tx_result
+                        return self._merge_reconciled_tx_result(tx_result, extra)
                 if is_terminal_failure:
                     self.state.transactions[phase] = tx_result
                     break
@@ -864,24 +875,14 @@ class Task3OathExecutor:
                 except (CommandExecutionError, ToolResponseError):
                     reconciled = None
                 if reconciled is not None and success_predicate(reconciled):
-                    return {
-                        "status": "MINED",
-                        "transactionId": None,
-                        "error": last_error,
-                        "reconciled": reconciled,
-                    }
+                    return self._build_reconciled_tx_result(wallet, error_message=last_error, reconciled=reconciled)
                 if auxiliary:
                     try:
                         extra = auxiliary(None)
                     except (CommandExecutionError, ToolResponseError):
                         extra = None
                     if extra is not None and success_predicate(extra):
-                        return {
-                            "status": "MINED",
-                            "transactionId": None,
-                            "error": last_error,
-                            "reconciled": extra,
-                        }
+                        return self._build_reconciled_tx_result(wallet, error_message=last_error, reconciled=extra)
             if attempt < len(self.retry_backoffs):
                 self._record(f"{phase}_retry", "pending", {"attempt": attempt, "delaySeconds": delay})
                 if not os.environ.get("CLAWS_TEMPLE_TASK3_EXECUTOR_SKIP_SLEEP"):
@@ -911,7 +912,7 @@ class Task3OathExecutor:
 
     def _poll_transaction(self, tx_id: str | None) -> dict[str, Any]:
         if not tx_id:
-            return {"confirmed": False}
+            return {"confirmed": False, "recoverySource": RECOVERY_SOURCE_NONE}
         receipt = self._portkey_query(
             "tx-result",
             {
@@ -920,16 +921,35 @@ class Task3OathExecutor:
             },
             label="transaction result",
         )
+        confirmed = receipt.get("Status") == "MINED"
         return {
-            "confirmed": receipt.get("Status") == "MINED",
+            "confirmed": confirmed,
+            "transactionId": tx_id if confirmed else None,
             "receipt": receipt,
+            "recoverySource": RECOVERY_SOURCE_DIRECT_RECEIPT if confirmed else RECOVERY_SOURCE_NONE,
         }
 
-    def _vote_auxiliary_reconciliation(self, wallet: WalletProfile) -> Callable[[str | None], dict[str, Any]]:
+    def _vote_auxiliary_reconciliation(
+        self,
+        wallet: WalletProfile,
+        *,
+        vote_payload: dict[str, Any],
+        attempt_started_at: float,
+    ) -> Callable[[str | None], dict[str, Any]]:
         def _inner(tx_id: str | None) -> dict[str, Any]:
             receipt_info = self._poll_transaction(tx_id) if tx_id else {"confirmed": False}
             if receipt_info.get("confirmed"):
                 return receipt_info
+            aelfscan_recovery = self._recover_vote_transaction_id(
+                wallet,
+                vote_payload=vote_payload,
+                attempt_started_at=attempt_started_at,
+            )
+            if aelfscan_recovery.get("confirmed"):
+                return {
+                    **aelfscan_recovery,
+                    "receipt": receipt_info.get("receipt"),
+                }
             try:
                 proposal_my_info = self._tomorrowdao(
                     "dao",
@@ -943,19 +963,21 @@ class Task3OathExecutor:
                     label="proposal my-info",
                 )
             except (CommandExecutionError, ToolResponseError):
-                return {"confirmed": False, "receipt": receipt_info.get("receipt")}
+                return {
+                    "confirmed": False,
+                    "receipt": receipt_info.get("receipt"),
+                    "recoverySource": RECOVERY_SOURCE_NONE,
+                }
             vote_amount = self._extract_numeric(proposal_my_info, keys=("voteAmount", "amount", "value"), default=0)
+            confirmed = vote_amount >= self._vote_amount
             return {
-                "confirmed": vote_amount >= self._vote_amount,
+                "confirmed": confirmed,
                 "receipt": receipt_info.get("receipt"),
                 "proposalMyInfo": proposal_my_info,
+                "recoverySource": RECOVERY_SOURCE_PROPOSAL_MY_INFO if confirmed else RECOVERY_SOURCE_NONE,
             }
 
         return _inner
-
-    def _vote_reconciliation(self, wallet: WalletProfile, tx_id: str | None) -> dict[str, Any]:
-        auxiliary = self._vote_auxiliary_reconciliation(wallet)
-        return auxiliary(tx_id)
 
     def _normalize_portkey_tx_result(self, data: dict[str, Any]) -> dict[str, Any]:
         inner = data.get("data") or {}
@@ -967,7 +989,212 @@ class Task3OathExecutor:
             "receipt": inner,
             "feePreview": data.get("feePreview"),
             "caAddress": data.get("caAddress"),
+            "recoverySource": RECOVERY_SOURCE_NONE,
         }
+
+    @staticmethod
+    def _merge_reconciled_tx_result(tx_result: dict[str, Any], reconciled: dict[str, Any]) -> dict[str, Any]:
+        merged = dict(tx_result)
+        merged["status"] = "MINED"
+        merged["reconciled"] = reconciled
+        recovered_tx_id = reconciled.get("transactionId")
+        if recovered_tx_id:
+            merged["transactionId"] = recovered_tx_id
+        else:
+            merged["transactionId"] = None
+        recovery_source = reconciled.get("recoverySource") or RECOVERY_SOURCE_NONE
+        merged["recoverySource"] = recovery_source
+        if reconciled.get("receipt") and not merged.get("receipt"):
+            merged["receipt"] = reconciled["receipt"]
+        return merged
+
+    @staticmethod
+    def _build_reconciled_tx_result(
+        wallet: WalletProfile,
+        *,
+        error_message: str | None,
+        reconciled: dict[str, Any],
+    ) -> dict[str, Any]:
+        return {
+            "status": "MINED",
+            "transactionId": reconciled.get("transactionId"),
+            "error": error_message,
+            "reconciled": reconciled,
+            "receipt": reconciled.get("receipt"),
+            "caAddress": wallet.ca_address,
+            "recoverySource": reconciled.get("recoverySource") or RECOVERY_SOURCE_NONE,
+        }
+
+    def _recover_vote_transaction_id(
+        self,
+        wallet: WalletProfile,
+        *,
+        vote_payload: dict[str, Any],
+        attempt_started_at: float,
+    ) -> dict[str, Any]:
+        tx_recovery = self._tx_recovery
+        if str(tx_recovery.get("provider") or "").lower() != RECOVERY_SOURCE_AELFSCAN:
+            return {"confirmed": False, "recoverySource": RECOVERY_SOURCE_NONE}
+
+        query_address = wallet.manager_address or wallet.ca_address
+        lookback_seconds = int(tx_recovery.get("phase_lookback_seconds") or 0)
+        started_after = max(0, int(attempt_started_at) - lookback_seconds)
+        recovery_trace = {
+            "provider": tx_recovery.get("provider"),
+            "queryAddress": query_address,
+            "expectedMethod": tx_recovery.get("vote_method_name"),
+            "expectedContractAddress": vote_payload.get("contractAddress"),
+            "expectedStatus": tx_recovery.get("confirmed_status"),
+            "expectedChainId": self._chain_id,
+            "startedAfterTimestamp": started_after,
+            "phaseLookbackSeconds": lookback_seconds,
+        }
+
+        try:
+            query_url, transactions = self._fetch_recent_address_transactions(query_address)
+        except (HTTPError, URLError, OSError, ValueError, json.JSONDecodeError) as exc:
+            recovery_trace["queryUrl"] = self._build_address_transactions_url(query_address)
+            recovery_trace["error"] = str(exc)
+            self._record("vote_tx_recovery", "failure", recovery_trace)
+            return {"confirmed": False, "recoverySource": RECOVERY_SOURCE_NONE}
+
+        recovery_trace["queryUrl"] = query_url
+        recovery_trace["responseCount"] = len(transactions)
+
+        candidates_by_tx_id: dict[str, dict[str, Any]] = {}
+        for transaction in transactions:
+            if not self._aelfscan_tx_matches_vote_recovery(
+                transaction,
+                vote_payload=vote_payload,
+                started_after=started_after,
+            ):
+                continue
+            transaction_id = str(transaction.get("transactionId") or "").strip()
+            if transaction_id:
+                candidates_by_tx_id[transaction_id] = transaction
+
+        candidate_tx_ids = list(candidates_by_tx_id)
+        recovery_trace["candidateCount"] = len(candidate_tx_ids)
+        recovery_trace["candidateTransactionIds"] = candidate_tx_ids
+
+        if len(candidate_tx_ids) == 1:
+            selected_tx_id = candidate_tx_ids[0]
+            recovery_trace["selectedTransactionId"] = selected_tx_id
+            self._record("vote_tx_recovery", "success", recovery_trace)
+            return {
+                "confirmed": True,
+                "transactionId": selected_tx_id,
+                "recoverySource": RECOVERY_SOURCE_AELFSCAN,
+                "aelfscan": {
+                    "queryUrl": query_url,
+                    "candidateTransactionIds": candidate_tx_ids,
+                    "selectedTransaction": candidates_by_tx_id[selected_tx_id],
+                },
+            }
+
+        trace_status = "ambiguous" if candidate_tx_ids else "pending"
+        self._record("vote_tx_recovery", trace_status, recovery_trace)
+        return {
+            "confirmed": bool(candidate_tx_ids),
+            "recoverySource": RECOVERY_SOURCE_AELFSCAN if candidate_tx_ids else RECOVERY_SOURCE_NONE,
+            "candidateTransactionIds": candidate_tx_ids,
+            "aelfscan": {
+                "queryUrl": query_url,
+                "candidateTransactionIds": candidate_tx_ids,
+            },
+        }
+
+    def _fetch_recent_address_transactions(self, address: str) -> tuple[str, list[dict[str, Any]]]:
+        query_url = self._build_address_transactions_url(address)
+        request = Request(
+            query_url,
+            headers={
+                "Accept": "application/json",
+                "User-Agent": AELFSCAN_USER_AGENT,
+            },
+        )
+        with urlopen(request, timeout=10) as response:
+            payload = json.load(response)
+        data = payload.get("data") or {}
+        transactions = data.get("transactions") or []
+        if not isinstance(transactions, list):
+            raise ValueError("aelfscan transactions payload is missing a list response")
+        return query_url, [item for item in transactions if isinstance(item, dict)]
+
+    def _build_address_transactions_url(self, address: str) -> str:
+        tx_recovery = self._tx_recovery
+        base_url = str(tx_recovery.get("address_transactions_url") or "").strip()
+        if not base_url:
+            raise ValueError("tx_recovery.address_transactions_url is not configured")
+        params = {
+            "skipCount": 0,
+            "maxResultCount": int(tx_recovery.get("max_result_count") or 25),
+            "address": address,
+        }
+        return f"{base_url}?{urlencode(params)}"
+
+    def _aelfscan_tx_matches_vote_recovery(
+        self,
+        transaction: dict[str, Any],
+        *,
+        vote_payload: dict[str, Any],
+        started_after: int,
+    ) -> bool:
+        tx_recovery = self._tx_recovery
+        if str(transaction.get("method") or "") != str(tx_recovery.get("vote_method_name") or ""):
+            return False
+        if self._coerce_int(transaction.get("status")) != self._coerce_int(tx_recovery.get("confirmed_status")):
+            return False
+        target_address = self._extract_nested_address(transaction.get("to"))
+        if target_address != str(vote_payload.get("contractAddress") or ""):
+            return False
+        chain_ids = transaction.get("chainIds") or []
+        if isinstance(chain_ids, str):
+            chain_ids = [chain_ids]
+        if self._chain_id not in [str(item) for item in chain_ids]:
+            return False
+        tx_timestamp = self._coerce_unix_timestamp(transaction.get("timestamp"))
+        if tx_timestamp is None or tx_timestamp < started_after:
+            return False
+        return True
+
+    @staticmethod
+    def _extract_nested_address(value: Any) -> str | None:
+        if isinstance(value, dict):
+            address = value.get("address")
+            return str(address) if address else None
+        if value:
+            return str(value)
+        return None
+
+    @staticmethod
+    def _coerce_int(value: Any) -> int | None:
+        try:
+            return int(str(value).strip())
+        except (TypeError, ValueError, AttributeError):
+            return None
+
+    @staticmethod
+    def _coerce_unix_timestamp(value: Any) -> int | None:
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            raw_value = int(value)
+        else:
+            text = str(value).strip()
+            if not text:
+                return None
+            if re.fullmatch(r"\d+", text):
+                raw_value = int(text)
+            else:
+                try:
+                    normalized = text.replace("Z", "+00:00")
+                    return int(datetime.fromisoformat(normalized).astimezone(timezone.utc).timestamp())
+                except ValueError:
+                    return None
+        if raw_value >= 10**12:
+            return raw_value // 1000
+        return raw_value
 
     @staticmethod
     def _is_password_error(error: Exception | str) -> bool:

@@ -19,6 +19,7 @@
     "success_telegram_group_url",
     "success_telegram_template",
     "success_bonus_note",
+    "tx_recovery",
     "dependency_invocation",
     "dao_alias",
     "dao_id",
@@ -80,6 +81,27 @@
       "properties": {
         "zh-CN": { "type": "string" },
         "en": { "type": "string" }
+      }
+    },
+    "tx_recovery": {
+      "type": "object",
+      "required": [
+        "provider",
+        "address_transactions_url",
+        "max_result_count",
+        "confirmed_status",
+        "phase_lookback_seconds",
+        "vote_method_name",
+        "approve_method_name"
+      ],
+      "properties": {
+        "provider": { "type": "string" },
+        "address_transactions_url": { "type": "string" },
+        "max_result_count": { "type": "number" },
+        "confirmed_status": { "type": "number" },
+        "phase_lookback_seconds": { "type": "number" },
+        "vote_method_name": { "type": "string" },
+        "approve_method_name": { "type": "string" }
       }
     },
     "dependency_invocation": {
