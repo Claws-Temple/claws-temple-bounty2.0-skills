@@ -470,11 +470,10 @@ def main() -> None:
         fail("expected Task 3 validation-failure switch rule to be configured")
     if dependency_invocation["state_reconciliation_priority"] != [
         "tx_receipt",
-        "vote_logs",
-        "allowance_or_balance_delta",
+        "aelfscan_recent_transactions",
         "proposal_my_info",
     ]:
-        fail("expected Task 3 state reconciliation priority to prefer receipt/logs before proposal_my_info")
+        fail("expected Task 3 state reconciliation priority to prefer receipt and recent transactions before proposal_my_info")
     if vote_payload["vote_option_field"] != "voteOption":
         fail("expected dependency_invocation.vote_payload.vote_option_field to use voteOption")
     if vote_payload["vote_option_value"] != 0:
@@ -1208,8 +1207,8 @@ def main() -> None:
     for marker in (
         "same verified `CA` write transport",
         "NODEVALIDATIONFAILED",
-        "proposal my-info` as an auxiliary source",
-        "`tx receipt`, `logs`, and allowance or balance deltas",
+        "proposal my-info` as the last auxiliary source",
+        "mined `tx receipt`, the configured recent-transaction recovery source",
         "fixed Telegram post template",
         "bonus-note or discussion-note wording",
         "dependency-tool input alias",
@@ -1273,17 +1272,17 @@ def main() -> None:
     for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
         if marker not in task4_flow:
             fail(f"missing Task 4 support flow marker: {marker}")
-    for marker in ("## OpenClaw Recovery Checklist", "native runtime package", "install that package into the usable OpenClaw runtime surface and then start `/new`"):
+    for marker in ("## OpenClaw Recovery Checklist", "only ships the remote live skill URL", "continue Task 4 in a non-OpenClaw host"):
         if marker not in task4_flow:
             fail(f"missing Task 4 OpenClaw checklist marker: {marker}")
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     for marker in ("我会先带你进入原生流程并继续推进", "只有遇到账号、登录态或 repo 前置条件时"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese execution-report marker: {marker}")
-    for marker in ("openclaw_native_wrapper_bundled", "这个仓库版本本身还没有内置可直接拿来跑 Task 4 的 SHIT Skills 原生 wrapper", "改到能加载远端 live skill 的非 OpenClaw 宿主继续 Task 4"):
+    for marker in ("openclaw_local_runtime_bundled", "这个仓库版本的 Task 4 只有远端 live skill", "切到能直接加载这个远端 live skill 的非 OpenClaw 宿主继续"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese OpenClaw recovery marker: {marker}")
-    for marker in ("openclaw_native_wrapper_bundled", "does not bundle a ready-to-run SHIT Skills native wrapper for Task 4", "continue Task 4 in a non-OpenClaw host that can load the remote live skill"):
+    for marker in ("openclaw_local_runtime_bundled", "only exposes the remote live skill", "continue Task 4 in a non-OpenClaw host that can load that remote live skill directly"):
         if marker not in task4_en:
             fail(f"missing Task 4 English OpenClaw recovery marker: {marker}")
 
@@ -1322,12 +1321,12 @@ def main() -> None:
             fail(f"missing Task 5 English capability-confirmation marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
-    for marker in ("TASK4_TARGET_HOST", "OPENCLAW_TASK4_NATIVE_READY", "OPENCLAW_TASK4_SESSION_REFRESHED", "CHECK_REMOTE_SKILL=1", "REMOTE_PROBE_MODE=strict"):
+    for marker in ("TASK4_TARGET_HOST", "CHECK_REMOTE_SKILL=1", "REMOTE_PROBE_MODE=strict", "Task 4 is closed for OpenClaw in this repository"):
         if marker not in release_gate:
             fail(f"release gate is missing Task 4 host-aware marker: {marker}")
 
     test_rollout_gate = (SKILL_ROOT / "scripts" / "test-rollout-gate.sh").read_text(encoding="utf-8")
-    for marker in ("TASK4_TARGET_HOST", "OPENCLAW_TASK4_NATIVE_READY", "OPENCLAW_TASK4_SESSION_REFRESHED", "task4-live-skill-probe.sh", "PROBE_MODE=strict"):
+    for marker in ("TASK4_TARGET_HOST", "task4-live-skill-probe.sh", "PROBE_MODE=strict", "Task 4 is closed for OpenClaw in this repository"):
         if marker not in test_rollout_gate:
             fail(f"test rollout gate is missing Task 4 host-aware marker: {marker}")
 
@@ -1339,7 +1338,7 @@ def main() -> None:
     for marker in ("native SHIT Skills flow", "Task 4 is unavailable", "do not simulate a prep-only success path"):
         if marker not in task4_rollout:
             fail(f"missing Task 4 rollout marker: {marker}")
-    for marker in ("does not bundle an OpenClaw-native SHIT Skills wrapper", "run `/new`", "install the compatible package, run `/new`, or switch host"):
+    for marker in ("does not bundle an OpenClaw-local Task 4 runtime surface", "keep Task 4 unavailable in this repository", "switch host"):
         if marker not in task4_rollout:
             fail(f"missing Task 4 OpenClaw rollout marker: {marker}")
     for banned in ("publish-prep mode", "prep-only mode"):
@@ -1383,8 +1382,8 @@ def main() -> None:
         for banned in ("Portkey App", "EOA 私钥", "EOA signing", "manual fallback", "手动完成"):
             if banned in text:
                 fail(f"Task 3 visible layer must not expose deprecated fallback detail in {label}: {banned}")
-    if "voteType" in CONFIG_PATH.read_text(encoding="utf-8") or '"Approve"' in CONFIG_PATH.read_text(encoding="utf-8"):
-        fail("old Task 3 voteType/Approve contract must be removed from config")
+    if "voteType" in CONFIG_PATH.read_text(encoding="utf-8"):
+        fail("old Task 3 voteType contract must be removed from config")
 
     for path in (
         SKILL_ROOT / "references" / "brand-lexicon.zh.md",

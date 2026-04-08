@@ -121,7 +121,7 @@ Verify:
 - After `/new`, ask OpenClaw to run:
 - `Use $claws-temple-bounty to show the roadmap that takes my agent out into the wild.`
 - `Use $claws-temple-bounty to start Task 1 and tell me whether agent-spectrum is ready in this session.`
-- `Use $claws-temple-bounty to tell me whether Task 4 can run in OpenClaw right now, and if not, list the exact missing native prerequisite.`
+- `Use $claws-temple-bounty to tell me whether Task 4 is currently unavailable in this OpenClaw package, and if so, tell me which non-OpenClaw host should handle it.`
 
 ### Claude Code
 
@@ -165,8 +165,8 @@ Enable and verify:
 - Local skill: `portkey-ca-agent-skills` `>= 2.3.0`
 - Remote live skill for Task 4 compatibility on non-OpenClaw hosts: `https://www.shitskills.net/skill.md`
 - OpenClaw Task 4 runtime: native dependency / native action first; do not assume the remote `skill.md` is directly loadable there
-- This repository does not currently ship an OpenClaw-native SHIT Skills wrapper or a dedicated Task 4 ClawHub slug
-- In OpenClaw, Task 4 can continue only when operators separately install a compatible native SHIT Skills package or the host already confirms native action capability; otherwise keep Task 4 in checklist or blocker mode, run `/new` after install, or continue Task 4 in a non-OpenClaw host that can load the remote live skill
+- This repository does not currently ship an OpenClaw-native SHIT Skills wrapper, a dedicated Task 4 ClawHub slug, or another documented OpenClaw-local runtime surface
+- As of April 8, 2026, Task 4 in this repository is backed only by the remote live skill at `https://www.shitskills.net/skill.md`, so OpenClaw should treat Task 4 as unavailable by default in this package and route the user to a non-OpenClaw host that can load the remote live skill
 
 If you want dependency preflight to fail hard instead of warning, run smoke check with `STRICT_DEPS=1`.
 
@@ -313,7 +313,7 @@ Task 3 now ships with the formal `Claws Temple II` faction mapping in `skills/cl
 Task 3 now expects `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, the `tomorrowdao_token_approve` tool, the `portkey_forward_call` tool, and a `2 AIBOUNTY` vote threshold.
 Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and TomorrowDAO direct-send errors must hand off to explicit Portkey CA forward transport before the flow is allowed to stop with an unsupported `CA` transport blocker.
 For non-OpenClaw hosts, Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
-For OpenClaw, this repository does not bundle the SHIT Skills native runtime by itself yet, so rollout requires a separately installed compatible native package or host-native action support in addition to account readiness.
+For OpenClaw, this repository does not bundle a Task 4 local runtime at all right now; since only the remote live skill exists here, Task 4 should be treated as unavailable in the current OpenClaw package unless a future runtime surface is explicitly added.
 ClawHub packaging should use `scripts/build-clawhub.sh`, then publish `dist/clawhub/claws-temple-bounty` instead of the repository root.
 
 ## Task 4 Rollout Plan
@@ -321,12 +321,12 @@ ClawHub packaging should use `scripts/build-clawhub.sh`, then publish `dist/claw
 - Testing window:
   - run `bash skills/claws-temple-bounty/scripts/test-rollout-gate.sh`
   - if the target host is not `OpenClaw`, require the Task 4 live-skill probe to pass
-  - if the target host is `OpenClaw`, require a separately installed compatible SHIT Skills native package, a fresh `/new` session after install, and confirmed native action availability; the remote probe alone is not enough
+  - if the target host is `OpenClaw`, treat Task 4 as unavailable for this repository until an explicit OpenClaw-local runtime surface is published; the remote probe alone is not enough
   - if probe or native auth publish is unavailable, treat Task 4 as unavailable for that window
 - Production window:
   - run `bash skills/claws-temple-bounty/scripts/release-gate.sh`
   - if the target host is not `OpenClaw`, require Task 4 live-skill probe and native auth publish to pass before treating Task 4 as available
-  - if the target host is `OpenClaw`, require the same separately installed native package plus confirmed native action availability before treating Task 4 as available
+  - if the target host is `OpenClaw`, keep Task 4 closed for this repository until an explicit OpenClaw-local runtime surface is published
 
 Maintainer runbook:
 

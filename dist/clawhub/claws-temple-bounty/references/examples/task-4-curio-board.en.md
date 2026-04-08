@@ -55,7 +55,7 @@ If the current host cannot complete native `SHIT Skills` sign-in or the chosen n
 
 If the current host is `OpenClaw`, but the native dependency or native action is not confirmed yet, the reply should say:
 
-`You are in OpenClaw, but this repository version does not bundle a ready-to-run SHIT Skills native wrapper for Task 4 by itself. This turn also still has no confirmed native dependency / native action path available. I will keep the missing items explicit: if operators already installed a compatible native package, I first confirm that package and the current action are usable; if not, install the compatible package, start a fresh /new session, and then retry; if no such package is available in this environment yet, continue Task 4 in a non-OpenClaw host that can load the remote live skill.`
+`You are in OpenClaw, but this repository version only exposes the remote live skill at https://www.shitskills.net/skill.md for Task 4 and does not ship an OpenClaw-local runtime surface. I will not pretend there is another installable package here. The clearest next step is to continue Task 4 in a non-OpenClaw host that can load that remote live skill directly, and only return to OpenClaw if a future local runtime is released for this path.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
@@ -64,7 +64,7 @@ If the current host is `OpenClaw`, but the native dependency or native action is
 
 - route: `task-4-curio-board`
 - live_dependency: `https://www.shitskills.net/skill.md`
-- openclaw_runtime: `native-dependency-first`
-- openclaw_native_wrapper_bundled: `false`
+- openclaw_runtime: `unsupported_in_this_package`
+- openclaw_local_runtime_bundled: `false`
 - default_bounty_action: `publish`
 - native_publish_required_fields: `title`, `summary`, `githubUrl`, `tags`, `installType`, `installCommand|installUrl`

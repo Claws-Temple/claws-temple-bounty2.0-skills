@@ -8,9 +8,9 @@ Use this flow for Task 4 or any SHIT Skills native action request inside the bou
 
 ## Host Rule
 
-- `OpenClaw`: native-dependency-first; prefer an installed local or ClawHub native dependency over the remote URL
+- `OpenClaw`: do not assume the remote live skill URL is directly loadable in this package
 - non-OpenClaw hosts: the remote live skill may remain the compatibility path when the host can really load it
-- current repository status: this repository does not bundle an OpenClaw-native SHIT Skills wrapper for Task 4, so OpenClaw availability depends on a separately installed compatible native package or confirmed host-native action support outside this package
+- current repository status: this repository does not bundle an OpenClaw-local Task 4 runtime surface; it only references the remote live skill at `https://www.shitskills.net/skill.md`
 
 ## Goal
 
@@ -38,9 +38,9 @@ Route the user into the native SHIT Skills platform flow without wrapping Task 4
    - optional `coverUrl`
 11. For comment, vote, like, edit, or delete, ask only for the native action-specific target or session readiness; do not block these actions on `GitHub` repository input.
 12. In maintainer-facing execution, resolve host capability before relying on the native action.
-13. If the current host is `OpenClaw`, first check whether the required native dependency is already installed locally or available through ClawHub-managed install state.
+13. If the current host is `OpenClaw`, say plainly that this repository version cannot finish Task 4 there by itself today because it only ships the remote live skill URL and no documented OpenClaw-local runtime.
 14. In `OpenClaw`, do not assume the remote `skill.md` URL can be loaded directly just because the live skill exists.
-15. If the current host is `OpenClaw` and there is still no separately installed compatible native package or confirmed native action capability, say plainly that this repository version cannot finish Task 4 there by itself, then keep the recovery options concrete: install the compatible native package, run `/new`, or switch Task 4 to a host that can load the remote live skill.
+15. In `OpenClaw`, keep the recovery options concrete: switch Task 4 to a host that can load the remote live skill, or wait until an explicit OpenClaw runtime surface is published for this path.
 16. Load the live SHIT Skills integration skill only when the host capability path for that host is actually available.
 17. Continue with the specific native action the user needs: publish, edit, delete, comment, vote, like, or parse GitHub `SKILL.md`.
 18. If the native action succeeds, say which SHIT Skills action is now complete; do not claim that the local skill itself finalized Task 4 qualification unless the user explicitly completed the default qualification action.
@@ -50,10 +50,10 @@ Route the user into the native SHIT Skills platform flow without wrapping Task 4
 
 When Task 4 is blocked in `OpenClaw`, keep the recovery steps explicit in the Task 4 reply itself:
 
-1. say whether the missing piece is `native runtime package`, `fresh /new session`, `account readiness`, or `native action capability`
-2. say plainly when this repository version does not bundle the missing runtime by itself
-3. if operators already have a compatible package, tell them to install that package into the usable OpenClaw runtime surface and then start `/new`
-4. if no compatible package is available in the current environment yet, tell the user to continue Task 4 in a non-OpenClaw host that can load the remote live skill
+1. say plainly that the current repository only ships the remote live skill URL and not an OpenClaw-local runtime
+2. say whether the current blocker is `current host = OpenClaw`, `account readiness`, or `authenticated native action`
+3. when the host is `OpenClaw`, tell the user to continue Task 4 in a non-OpenClaw host that can load the remote live skill
+4. only reopen OpenClaw Task 4 after a future explicit runtime surface is published and documented
 
 ## Required Visible Output
 
@@ -64,8 +64,8 @@ When Task 4 is blocked in `OpenClaw`, keep the recovery steps explicit in the Ta
 - native action choice or default recommendation
 - qualification-vs-auxiliary-action clarification
 - current native action, blocker, or exact next step
-- OpenClaw native-dependency checklist wording when OpenClaw is missing its usable native dependency
-- exact OpenClaw recovery action when the repository itself does not bundle the needed native runtime
+- OpenClaw unsupported wording when the repository only ships the remote live skill
+- exact OpenClaw recovery action toward a non-OpenClaw compatible host
 - support CTA when the user is genuinely stuck
 
 ## Native Publish Schema
@@ -105,12 +105,11 @@ If the remote dependency cannot be loaded or authenticated native publishing is 
 - do not pretend the native action already happened
 - append support CTA when the user cannot continue automatically in the current host
 
-If the current host is `OpenClaw` and the usable native dependency is not installed yet:
+If the current host is `OpenClaw`:
 
-- explain that OpenClaw still needs the local or ClawHub native dependency before this Task 4 path can run there
-- if this repository version does not bundle that native runtime, say so plainly instead of implying a hidden install source exists here
-- keep the next step explicit: identify whether the gap is `runtime package`, `fresh /new`, `account`, or `native action capability`, then tell the user to install a compatible native package, start `/new`, or switch Task 4 to a host that can load the remote live skill
-- list the exact missing prerequisite plainly
+- explain that this repository only ships the remote live skill URL for Task 4 and does not provide an OpenClaw-local runtime today
+- list the exact current blocker plainly, such as `current host = OpenClaw`, `account`, or `authenticated native action`
+- keep the next step explicit: switch Task 4 to a host that can load the remote live skill, or wait until an explicit OpenClaw runtime is published
 - keep the reply in checklist or blocker mode
 - do not imply that the remote URL can be loaded directly in this host
 
@@ -121,4 +120,4 @@ If the current host is `OpenClaw` and the usable native dependency is not instal
 - the visible layer should say that `GitHub` is the only publishable source for Task 4
 - do not use a local Task 4 completion state machine
 - keep the live skill URL in the maintainer layer when the user asks for details
-- in OpenClaw, prefer a locally installed or ClawHub-installed native dependency over the remote live-skill URL
+- in OpenClaw, do not promise Task 4 availability for this repository until an explicit local runtime surface is published

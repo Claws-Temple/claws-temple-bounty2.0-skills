@@ -275,7 +275,7 @@ Use these strings when `cta_type = support`.
 - if the current host is `OpenClaw`, treat Task 4 as native-dependency-first instead of remote-URL-first
 - in `OpenClaw`, do not assume `https://www.shitskills.net/skill.md` is directly loadable as a runtime surface
 - if `OpenClaw` is missing the required native dependency or native action capability, return a precise checklist or blocker instead of claiming the remote live skill will run there automatically
-- if the current repository version does not bundle a usable OpenClaw-native SHIT Skills package, say that plainly and keep the next recovery action concrete: install the compatible native package, run `/new`, or switch Task 4 to a non-OpenClaw host that can load the remote live skill
+- if the current repository version only ships the remote live skill and no OpenClaw-local runtime surface, say that plainly and keep the next recovery action concrete: switch Task 4 to a non-OpenClaw host that can load the remote live skill, or wait until an explicit OpenClaw runtime is published
 - for non-OpenClaw hosts, the remote live skill may remain the compatibility path when that host really supports it
 - require a publishable `GitHub repo URL` only when the chosen native action actually needs it
 - gather the native publish fields only when the chosen native action actually needs them:

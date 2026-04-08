@@ -247,10 +247,11 @@ Use these strings when `cta_type = support`.
 - derive the final `Vote` payload through `tomorrowdao_dao_vote --mode simulate`, then send that exact normalized payload through `portkey_forward_call`
 - after a successful `Approve`, prefer the same verified Portkey CA forward transport for the final `Vote` instead of switching to a different write path
 - for `Approve`, retry at most 3 times with state reconciliation before each attempt; if allowance is already sufficient after a timeout, continue directly to `Vote`
-- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, allowance, and primary state signals from `tx receipt`, `logs`, and allowance or balance deltas
-- treat `proposal my-info` as an auxiliary source; if it is unavailable or returns no user record, continue with receipt and log based reconciliation instead of failing the flow immediately
+- for `Vote`, retry at most 3 times; before each retry, re-check proposal availability, mined `tx receipt`, the configured recent-transaction recovery source, and then `proposal my-info`
+- treat the configured recent-transaction recovery source as the first fallback when a mined `Vote txId` is missing after send uncertainty
+- treat `proposal my-info` as the last auxiliary source; if it is unavailable or returns no user record, continue with receipt and recent-transaction based reconciliation instead of failing the flow immediately
 - if a non-preferred vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, switch back to the same verified `CA` write transport that already succeeded for `Approve`
-- if `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
+- if recent-transaction recovery is ambiguous or `proposal my-info` already shows the vote state change but the receipt is not final yet, keep the user in `submitted` and continue confirmation polling instead of declaring failure
 - keep approval tx details in maintainer-facing details unless the user explicitly asks; the `completed` close should still use the final vote `txId`
 - use `submitted` after the final vote has been sent but before mined-success receipt confirmation is available
 - if reconciliation confirms progress but the final vote `txId` is still missing, stay in `submitted` instead of moving to `completed`
@@ -274,7 +275,7 @@ Use these strings when `cta_type = support`.
 - if the current host is `OpenClaw`, treat Task 4 as native-dependency-first instead of remote-URL-first
 - in `OpenClaw`, do not assume `https://www.shitskills.net/skill.md` is directly loadable as a runtime surface
 - if `OpenClaw` is missing the required native dependency or native action capability, return a precise checklist or blocker instead of claiming the remote live skill will run there automatically
-- if the current repository version does not bundle a usable OpenClaw-native SHIT Skills package, say that plainly and keep the next recovery action concrete: install the compatible native package, run `/new`, or switch Task 4 to a non-OpenClaw host that can load the remote live skill
+- if the current repository version only ships the remote live skill and no OpenClaw-local runtime surface, say that plainly and keep the next recovery action concrete: switch Task 4 to a non-OpenClaw host that can load the remote live skill, or wait until an explicit OpenClaw runtime is published
 - for non-OpenClaw hosts, the remote live skill may remain the compatibility path when that host really supports it
 - require a publishable `GitHub repo URL` only when the chosen native action actually needs it
 - gather the native publish fields only when the chosen native action actually needs them:

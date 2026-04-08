@@ -122,7 +122,7 @@ OpenClaw 注意事项：
 - 在 `/new` 之后，让 OpenClaw 依次执行：
 - `使用 $claws-temple-bounty 展示这条让 Agent 去原野上交朋友的路线图。`
 - `使用 $claws-temple-bounty 从 Task 1 开始，并告诉我这次会话里的 agent-spectrum 是否已经就绪。`
-- `使用 $claws-temple-bounty 告诉我 Task 4 现在能不能在 OpenClaw 里继续；如果不能，就把缺失的原生前置条件逐条列出来。`
+- `使用 $claws-temple-bounty 告诉我 Task 4 在当前 OpenClaw package 里是不是不可用；如果不可用，就明确告诉我应该切到哪类非 OpenClaw 宿主继续。`
 
 ### Claude Code
 
@@ -166,8 +166,8 @@ OpenClaw 注意事项：
 - 本地 skill：`portkey-ca-agent-skills` `>= 2.3.0`
 - Task 4 的非 OpenClaw 兼容路径仍依赖远端 live skill：`https://www.shitskills.net/skill.md`
 - OpenClaw 上的 Task 4 运行面改成 `native dependency / native action first`，不要默认远端 `skill.md` 能直接加载
-- 当前仓库本身还没有内置 OpenClaw 可直接安装的 SHIT Skills 原生 wrapper，也没有单独的 Task 4 ClawHub slug
-- 在 OpenClaw 里，Task 4 只有在运营侧另外装好了兼容的 SHIT Skills 原生包，或者宿主已经明确确认原生 action capability 可用时，才继续往下跑；否则就保持 checklist / blocker，并在安装后先 `/new`，或者改到能加载远端 live skill 的非 OpenClaw 宿主继续
+- 当前仓库本身还没有内置 OpenClaw 可直接安装的 SHIT Skills 原生 wrapper，也没有单独的 Task 4 ClawHub slug 或其它已文档化的 OpenClaw 本地运行面
+- 截至 2026 年 4 月 8 日，这个仓库里的 Task 4 只有远端 live skill `https://www.shitskills.net/skill.md`，所以在 OpenClaw 里应该默认把 Task 4 视为当前 package 不可用，并明确引导到能加载这个远端 live skill 的非 OpenClaw 宿主继续
 
 如果希望依赖预检在缺失时直接失败，而不是只给 warning，可以用 `STRICT_DEPS=1` 运行 smoke check。
 
@@ -314,7 +314,7 @@ Task 3 当前内置的是正式版 `Claws Temple II` faction 映射，定义在 
 Task 3 现在要求 `tomorrowdao-agent-skills >= 0.2.2`、`portkey-ca-agent-skills >= 2.3.0`、通用 `tomorrowdao_token_balance_view` 工具、通用 `tomorrowdao_token_allowance_view` 工具、`tomorrowdao_token_approve` 工具、`portkey_forward_call` 工具，以及 `2 AIBOUNTY` 的投票门槛。
 Task 3 现在也把 `CA` keystore 解锁出来的 manager key 视为“仅属于已验证 CA 写入路径”的能力：一旦选定 `CA`，就禁止 direct target-contract send，也禁止继续走 env/private-key fallback；如果 TomorrowDAO direct-send 在 `CA` 身份下被拒绝，系统必须继续切到显式 Portkey CA forward transport，而不是直接停在 unsupported `CA` transport blocker。
 对非 OpenClaw 宿主来说，Task 4 的 live publish 还依赖 `https://www.shitskills.net/skill.md` 的可达性。
-对 OpenClaw 来说，这个仓库目前还不会自己附带 SHIT Skills 原生运行面，所以除了账号 readiness 之外，还要额外依赖“已安装兼容原生包”或“宿主已确认原生 action capability 可用”。
+对 OpenClaw 来说，这个仓库目前并没有附带 Task 4 的本地运行面；既然这里只有远端 live skill，就应该把 Task 4 明确视为当前 OpenClaw package 不可用，而不是暗示还存在别的可安装包。
 ClawHub 打包应该先运行 `scripts/build-clawhub.sh`，再发布 `dist/clawhub/claws-temple-bounty`，不要直接发仓库根目录。
 
 ## Task 4 上线预案
@@ -322,12 +322,12 @@ ClawHub 打包应该先运行 `scripts/build-clawhub.sh`，再发布 `dist/clawh
 - 测试窗口：
   - 运行 `bash skills/claws-temple-bounty/scripts/test-rollout-gate.sh`
   - 如果目标宿主不是 `OpenClaw`，要求 Task 4 live-skill probe 通过
-  - 如果目标宿主是 `OpenClaw`，要求运营侧已安装兼容的 SHIT Skills 原生包、安装后已 `/new` 刷新新会话，并确认原生 action 可用；仅有远端 probe 通过还不够
+  - 如果目标宿主是 `OpenClaw`，当前仓库应直接把 Task 4 视为不可用，直到未来发布出明确的 OpenClaw 本地运行面；仅有远端 probe 通过还不够
   - 如果 probe 或原生认证发布不可用，就把 Task 4 视为当前窗口不可用
 - 正式窗口：
   - 运行 `bash skills/claws-temple-bounty/scripts/release-gate.sh`
   - 如果目标宿主不是 `OpenClaw`，只有 Task 4 live-skill probe 和原生认证发布都通过，才把 Task 4 当成可用
-  - 如果目标宿主是 `OpenClaw`，只有“兼容原生包已安装 + 原生 action 可用”都确认后，才把 Task 4 当成可用
+  - 如果目标宿主是 `OpenClaw`，当前仓库应保持 Task 4 关闭，直到未来发布出明确的 OpenClaw 本地运行面
 
 维护 runbook：
 
