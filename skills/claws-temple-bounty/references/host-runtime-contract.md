@@ -56,7 +56,7 @@ Task-specific consequences:
 - Task 1: no dependency result means no hexagon, no coordinate card, no type, and no faction mapping
 - Task 2: no current-turn resolved `user ID` means no queue-ready claim
 - Task 3: no verified helper prerequisites means no helper-mode promise
-- Task 4: no OpenClaw native dependency means no promise that the remote live skill can run there
+- Task 4: no local runtime proof means no promise that this repository will execute the remote live skill for the user, but it should still hand the user off to the third-party remote requirements instead of inventing a local blocker
 - Task 5: no confirmed browser capability means draft-first only
 
 This is the repo-wide `fail-closed` baseline: when the runtime proof is missing, the skill must stop at preflight, guidance, or blocker output instead of improvising a fake success path.
@@ -68,7 +68,7 @@ This is the repo-wide `fail-closed` baseline: when the runtime proof is missing,
   - `${CODEX_HOME:-$HOME/.codex}/skills` remains the compatibility fallback
 - OpenClaw:
   - prefer workspace or managed skill roots over `.codex`
-  - prefer local or ClawHub-installed native dependencies over remote `skill.md` assumptions
+  - Task 4 in this repository is an external handoff to the remote live skill, not a locally bundled runtime
   - after install or upgrade, remind the user to `/new`
 - ClawHub bundle:
   - treat this package as a distribution copy, not the canonical editing surface

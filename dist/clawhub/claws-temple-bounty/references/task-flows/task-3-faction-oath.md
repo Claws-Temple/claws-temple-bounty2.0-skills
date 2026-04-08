@@ -97,13 +97,13 @@ Routing rule:
 33. Keep the visible layer natural during the allowance step. Tell the user that one more authorization step is being completed before the oath can be sent, but keep raw contract path and approval tx details in the maintainer layer unless the user asks.
 34. Invoke `tomorrowdao_dao_vote --mode simulate` after the mapping, dependency checks, token-balance precheck, and any required approval step all pass; use the exact dependency-tool vote payload contract from the config file and do not reinterpret `proposalId` there as a raw contract ABI field name.
 35. Use the normalized `tomorrowdao_dao_vote --mode simulate` result as the only source for the final `Vote` contract address and final `votingItemId` payload, then send that exact payload through `portkey_forward_call`.
-36. For `Vote`, prefer receipt, event logs, and allowance or balance deltas as the primary reconciliation signals.
-37. Treat `proposal my-info` as an auxiliary source only. If it is unavailable or returns no user record, continue the flow with receipt and log based reconciliation instead of failing immediately.
+36. For `Vote`, prefer mined receipt first, then recent address-transaction recovery, and only then `proposal my-info` as the final auxiliary confirmation source.
+37. Use the configured `tx_recovery` source from `../../config/faction-proposals.json` to recover a missing `Vote txId` from recent address transactions when the send path is uncertain.
 38. If TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, treat that as expected CA-routing evidence and continue through the explicit Portkey CA forward transport instead of stopping.
-39. If `Vote` returns a timeout, validation failure, or another uncertain send result, re-check proposal availability, allowance, primary reconciliation signals, and then `proposal my-info` when available before retrying.
+39. If `Vote` returns a timeout, validation failure, `Voter already voted`, or another uncertain send result, re-check mined receipt, recent address transactions, and then `proposal my-info` when available before retrying.
 40. Retry `Vote` at most 3 times using bounded backoff `3s -> 8s -> 15s`.
 41. If the receipt or logs already show that the vote state changed but the final confirmation is not settled yet, move the user to `submitted` and continue polling for final confirmation.
-42. If `proposal my-info` also shows that the vote state changed but the final receipt is not confirmed yet, keep the user in `submitted` and continue polling instead of declaring failure.
+42. If recent address-transaction recovery shows more than one plausible `Vote` candidate, or if `proposal my-info` shows the vote state change but the final `txId` is still not correlated, keep the user in `submitted` and continue polling instead of declaring failure.
 43. Once the final vote is sent but before a mined-success receipt is available, move the user to `submitted`.
 44. In `submitted`, tell the user that the oath has been sent and is waiting for final confirmation in the public record. Do not move to `completed` yet, and do not append support CTA unless receipt monitoring itself is externally blocked.
 45. Treat the oath as successful only when the final vote returns a mined-success `txId` from `TxReceipt`.
@@ -153,7 +153,8 @@ Use the matching brand lexicon only for task labels, helper wording, and close-o
 - do not present `Portkey App`, `EOA`, `ManagerForwardCall`, or manual route choices in the visible layer
 - when the current signer path is `CA`, the fastest unblock is inside this skill: read allowance, derive `Approve` and `Vote` payloads through TomorrowDAO simulate, then send both writes through the same verified `CA` write transport, implemented here as the same verified Portkey CA forward transport
 - if a different vote path returns `NODEVALIDATIONFAILED` with `Insufficient allowance` after allowance is already sufficient, treat that as a transport mismatch instead of a real allowance failure
-- use `proposal my-info` as an auxiliary reconciliation helper, not as the only source of truth for vote-state confirmation
+- use `proposal my-info` as the last auxiliary reconciliation helper, not as the only source of truth for vote-state confirmation
+- prefer the configured `tx_recovery` provider to recover a missing `Vote txId` before falling back to `proposal my-info`
 - the spender for the allowance check and approval must be the current vote contract address from the dependency runtime, not a new hardcoded visible-layer constant
 - if `environment = production` and `is_test_only = false`, the visible layer should treat the selected mapping as the final formal record for Task 3
 - do not repeat raw IDs in any other reference file

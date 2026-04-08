@@ -17,7 +17,7 @@ I first confirm two things:
 If you have not named an action yet, I recommend `publish` as the default bounty-path action.  
 If you do not have an account yet, I route you into native registration or sign-in first.
 
-If the current host is `OpenClaw`, I should check native dependency and native action availability first instead of assuming the remote `skill.md` is directly loadable in the current turn.
+If the current host is `OpenClaw`, I should say clearly that this step follows the remote requirements at `https://www.shitskills.net/skill.md` and that this repository is not rewriting the third-party flow locally.
 
 Only when you choose `publish` or another repo-dependent action, I collect these fields:
 
@@ -53,18 +53,17 @@ If the current host cannot complete native `SHIT Skills` sign-in or the chosen n
 
 `This is not just a missing field. The SHIT Skills native action is still blocked in the current host, so I am pausing here until the sign-in or native action path is available again.`
 
-If the current host is `OpenClaw`, but the native dependency or native action is not confirmed yet, the reply should say:
+If the current host is `OpenClaw`, the reply should say:
 
-`You are in OpenClaw, but this repository version does not bundle a ready-to-run SHIT Skills native wrapper for Task 4 by itself. This turn also still has no confirmed native dependency / native action path available. I will keep the missing items explicit: if operators already installed a compatible native package, I first confirm that package and the current action are usable; if not, install the compatible package, start a fresh /new session, and then retry; if no such package is available in this environment yet, continue Task 4 in a non-OpenClaw host that can load the remote live skill.`
+`You are in OpenClaw, but this step is already a third-party remote flow. I will not turn the lack of a local runtime surface in this repository into a blocker. Continue Task 4 by following the requirements at https://www.shitskills.net/skill.md directly, and if that remote flow actually fails or gets stuck, bring the exact step and error to the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) for troubleshooting.`
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
-- `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
 
 ## Maintainer Details
 
 - route: `task-4-curio-board`
 - live_dependency: `https://www.shitskills.net/skill.md`
-- openclaw_runtime: `native-dependency-first`
-- openclaw_native_wrapper_bundled: `false`
+- openclaw_runtime: `remote_handoff`
+- openclaw_local_runtime_bundled: `false`
 - default_bounty_action: `publish`
 - native_publish_required_fields: `title`, `summary`, `githubUrl`, `tags`, `installType`, `installCommand|installUrl`
