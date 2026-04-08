@@ -121,7 +121,7 @@ Verify:
 - After `/new`, ask OpenClaw to run:
 - `Use $claws-temple-bounty to show the roadmap that takes my agent out into the wild.`
 - `Use $claws-temple-bounty to start Task 1 and tell me whether agent-spectrum is ready in this session.`
-- `Use $claws-temple-bounty to tell me whether Task 4 is currently unavailable in this OpenClaw package, and if so, tell me which non-OpenClaw host should handle it.`
+- `Use $claws-temple-bounty to tell me how to continue Task 4 by following the remote SHIT Skills requirements directly from OpenClaw.`
 
 ### Claude Code
 
@@ -164,9 +164,8 @@ Enable and verify:
 - Local skill: `tomorrowdao-agent-skills` `>= 0.2.2`
 - Local skill: `portkey-ca-agent-skills` `>= 2.3.0`
 - Remote live skill for Task 4 compatibility on non-OpenClaw hosts: `https://www.shitskills.net/skill.md`
-- OpenClaw Task 4 runtime: native dependency / native action first; do not assume the remote `skill.md` is directly loadable there
-- This repository does not currently ship an OpenClaw-native SHIT Skills wrapper, a dedicated Task 4 ClawHub slug, or another documented OpenClaw-local runtime surface
-- As of April 8, 2026, Task 4 in this repository is backed only by the remote live skill at `https://www.shitskills.net/skill.md`, so OpenClaw should treat Task 4 as unavailable by default in this package and route the user to a non-OpenClaw host that can load the remote live skill
+- Task 4 is a third-party remote handoff: this repository points users to `https://www.shitskills.net/skill.md` and does not rewrite or vendor that flow
+- In OpenClaw, do not block the user just because this repository has no local Task 4 runtime surface; instead tell them to follow the remote SHIT Skills requirements directly, and send them to Telegram only if they hit execution issues
 
 If you want dependency preflight to fail hard instead of warning, run smoke check with `STRICT_DEPS=1`.
 
@@ -239,7 +238,7 @@ Task 3 now prefers one consistent verified `CA` write transport for both `Approv
 Task 3 no longer offers `manual fallback`, `Portkey App`, or `EOA` route choices in the user-facing flow.
 If TomorrowDAO direct send returns `SIGNER_CA_DIRECT_SEND_FORBIDDEN`, that is no longer the final blocker by itself; the flow should continue through the explicit Portkey CA forward transport and only stop with an unsupported `CA` transport blocker when that forward path is unavailable.
 For Task 2, missing local login should not be treated as an immediate blocker when onboarding can still continue; first-time sign-up and returning-user recovery sign-in belong to the normal pairing path.
-Task 4 is now host-aware: non-OpenClaw hosts may still use the remote live skill as a compatibility path, while OpenClaw should stay native-dependency-first and return a checklist or blocker when that native runtime is not installed.
+Task 4 is now a remote third-party handoff: this repository should tell users to continue according to `https://www.shitskills.net/skill.md`, not pretend to own or rewrite that flow.
 Task 5 is now capability-first: even in OpenClaw, browser-action hints should appear only after the current turn already confirmed browser capability.
 
 ## ClawHub Bundle
@@ -312,8 +311,8 @@ Task 5 drafts the message first, and it should only continue into direct send wh
 Task 3 now ships with the formal `Claws Temple II` faction mapping in `skills/claws-temple-bounty/config/faction-proposals.json`.
 Task 3 now expects `tomorrowdao-agent-skills >= 0.2.2`, `portkey-ca-agent-skills >= 2.3.0`, the generic `tomorrowdao_token_balance_view` tool, the generic `tomorrowdao_token_allowance_view` tool, the `tomorrowdao_token_approve` tool, the `portkey_forward_call` tool, and a `2 AIBOUNTY` vote threshold.
 Task 3 now also treats a `CA` keystore's manager key as transport-scoped only: direct target-contract send is forbidden, env/private-key fallback is forbidden once `CA` is selected, and TomorrowDAO direct-send errors must hand off to explicit Portkey CA forward transport before the flow is allowed to stop with an unsupported `CA` transport blocker.
-For non-OpenClaw hosts, Task 4 live publish also depends on network reachability to `https://www.shitskills.net/skill.md`.
-For OpenClaw, this repository does not bundle a Task 4 local runtime at all right now; since only the remote live skill exists here, Task 4 should be treated as unavailable in the current OpenClaw package unless a future runtime surface is explicitly added.
+Task 4 depends on the third-party remote live skill at `https://www.shitskills.net/skill.md`.
+For OpenClaw, this repository still does not bundle a local Task 4 runtime, but that should translate into `follow the remote SHIT Skills requirements directly`, not into a local blocker from this package.
 ClawHub packaging should use `scripts/build-clawhub.sh`, then publish `dist/clawhub/claws-temple-bounty` instead of the repository root.
 
 ## Task 4 Rollout Plan
@@ -321,12 +320,12 @@ ClawHub packaging should use `scripts/build-clawhub.sh`, then publish `dist/claw
 - Testing window:
   - run `bash skills/claws-temple-bounty/scripts/test-rollout-gate.sh`
   - if the target host is not `OpenClaw`, require the Task 4 live-skill probe to pass
-  - if the target host is `OpenClaw`, treat Task 4 as unavailable for this repository until an explicit OpenClaw-local runtime surface is published; the remote probe alone is not enough
-  - if probe or native auth publish is unavailable, treat Task 4 as unavailable for that window
+  - if the target host is `OpenClaw`, treat Task 4 as an external handoff and do not block this repository release on a missing local runtime surface
+  - if probe or native auth publish is unavailable on a non-OpenClaw host, keep that as a maintainer warning about the external flow instead of claiming the repository package itself is broken
 - Production window:
   - run `bash skills/claws-temple-bounty/scripts/release-gate.sh`
   - if the target host is not `OpenClaw`, require Task 4 live-skill probe and native auth publish to pass before treating Task 4 as available
-  - if the target host is `OpenClaw`, keep Task 4 closed for this repository until an explicit OpenClaw-local runtime surface is published
+  - if the target host is `OpenClaw`, keep Task 4 as an external handoff and do not fail the repository release just because this package does not vendor the third-party flow
 
 Maintainer runbook:
 

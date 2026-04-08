@@ -8,9 +8,10 @@ Use this flow for Task 4 or any SHIT Skills native action request inside the bou
 
 ## Host Rule
 
-- `OpenClaw`: do not assume the remote live skill URL is directly loadable in this package
-- non-OpenClaw hosts: the remote live skill may remain the compatibility path when the host can really load it
-- current repository status: this repository does not bundle an OpenClaw-local Task 4 runtime surface; it only references the remote live skill at `https://www.shitskills.net/skill.md`
+- all hosts: Task 4 follows the third-party remote live skill at `https://www.shitskills.net/skill.md`
+- all hosts: treat Task 4 as a third-party remote handoff instead of a local runtime owned by this repository
+- `OpenClaw`: do not turn the lack of a local runtime surface in this repository into a blocker by itself; hand the user off to the remote requirements directly
+- current repository status: this repository does not bundle a local Task 4 runtime surface and does not rewrite the third-party flow
 
 ## Goal
 
@@ -37,23 +38,21 @@ Route the user into the native SHIT Skills platform flow without wrapping Task 4
    - optional `content`
    - optional `coverUrl`
 11. For comment, vote, like, edit, or delete, ask only for the native action-specific target or session readiness; do not block these actions on `GitHub` repository input.
-12. In maintainer-facing execution, resolve host capability before relying on the native action.
-13. If the current host is `OpenClaw`, say plainly that this repository version cannot finish Task 4 there by itself today because it only ships the remote live skill URL and no documented OpenClaw-local runtime.
-14. In `OpenClaw`, do not assume the remote `skill.md` URL can be loaded directly just because the live skill exists.
-15. In `OpenClaw`, keep the recovery options concrete: switch Task 4 to a host that can load the remote live skill, or wait until an explicit OpenClaw runtime surface is published for this path.
-16. Load the live SHIT Skills integration skill only when the host capability path for that host is actually available.
-17. Continue with the specific native action the user needs: publish, edit, delete, comment, vote, like, or parse GitHub `SKILL.md`.
-18. If the native action succeeds, say which SHIT Skills action is now complete; do not claim that the local skill itself finalized Task 4 qualification unless the user explicitly completed the default qualification action.
-19. If the host cannot load the usable native dependency for that host, the network path is unavailable, or the required authenticated native action is unavailable, stop with a hard blocker and support CTA.
+12. In maintainer-facing execution, treat `https://www.shitskills.net/skill.md` as the source of truth for Task 4 requirements and action rules.
+13. If the current host is `OpenClaw`, say plainly that this repository is handing the user off to the remote Task 4 requirements rather than executing the third-party flow locally.
+14. Do not pretend that this repository has already completed the remote action; the user should continue according to the remote live skill requirements.
+15. Continue with the specific native action the user needs: publish, edit, delete, comment, vote, like, or parse GitHub `SKILL.md`.
+16. If the user reports that the third-party flow succeeds, say which SHIT Skills action is now complete; do not claim that the local skill itself finalized Task 4 qualification unless the user explicitly confirms the default qualification action happened there.
+17. If the user reports that the remote third-party flow is failing, summarize the issue plainly and append the Telegram-only Task 4 support CTA.
 
 ## OpenClaw Recovery Checklist
 
-When Task 4 is blocked in `OpenClaw`, keep the recovery steps explicit in the Task 4 reply itself:
+When Task 4 is started in `OpenClaw`, keep the handoff steps explicit in the Task 4 reply itself:
 
-1. say plainly that the current repository only ships the remote live skill URL and not an OpenClaw-local runtime
-2. say whether the current blocker is `current host = OpenClaw`, `account readiness`, or `authenticated native action`
-3. when the host is `OpenClaw`, tell the user to continue Task 4 in a non-OpenClaw host that can load the remote live skill
-4. only reopen OpenClaw Task 4 after a future explicit runtime surface is published and documented
+1. say plainly that the current repository is handing the user off to the remote live skill URL and not rewriting that third-party flow
+2. tell the user to follow the remote SHIT Skills requirements directly for account, login, publish, or other action-specific steps
+3. do not tell the user to stop just because the current package has no local runtime surface
+4. if the user reports a real execution issue in the remote flow, append the Telegram-only support CTA
 
 ## Required Visible Output
 
@@ -63,10 +62,10 @@ When Task 4 is blocked in `OpenClaw`, keep the recovery steps explicit in the Ta
 - one short execution line that the agent is carrying the native flow forward and will only pause for the minimum missing user prerequisite
 - native action choice or default recommendation
 - qualification-vs-auxiliary-action clarification
-- current native action, blocker, or exact next step
-- OpenClaw unsupported wording when the repository only ships the remote live skill
-- exact OpenClaw recovery action toward a non-OpenClaw compatible host
-- support CTA when the user is genuinely stuck
+- current native action or exact next step
+- remote handoff wording that tells the user to follow `https://www.shitskills.net/skill.md`
+- OpenClaw wording that does not block the user just because this repository lacks a local runtime surface
+- Telegram-only support CTA only when the user is genuinely stuck in the third-party Task 4 flow
 
 ## Native Publish Schema
 
@@ -100,18 +99,16 @@ If the user chose a repo-dependent action and has no publishable `GitHub` reposi
 
 If the remote dependency cannot be loaded or authenticated native publishing is unavailable:
 
-- stop with a hard failure for the current Task 4 attempt
-- do not draft a prep payload
+- explain that Task 4 follows the third-party remote flow
 - do not pretend the native action already happened
-- append support CTA when the user cannot continue automatically in the current host
+- append the Telegram-only support CTA only when the user reports that the remote flow cannot continue
 
 If the current host is `OpenClaw`:
 
-- explain that this repository only ships the remote live skill URL for Task 4 and does not provide an OpenClaw-local runtime today
-- list the exact current blocker plainly, such as `current host = OpenClaw`, `account`, or `authenticated native action`
-- keep the next step explicit: switch Task 4 to a host that can load the remote live skill, or wait until an explicit OpenClaw runtime is published
-- keep the reply in checklist or blocker mode
-- do not imply that the remote URL can be loaded directly in this host
+- explain that this repository is handing Task 4 off to the remote live skill requirements
+- keep the next step explicit: follow the remote SHIT Skills requirements directly for the chosen action
+- keep the reply in handoff or checklist mode, not blocker mode
+- only add the Telegram-only support CTA when the user reports a real Task 4 execution issue in the remote flow
 
 ## Maintainer Notes
 
@@ -120,4 +117,4 @@ If the current host is `OpenClaw`:
 - the visible layer should say that `GitHub` is the only publishable source for Task 4
 - do not use a local Task 4 completion state machine
 - keep the live skill URL in the maintainer layer when the user asks for details
-- in OpenClaw, do not promise Task 4 availability for this repository until an explicit local runtime surface is published
+- in OpenClaw, do not invent a local runtime surface; simply hand the user off to the third-party remote requirements

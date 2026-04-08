@@ -18,7 +18,7 @@
 如果你还没有指定动作，我会先推荐 `发布` 作为当前 bounty 路线下最自然的默认动作。  
 如果你还没有账号，我会先带你走原生注册或登录。
 
-如果当前宿主是 `OpenClaw`，我会先按 `native dependency / native action` 来检查可用性，不会默认把远端 `skill.md` 当成当前回合一定可直接加载的运行面。
+如果当前宿主是 `OpenClaw`，我会明确告诉你：这一项按远端 `https://www.shitskills.net/skill.md` 的要求继续即可，这个仓库不会擅自改写第三方流程。
 
 只有当你先选了 `发布` 或其他确实依赖 repo 的原生动作，而且账号也已经准备好时，我才会继续确认 `GitHub repo URL`，再收后面的发布字段：
 
@@ -54,18 +54,17 @@
 
 `当前不是缺材料，而是 SHIT Skills 的原生动作在这个宿主里还没法继续。我先把你停在这里，等登录态或原生动作恢复后再继续。`
 
-如果当前宿主是 `OpenClaw`，但还没装好对应的 native dependency 或 native action 还没确认可用，就应该明确告诉你：
+如果当前宿主是 `OpenClaw`，就应该明确告诉你：
 
-`你现在是在 OpenClaw 里，但这个仓库版本的 Task 4 只有远端 live skill https://www.shitskills.net/skill.md，并没有 OpenClaw 本地运行面。我不会假装这里还存在另一个可安装包。当前最明确的下一步，是把 Task 4 切到能直接加载这个远端 live skill 的非 OpenClaw 宿主继续；如果以后发布了明确的 OpenClaw 本地运行面，再回到 OpenClaw 补这一步。`
+`你现在是在 OpenClaw 里，但这一步本来就是第三方远端流程。我不会把当前仓库没有本地运行面这件事说成 blocker。你现在就按 https://www.shitskills.net/skill.md 上的要求继续 Task 4 即可；如果在那边执行时真的遇到报错或卡住，再把步骤和报错贴到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 一起排查。`
 
 - `→ 如果这里卡住了，欢迎到 [Telegram 群](https://t.me/+tChFhfxgU6AzYjJl) 贴出你当前的步骤、报错和关键信息，我们可以一起帮你排查。`
-- `→ 也可以去 [X / Twitter](https://x.com/aelfblockchain) 发帖求助，带上你当前的状态和卡点，方便社区更快看到并协助你。`
 
 ## 维护者详情
 
 - route: `task-4-curio-board`
 - live_dependency: `https://www.shitskills.net/skill.md`
-- openclaw_runtime: `unsupported_in_this_package`
+- openclaw_runtime: `remote_handoff`
 - openclaw_local_runtime_bundled: `false`
 - default_bounty_action: `publish`
 - native_publish_required_fields: `title`, `summary`, `githubUrl`, `tags`, `installType`, `installCommand|installUrl`

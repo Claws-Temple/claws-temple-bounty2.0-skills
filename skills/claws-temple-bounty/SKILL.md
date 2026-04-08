@@ -136,13 +136,13 @@ Dependency rule:
 - for Task 3, only treat the oath as completed after the final vote returns a mined-success `txId`; if reconciliation confirms progress without a correlated final `txId`, keep the state in `submitted` instead of declaring completion
 - for Task 3, when the current config is the production mapping, present the oath as the formal faction oath record and do not mention testing, rehearsal, or a later replacement path
 - for Task 4, route the user into the native SHIT Skills flow instead of a local Task 4 completion state machine
-- for Task 4, treat OpenClaw as native-dependency-first: prefer an installed local or ClawHub native dependency over the remote `skill.md` URL, and do not assume OpenClaw can load the remote URL directly
+- for Task 4, treat this repository as a third-party handoff to `https://www.shitskills.net/skill.md`; do not rewrite or vendor that remote flow locally
 - for Task 4, the default visible layer should say that the agent is carrying the native flow forward and will only stop when it still needs an action choice, an account status, or a repo prerequisite from the user
 - for Task 4, ask which native action the user wants first; if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - for Task 4, require a publishable `GitHub` repository URL plus any native required fields such as `installType`, `installCommand`, or `installUrl` only when the user chooses `publish` or another action that actually needs them
 - for Task 4, treat missing native prerequisites such as `GitHub repo URL`, missing content fields, or an unchosen action as checklist gaps, not support blockers
-- for Task 4, if the current host is OpenClaw and the native dependency is not locally available yet, stop with a checklist or blocker that tells the user exactly which native dependency or account prerequisite is still missing
-- for Task 4, if the current host cannot load the live remote skill, the network path is unavailable, or authenticated native publishing is unavailable, stop with a branded blocker summary and support CTA
+- for Task 4, if the current host is OpenClaw, do not stop the user just because this repository has no local runtime surface; tell them to continue according to the remote SHIT Skills requirements directly
+- for Task 4, only append the Telegram-only support note when the user actually reports that Task 4 execution on the remote third-party flow has failed or become blocked
 - for Task 5, when the visible layer mentions sending now on `Telegram` or `X`, first say that the agent will draft the message first and will continue direct send only if the current host really has the required permissions and capability; otherwise the final send step belongs to the user
 - for Task 5, if the current host is `OpenClaw`, the user has already chosen `Telegram` or `X`, the user explicitly wants to send now, and the current turn has already confirmed browser capability, the visible layer may mention browser action only as a conditional convenience after that host-capability caveat
 - for Task 5, do not mention browser action before the platform is chosen, when the user only wants draft copy, or in hosts other than `OpenClaw`

@@ -17,7 +17,7 @@
 - Task 3 now ships a bundled single-entry helper at `scripts/task3-oath-executor.sh` for hosts that can execute shell commands.
 - Task 3 may ask for the `CA keystore password` once when a real write needs the active `CA` context.
 - In OpenClaw, install or update dependencies and then start a new session with `/new`.
-- Task 4 still depends on the remote live skill at `https://www.shitskills.net/skill.md` for non-OpenClaw compatibility paths.
-- In OpenClaw, Task 4 is native-dependency-first and should not assume the remote URL can be loaded directly there.
+- Task 4 is a third-party remote handoff to `https://www.shitskills.net/skill.md`; this bundle does not rewrite or vendor that flow.
+- In OpenClaw, Task 4 should not be turned into a local blocker by this repository package; hand the user off to the remote requirements, and use Telegram support only when the remote flow actually fails.
 - No hidden private-key fallback is allowed in this distribution, and no undeclared secret dependency should be introduced.
 - This built directory is the intended publish target on ClawHub; do not substitute the repository root.

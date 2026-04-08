@@ -119,7 +119,7 @@ def main(argv: list[str]) -> None:
         "tomorrowdao-agent-skills",
         "portkey-ca-agent-skills",
         "references/host-runtime-contract.md",
-        "native-dependency-first",
+        "third-party remote handoff",
         "browser capability",
         "CA keystore password",
         "https://www.shitskills.net/skill.md",

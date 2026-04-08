@@ -1,32 +1,30 @@
 # Task 4 Live Rollout Runbook
 
-Use this file for maintainer-facing rollout and incident handling for the external Task 4 live skill.
+Use this file for maintainer-facing rollout and incident handling for the external Task 4 live skill handoff.
 
 ## Goal
 
-Keep Task 4 clearly available or unavailable as a native SHIT Skills flow, without falling back to a local prep-only success path.
+Keep Task 4 clearly framed as a third-party remote handoff, without pretending the current repository owns that execution surface.
 
-For `OpenClaw`, do not assume the remote `skill.md` probe is usable in this repository package.
-Treat the remote `skill.md` probe as a non-OpenClaw compatibility path unless a future OpenClaw-local runtime surface is explicitly added and documented.
-Current repository status: this package does not bundle an OpenClaw-local Task 4 runtime surface; it only references the remote live skill at `https://www.shitskills.net/skill.md`.
+For `OpenClaw`, do not turn the lack of a local runtime surface into a repository blocker by itself.
+Treat the remote `skill.md` as the third-party source of truth for Task 4 requirements across hosts.
+Current repository status: this package does not bundle a local Task 4 runtime surface; it only hands users off to `https://www.shitskills.net/skill.md`.
 
 ## Rollout Modes
 
 - `test rollout`
   - run `scripts/test-rollout-gate.sh`
   - local dependencies must pass
-  - for non-OpenClaw hosts, remote Task 4 probe must pass
-  - for OpenClaw, keep Task 4 unavailable in this repository until an explicit local runtime surface exists
-  - authenticated native publish must be available
-  - if either prerequisite is missing, Task 4 is unavailable for that window
+  - for non-OpenClaw hosts, remote Task 4 probe may be checked as a maintainer signal
+  - for OpenClaw, keep Task 4 as an external handoff and do not fail this repository just because no local runtime surface exists
+  - authenticated native publish belongs to the third-party flow, not to this repository package
   - Tasks 1, 2, 3, and 5 may continue normally
 - `production rollout`
   - run `scripts/release-gate.sh`
   - local dependencies must pass
-  - for non-OpenClaw hosts, remote Task 4 probe must pass
-  - for OpenClaw, keep Task 4 unavailable in this repository until an explicit local runtime surface exists
-  - authenticated native publish must be available
-  - only then treat Task 4 as available
+  - for non-OpenClaw hosts, remote Task 4 probe may be checked as a maintainer signal
+  - for OpenClaw, keep Task 4 as an external handoff and do not fail this repository just because no local runtime surface exists
+  - only then treat the repository handoff text as healthy; the third-party execution itself remains outside this package
 
 ## Preflight Checklist
 
@@ -34,25 +32,25 @@ Before announcing a live Task 4 window:
 
 1. run `python3 scripts/validate_skill_repo.py`
 2. run `bash skills/claws-temple-bounty/scripts/smoke-check.sh`
-3. if the target host is not `OpenClaw`, run `bash skills/claws-temple-bounty/scripts/task4-live-skill-probe.sh`
-4. if the target host is `OpenClaw`, treat Task 4 as closed in this repository package and direct users to a non-OpenClaw host for the live skill path
-5. confirm the current host supports the chosen native action path
-6. confirm the current host has authenticated native publishing available
+3. optionally run `bash skills/claws-temple-bounty/scripts/task4-live-skill-probe.sh` as a maintainer signal for the third-party remote flow
+4. if the target host is `OpenClaw`, confirm that Task 4 is presented as a remote handoff instead of a local blocker
+5. confirm the current host supports the chosen action path only when you are actively testing the third-party flow itself
+6. if the user reports trouble in the third-party flow, direct them to Telegram support only, with the exact step and error
 
 ## Availability Matrix
 
 - remote probe fails
-  - status: `unavailable`
-  - action: close the current non-OpenClaw Task 4 window
-  - user promise: explain the blocker and send the support CTA
-- OpenClaw repository runtime missing
-  - status: `blocked`
-  - action: stop the current OpenClaw Task 4 attempt
-  - user promise: explain that this repository only exposes the remote live skill for Task 4, does not ship an OpenClaw-local runtime, and therefore the next concrete step is to switch host or wait for a future runtime release
+  - status: `third_party_warning`
+  - action: keep the repository handoff text available and warn maintainers that the third-party live flow may be unhealthy
+  - user promise: tell the user to follow the remote requirements and use Telegram if they hit a real Task 4 execution issue
+- OpenClaw local runtime missing
+  - status: `expected_handoff`
+  - action: do not stop the user because of this repository package; hand them off to the remote live skill requirements
+  - user promise: explain that Task 4 continues according to the third-party remote skill and that this repository is not rewriting it locally
 - remote probe passes but auth publish is unavailable
-  - status: `blocked`
-  - action: stop the current Task 4 attempt
-  - user promise: explain the missing prerequisite plainly and send the support CTA
+  - status: `third_party_warning`
+  - action: keep the repository handoff text available
+  - user promise: explain that the issue lives in the third-party flow and send the Telegram-only Task 4 support note only when the user asks for help with that failure
 - native action succeeds
   - status: `native action complete`
   - action: report the completed SHIT Skills action without claiming local bounty-state completion
@@ -61,7 +59,7 @@ Before announcing a live Task 4 window:
 
 For a testing window, publish this rule to maintainers:
 
-- Task 4 must be treated as unavailable when the remote probe or authenticated publish path fails
+- Task 4 remains a third-party handoff even when the remote probe or authenticated publish path fails
 - do not simulate a prep-only success path
 - Tasks 1, 2, 3, and 5 may continue testing even while Task 4 is unavailable
 
@@ -70,13 +68,13 @@ For a testing window, publish this rule to maintainers:
 If the remote live skill becomes unstable during testing:
 
 1. rerun `scripts/task4-live-skill-probe.sh`
-2. if it still fails, keep the current Task 4 window closed
-3. tell testers that Task 4 is unavailable until the native flow is healthy again
-4. rerun the probe before reopening Task 4
+2. if it still fails, tell maintainers that the third-party Task 4 flow may be unstable
+3. tell testers that Task 4 still follows the remote requirements and that Telegram support is the only escalation path for execution issues
+4. rerun the probe before you announce that the third-party flow looks healthy again
 
-If the current target host is `OpenClaw` and the native dependency is still missing:
+If the current target host is `OpenClaw`:
 
-1. keep the current Task 4 window closed in OpenClaw
-2. do not pretend that the remote URL can replace the native dependency there
-3. tell testers that this repository only has the remote live skill for Task 4 and no OpenClaw-local runtime
-4. route testing and production use back to a non-OpenClaw host until a future runtime is published
+1. do not stop the user just because this repository has no local runtime surface
+2. tell testers that this repository only hands Task 4 off to the remote live skill
+3. tell users to follow the remote SHIT Skills requirements directly
+4. if the user reports a real execution issue, route them to Telegram support with the exact step and error

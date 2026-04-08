@@ -618,7 +618,9 @@ def main() -> None:
         "`support`",
         "`none`",
         "Telegram first, then X",
+        "Task 4 remote-flow exception",
         "## Support CTA Strings",
+        "Task 4 Remote-Flow Exception",
         "## Dependency Self-Heal Rules",
         "try automatic install, refresh, or upgrade first",
         "explicit install or upgrade guidance",
@@ -629,7 +631,7 @@ def main() -> None:
         "require a real current-turn `agent-spectrum` dependency result",
         "keep descending into dependency or local identity context in the same turn",
         "identity entry / user ID is not ready in the current host",
-        "native-dependency-first",
+        "do not append the X support string for this case",
         "browser capability was already confirmed in the current turn",
     ):
         if marker not in output_contract:
@@ -851,12 +853,18 @@ def main() -> None:
         fail("missing Task 4 Chinese blocker example")
     if "Blocker Example" not in task4_en:
         fail("missing Task 4 English blocker example")
-    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)", "[X / Twitter](https://x.com/aelfblockchain)"):
+    for marker in ("[Telegram 群](https://t.me/+tChFhfxgU6AzYjJl)",):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese support marker: {marker}")
-    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)", "[X](https://x.com/aelfblockchain)"):
+    for marker in ("[Telegram group](https://t.me/+tChFhfxgU6AzYjJl)",):
         if marker not in task4_en:
             fail(f"missing Task 4 English support marker: {marker}")
+    for banned in ("[X / Twitter](https://x.com/aelfblockchain)",):
+        if banned in task4_zh:
+            fail(f"Task 4 Chinese support path must stay Telegram-only: {banned}")
+    for banned in ("[X](https://x.com/aelfblockchain)",):
+        if banned in task4_en:
+            fail(f"Task 4 English support path must stay Telegram-only: {banned}")
     for banned in ("奇物来源", "ClawHub", "已准备", "已发布", "已评论", "已完成", "completion_rule: `publish + comment`", "publish-prep mode"):
         if banned in task4_zh:
             fail(f"old Task 4 Chinese marker must be removed: {banned}")
@@ -877,10 +885,10 @@ def main() -> None:
         "`installType`",
         "`installCommand`",
         "`installUrl`",
-        "hard failure",
+        "Telegram-only Task 4 support CTA",
         "OpenClaw",
-        "native dependency",
-        "do not assume the remote `skill.md` URL can be loaded directly",
+        "third-party remote handoff",
+        "follow the remote SHIT Skills requirements directly",
     ):
         if marker not in task4_flow:
             fail(f"missing Task 4 native-flow marker: {marker}")
@@ -1269,20 +1277,20 @@ def main() -> None:
         if forbidden in task3_en:
             fail(f"legacy Task 3 English combined template should be removed: {forbidden}")
 
-    for marker in ("support CTA", "hard failure", "GitHub", "SHIT Skills"):
+    for marker in ("support CTA", "GitHub", "SHIT Skills", "Telegram-only Task 4 support CTA"):
         if marker not in task4_flow:
             fail(f"missing Task 4 support flow marker: {marker}")
-    for marker in ("## OpenClaw Recovery Checklist", "only ships the remote live skill URL", "continue Task 4 in a non-OpenClaw host"):
+    for marker in ("## OpenClaw Recovery Checklist", "follow the remote SHIT Skills requirements directly", "do not tell the user to stop just because the current package has no local runtime surface"):
         if marker not in task4_flow:
             fail(f"missing Task 4 OpenClaw checklist marker: {marker}")
     task4_zh = (EXAMPLES_DIR / "task-4-curio-board.zh.md").read_text(encoding="utf-8")
     for marker in ("我会先带你进入原生流程并继续推进", "只有遇到账号、登录态或 repo 前置条件时"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese execution-report marker: {marker}")
-    for marker in ("openclaw_local_runtime_bundled", "这个仓库版本的 Task 4 只有远端 live skill", "切到能直接加载这个远端 live skill 的非 OpenClaw 宿主继续"):
+    for marker in ("openclaw_local_runtime_bundled", "按 https://www.shitskills.net/skill.md 上的要求继续 Task 4 即可", "不会把当前仓库没有本地运行面这件事说成 blocker"):
         if marker not in task4_zh:
             fail(f"missing Task 4 Chinese OpenClaw recovery marker: {marker}")
-    for marker in ("openclaw_local_runtime_bundled", "only exposes the remote live skill", "continue Task 4 in a non-OpenClaw host that can load that remote live skill directly"):
+    for marker in ("openclaw_local_runtime_bundled", "Continue Task 4 by following the requirements at https://www.shitskills.net/skill.md directly", "will not turn the lack of a local runtime surface in this repository into a blocker"):
         if marker not in task4_en:
             fail(f"missing Task 4 English OpenClaw recovery marker: {marker}")
 
@@ -1321,12 +1329,12 @@ def main() -> None:
             fail(f"missing Task 5 English capability-confirmation marker: {marker}")
 
     release_gate = (SKILL_ROOT / "scripts" / "release-gate.sh").read_text(encoding="utf-8")
-    for marker in ("TASK4_TARGET_HOST", "CHECK_REMOTE_SKILL=1", "REMOTE_PROBE_MODE=strict", "Task 4 is closed for OpenClaw in this repository"):
+    for marker in ("TASK4_TARGET_HOST", "CHECK_REMOTE_SKILL=1", "REMOTE_PROBE_MODE=strict", "Task 4 stays as a remote third-party handoff for OpenClaw"):
         if marker not in release_gate:
             fail(f"release gate is missing Task 4 host-aware marker: {marker}")
 
     test_rollout_gate = (SKILL_ROOT / "scripts" / "test-rollout-gate.sh").read_text(encoding="utf-8")
-    for marker in ("TASK4_TARGET_HOST", "task4-live-skill-probe.sh", "PROBE_MODE=strict", "Task 4 is closed for OpenClaw in this repository"):
+    for marker in ("TASK4_TARGET_HOST", "task4-live-skill-probe.sh", "PROBE_MODE=strict", "Task 4 stays as a remote third-party handoff for OpenClaw"):
         if marker not in test_rollout_gate:
             fail(f"test rollout gate is missing Task 4 host-aware marker: {marker}")
 
@@ -1335,10 +1343,10 @@ def main() -> None:
         fail("Task 4 probe must not reference publish-prep mode anymore")
 
     task4_rollout = (SKILL_ROOT / "references" / "task-4-live-rollout.md").read_text(encoding="utf-8")
-    for marker in ("native SHIT Skills flow", "Task 4 is unavailable", "do not simulate a prep-only success path"):
+    for marker in ("third-party remote handoff", "do not simulate a prep-only success path", "Telegram support is the only escalation path"):
         if marker not in task4_rollout:
             fail(f"missing Task 4 rollout marker: {marker}")
-    for marker in ("does not bundle an OpenClaw-local Task 4 runtime surface", "keep Task 4 unavailable in this repository", "switch host"):
+    for marker in ("does not bundle a local Task 4 runtime surface", "third-party remote handoff", "do not fail this repository just because no local runtime surface exists"):
         if marker not in task4_rollout:
             fail(f"missing Task 4 OpenClaw rollout marker: {marker}")
     for banned in ("publish-prep mode", "prep-only mode"):

@@ -115,6 +115,7 @@ Hard rules:
 - append support CTA only when `cta_type = support`
 - do not mix support CTA with ordinary success or next-task CTA in the same close
 - support replies must show `Telegram first, then X`
+- Task 4 remote-flow exception: when the blocker is specifically inside the third-party SHIT Skills flow, use Telegram-only support guidance instead of the default Telegram + X pair
 
 ## Dependency Self-Heal Rules
 
@@ -149,6 +150,13 @@ Use these strings when `cta_type = support`.
 
 - `→ If you're stuck here, join the [Telegram group](https://t.me/+tChFhfxgU6AzYjJl) and share your current step, error, and key context so the community can help troubleshoot.`
 - `→ You can also post on [X](https://x.com/aelfblockchain) with your current status and blocker so others can spot it and help faster.`
+
+### Task 4 Remote-Flow Exception
+
+When the blocker is specifically inside the third-party Task 4 flow:
+
+- append only the Telegram support string above
+- do not append the X support string for this case
 
 ## Task Framing Rules
 
@@ -272,11 +280,9 @@ Use these strings when `cta_type = support`.
 - if the user is following the bounty default path and has not chosen an action yet, recommend `publish`
 - say clearly that `publish` is the default qualification action in the bounty path, while other native actions are auxiliary unless campaign rules say otherwise
 - ask whether the user already has a SHIT Skills account; if not, route them into registration or sign-in first
-- if the current host is `OpenClaw`, treat Task 4 as native-dependency-first instead of remote-URL-first
-- in `OpenClaw`, do not assume `https://www.shitskills.net/skill.md` is directly loadable as a runtime surface
-- if `OpenClaw` is missing the required native dependency or native action capability, return a precise checklist or blocker instead of claiming the remote live skill will run there automatically
-- if the current repository version only ships the remote live skill and no OpenClaw-local runtime surface, say that plainly and keep the next recovery action concrete: switch Task 4 to a non-OpenClaw host that can load the remote live skill, or wait until an explicit OpenClaw runtime is published
-- for non-OpenClaw hosts, the remote live skill may remain the compatibility path when that host really supports it
+- if the current host is `OpenClaw`, say plainly that Task 4 follows the remote third-party requirements at `https://www.shitskills.net/skill.md` and that this repository is not rewriting that flow locally
+- do not turn missing OpenClaw-local runtime proof into a blocker by itself; the default behavior is to hand the user off to the remote requirements
+- for every host, the remote live skill remains the source of truth for Task 4 behavior and requirements
 - require a publishable `GitHub repo URL` only when the chosen native action actually needs it
 - gather the native publish fields only when the chosen native action actually needs them:
   - `title`
@@ -292,7 +298,7 @@ Use these strings when `cta_type = support`.
 - do not claim that the local bounty skill itself has completed Task 4; only say which SHIT Skills native action is ready, blocked, or confirmed
 - if the user chose a repo-dependent action but does not have a publishable `GitHub repo URL`, explain that the action is still missing a prerequisite and keep `cta_type = none`
 - if registration or sign-in is the next normal step, keep `cta_type = none`
-- if registration, sign-in, authenticated publishing, native dependency readiness, or live remote loading is truly blocked, explain the blocker plainly and append support CTA
+- if the user reports that registration, sign-in, authenticated publishing, or another remote Task 4 requirement is failing in the third-party flow, explain the blocker plainly and append the Telegram-only Task 4 support guidance
 
 ### Task 5 Replies
 

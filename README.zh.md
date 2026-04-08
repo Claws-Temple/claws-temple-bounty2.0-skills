@@ -122,7 +122,7 @@ OpenClaw 注意事项：
 - 在 `/new` 之后，让 OpenClaw 依次执行：
 - `使用 $claws-temple-bounty 展示这条让 Agent 去原野上交朋友的路线图。`
 - `使用 $claws-temple-bounty 从 Task 1 开始，并告诉我这次会话里的 agent-spectrum 是否已经就绪。`
-- `使用 $claws-temple-bounty 告诉我 Task 4 在当前 OpenClaw package 里是不是不可用；如果不可用，就明确告诉我应该切到哪类非 OpenClaw 宿主继续。`
+- `使用 $claws-temple-bounty 告诉我怎样在 OpenClaw 里直接按照远端 SHIT Skills 的要求继续 Task 4。`
 
 ### Claude Code
 
@@ -165,9 +165,8 @@ OpenClaw 注意事项：
 - 本地 skill：`tomorrowdao-agent-skills` `>= 0.2.2`
 - 本地 skill：`portkey-ca-agent-skills` `>= 2.3.0`
 - Task 4 的非 OpenClaw 兼容路径仍依赖远端 live skill：`https://www.shitskills.net/skill.md`
-- OpenClaw 上的 Task 4 运行面改成 `native dependency / native action first`，不要默认远端 `skill.md` 能直接加载
-- 当前仓库本身还没有内置 OpenClaw 可直接安装的 SHIT Skills 原生 wrapper，也没有单独的 Task 4 ClawHub slug 或其它已文档化的 OpenClaw 本地运行面
-- 截至 2026 年 4 月 8 日，这个仓库里的 Task 4 只有远端 live skill `https://www.shitskills.net/skill.md`，所以在 OpenClaw 里应该默认把 Task 4 视为当前 package 不可用，并明确引导到能加载这个远端 live skill 的非 OpenClaw 宿主继续
+- Task 4 是第三方远端 handoff：这个仓库只负责把用户引到 `https://www.shitskills.net/skill.md`，不会改写或内置这条流程
+- 在 OpenClaw 里，不要因为当前仓库没有本地 Task 4 运行面就阻止用户；默认做法是告诉用户直接按远端 SHIT Skills 的要求继续，只有执行中真的出问题时再引导去 Telegram 沟通
 
 如果希望依赖预检在缺失时直接失败，而不是只给 warning，可以用 `STRICT_DEPS=1` 运行 smoke check。
 
@@ -240,7 +239,7 @@ Task 3 配置里的 `proposalId` 是配置内依赖投票工具使用的 `依赖
 Task 3 不再给用户 `手动完成`、`Portkey App` 或 `EOA` 这类回退分支。
 如果 TomorrowDAO direct send 返回 `SIGNER_CA_DIRECT_SEND_FORBIDDEN`，它本身不再视为最终 blocker；流程应该继续切到显式 Portkey CA forward transport，只有这条 forward 路径不可用时，才允许停在 unsupported `CA` transport blocker。
 对 Task 2 来说，如果只是本地还没登录，不应直接视为 blocker；新用户注册和老用户恢复登录都属于正常 onboarding 路径。
-Task 4 现在按宿主分层：非 OpenClaw 仍可把远端 live skill 当兼容路径，OpenClaw 则应坚持 native dependency first；如果原生运行面没装好，就明确返回 checklist 或 blocker。
+Task 4 现在改成远端第三方 handoff：当前仓库只负责引导用户按 `https://www.shitskills.net/skill.md` 继续，不再假装自己拥有或重写这条流程。
 Task 5 现在也改成 capability-first：即使在 OpenClaw 里，也只有在本回合已经确认浏览器能力时，才允许出现浏览器直发提示。
 
 ## ClawHub Bundle
@@ -313,8 +312,8 @@ Task 5 会先由 agent 起草内容；只有当前宿主真的具备对应权限
 Task 3 当前内置的是正式版 `Claws Temple II` faction 映射，定义在 `skills/claws-temple-bounty/config/faction-proposals.json`。
 Task 3 现在要求 `tomorrowdao-agent-skills >= 0.2.2`、`portkey-ca-agent-skills >= 2.3.0`、通用 `tomorrowdao_token_balance_view` 工具、通用 `tomorrowdao_token_allowance_view` 工具、`tomorrowdao_token_approve` 工具、`portkey_forward_call` 工具，以及 `2 AIBOUNTY` 的投票门槛。
 Task 3 现在也把 `CA` keystore 解锁出来的 manager key 视为“仅属于已验证 CA 写入路径”的能力：一旦选定 `CA`，就禁止 direct target-contract send，也禁止继续走 env/private-key fallback；如果 TomorrowDAO direct-send 在 `CA` 身份下被拒绝，系统必须继续切到显式 Portkey CA forward transport，而不是直接停在 unsupported `CA` transport blocker。
-对非 OpenClaw 宿主来说，Task 4 的 live publish 还依赖 `https://www.shitskills.net/skill.md` 的可达性。
-对 OpenClaw 来说，这个仓库目前并没有附带 Task 4 的本地运行面；既然这里只有远端 live skill，就应该把 Task 4 明确视为当前 OpenClaw package 不可用，而不是暗示还存在别的可安装包。
+Task 4 依赖第三方远端 live skill `https://www.shitskills.net/skill.md`。
+对 OpenClaw 来说，这个仓库目前仍然没有本地 Task 4 运行面，但这只意味着“按远端要求继续”，不意味着由当前 package 主动阻止用户。
 ClawHub 打包应该先运行 `scripts/build-clawhub.sh`，再发布 `dist/clawhub/claws-temple-bounty`，不要直接发仓库根目录。
 
 ## Task 4 上线预案
@@ -322,12 +321,12 @@ ClawHub 打包应该先运行 `scripts/build-clawhub.sh`，再发布 `dist/clawh
 - 测试窗口：
   - 运行 `bash skills/claws-temple-bounty/scripts/test-rollout-gate.sh`
   - 如果目标宿主不是 `OpenClaw`，要求 Task 4 live-skill probe 通过
-  - 如果目标宿主是 `OpenClaw`，当前仓库应直接把 Task 4 视为不可用，直到未来发布出明确的 OpenClaw 本地运行面；仅有远端 probe 通过还不够
-  - 如果 probe 或原生认证发布不可用，就把 Task 4 视为当前窗口不可用
+  - 如果目标宿主是 `OpenClaw`，把 Task 4 视为仓库外部 handoff，不要因为当前仓库没有本地运行面就阻止这次 release
+  - 如果 probe 或原生认证发布在非 OpenClaw 宿主上异常，把它当成第三方流程告警，而不是当前仓库本身坏掉
 - 正式窗口：
   - 运行 `bash skills/claws-temple-bounty/scripts/release-gate.sh`
   - 如果目标宿主不是 `OpenClaw`，只有 Task 4 live-skill probe 和原生认证发布都通过，才把 Task 4 当成可用
-  - 如果目标宿主是 `OpenClaw`，当前仓库应保持 Task 4 关闭，直到未来发布出明确的 OpenClaw 本地运行面
+  - 如果目标宿主是 `OpenClaw`，把 Task 4 继续当成远端 handoff，不要因为当前仓库没有本地运行面而让 release 失败
 
 维护 runbook：
 
